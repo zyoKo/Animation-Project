@@ -12,6 +12,11 @@ workspace "3DAnimation"
     vendordir = "./vendor"
     outputdir = "%{cfg.buildcfg}_%{cfg.system}_%{cfg.architecture}"
 
+    group "Dependencies"
+        include "3DAnimation/vendor/GLFW"
+        include "3DAnimation/vendor/glad"
+    group ""
+
     group "3DAnimation"
         include "3DAnimation"
     group ""

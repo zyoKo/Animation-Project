@@ -15,12 +15,23 @@ project "3DAnimation"
 
     includedirs 
     {
-        sourcedir
+        sourcedir,
+        vendordir .. "/GLFW/include",
+        vendordir .. "/glad/include"
     }
 
-    defines 
+    defines
     {
-        "WINDOWS"
+        "GLFW_INCLUDE_NONE",
+        "OPEN_GL",
+        "_CRT_SECURE_NO_WARNINGS"
+    }
+
+    links
+    {
+        "GLFW",
+        "Glad",
+        "opengl32.lib"
     }
 
     filter { "configurations:Debug" }
