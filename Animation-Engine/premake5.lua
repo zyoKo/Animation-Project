@@ -1,4 +1,4 @@
-project "3DAnimation"
+project "Animation-Engine"
     kind "StaticLib"
     language "C++"
     cppdialect "C++20"

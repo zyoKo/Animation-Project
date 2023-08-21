@@ -1,4 +1,4 @@
-workspace "3DAnimation"
+workspace "AnimationProject"
     architecture "x86_64"
     startproject "Sandbox"
 
@@ -13,12 +13,12 @@ workspace "3DAnimation"
     outputdir = "%{cfg.buildcfg}_%{cfg.system}_%{cfg.architecture}"
 
     group "Dependencies"
-        include "3DAnimation/vendor/GLFW"
-        include "3DAnimation/vendor/glad"
+        include "Animation-Engine/vendor/GLFW"
+        include "Animation-Engine/vendor/glad"
     group ""
 
     group "Core"
-        include "3DAnimation"
+        include "Animation-Engine"
     group ""
 
     group "Misc"
@@ -30,10 +30,9 @@ newaction
     trigger = "clean",
     description = "Remove all binaries, intermediate binaries, and VS Files.",
     execute = function()
-        print("Removing binaries")
-        os.rmdir("./bin")
-        print("Removing intermediate binaries")
-        os.rmdir("./bin-int")
+        print("Removing binaries & intermediate binaries")
+        os.rmdir("./Animation-Engine/build")
+        os.rmdir("./Sandbox/build")
         print("Removing project files")
         os.rmdir("./.vs")
         os.remove("**.sln")

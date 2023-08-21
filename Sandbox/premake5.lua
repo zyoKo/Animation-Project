@@ -21,15 +21,15 @@ project "Sandbox"
     includedirs 
     {
         sourcedir,
-        "../3DAnimation/src",
-        "../3DAnimation/vendor",
-        "../3DAnimation/vendor/glad/include",
-        "../3DAnimation/vendor/GLFW/include"
+        "../Animation-Engine/src",
+        "../Animation-Engine/vendor",
+        "../Animation-Engine/vendor/glad/include",
+        "../Animation-Engine/vendor/GLFW/include"
     }
 
     links
     {
-        "3DAnimation"
+        "Animation-Engine"
     }
 
     filter "system:windows"
