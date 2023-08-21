@@ -1,6 +1,6 @@
 workspace "3DAnimation"
     architecture "x86_64"
-    startproject "3DAnimation"
+    startproject "Sandbox"
 
     configurations
     {
@@ -17,8 +17,12 @@ workspace "3DAnimation"
         include "3DAnimation/vendor/glad"
     group ""
 
-    group "3DAnimation"
+    group "Core"
         include "3DAnimation"
+    group ""
+
+    group "Misc"
+        include "Sandbox"
     group ""
 
 newaction

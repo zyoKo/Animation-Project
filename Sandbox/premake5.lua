@@ -1,5 +1,5 @@
-project "3DAnimation"
-    kind "StaticLib"
+project "Sandbox"
+    kind "ConsoleApp"
     language "C++"
     cppdialect "C++20"
     staticruntime "on"
@@ -13,33 +13,36 @@ project "3DAnimation"
         sourcedir .. "/**.h"
     }
 
+    defines
+    {
+        "GLFW_INCLUDE_NONE"
+    }
+
     includedirs 
     {
         sourcedir,
-        vendordir .. "/GLFW/include",
-        vendordir .. "/glad/include"
-    }
-
-    defines
-    {
-        "GLFW_INCLUDE_NONE",
-        "OPEN_GL",
-        "_CRT_SECURE_NO_WARNINGS"
+        "../3DAnimation/src",
+        "../3DAnimation/vendor",
+        "../3DAnimation/vendor/glad/include",
+        "../3DAnimation/vendor/GLFW/include"
     }
 
     links
     {
-        "GLFW",
-        "Glad",
-        "opengl32.lib"
+        "3DAnimation"
     }
+
+    filter "system:windows"
+        systemversion "latest"
 
     filter { "configurations:Debug" }
         buildoptions "/MTd"
+        defines "ANIMATION_DEBUG"
         runtime "Debug"
         symbols "on"
 
     filter { "configurations:Release" }
         buildoptions "/MT"
+        defines "ANIMATION_RELEASE"
         runtime "Release"
         optimize "on"

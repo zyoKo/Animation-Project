@@ -13,7 +13,7 @@ void processInput(GLFWwindow* window)
         glfwSetWindowShouldClose(window, true);
 }
 
-int main()
+int mainz()
 {
     /* Initialize the library */
     if (!glfwInit())
