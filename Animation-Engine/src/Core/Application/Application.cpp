@@ -1,6 +1,6 @@
-#include "Application.h"
+#include "AnimationPch.h"
 
-#include <iostream>
+#include "Application.h"
 #include "Core/Logger/Log.h"
 #include "GLFW/glfw3.h"
 #include "Graphics/RenderApi.h"

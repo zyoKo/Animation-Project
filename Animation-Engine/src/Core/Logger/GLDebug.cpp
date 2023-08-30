@@ -1,5 +1,6 @@
-#include "GLDebug.h"
+#include <AnimationPch.h>
 
+#include "GLDebug.h"
 #include "Log.h"
 
 namespace Animator::Utilities

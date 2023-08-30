@@ -16,5 +16,5 @@
 	}\
 	while(0)
 #else
-	#define ANIM_ASSERT(x, ...)
+	#define ANIM_ASSERT(x, ...) while(0)
 #endif

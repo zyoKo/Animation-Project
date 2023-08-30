@@ -7,6 +7,9 @@ project "Animation-Engine"
     targetdir("./build/bin/" .. outputdir .. "/%{prj.name}")
     objdir("./build/obj/" .. outputdir .. "/%{prj.name}")
 
+    pchheader "AnimationPch.h"
+    pchsource "src/AnimationPch.cpp"
+
     files 
     {
         sourcedir .. "/**.cpp",

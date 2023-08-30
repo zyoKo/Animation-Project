@@ -1,3 +1,5 @@
+#include "AnimationPch.h"
+
 #include "Utilites.h"
 
 namespace Animator::Utilities

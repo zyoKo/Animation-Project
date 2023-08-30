@@ -1,7 +1,6 @@
+#include <AnimationPch.h>
+
 #include "WindowsWindow.h"
-
-#include <iostream>
-
 #include "Core/Logger/Log.h"
 #include "glad/glad.h"
 #include "Graphics/RenderApi.h"

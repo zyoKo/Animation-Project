@@ -1,5 +1,6 @@
-#include "OpenGLContext.h"
+#include <AnimationPch.h>
 
+#include "OpenGLContext.h"
 #include "Core/Logger/Log.h"
 #include "Core/Logger/GLDebug.h"
 
