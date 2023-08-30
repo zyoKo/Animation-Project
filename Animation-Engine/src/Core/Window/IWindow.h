@@ -26,6 +26,8 @@ namespace Animator
 	public:
 		virtual ~IWindow() = default;
 
+		virtual bool WindowShouldClose() = 0;
+
 		virtual void Update() = 0;
 
 		virtual uint32_t GetWidth() = 0;

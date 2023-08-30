@@ -18,7 +18,7 @@ namespace Animator
 
 		virtual void Initialize();
 
-		virtual void Update();
+		virtual void Run();
 
 		virtual void Render();
 

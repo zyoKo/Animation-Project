@@ -15,7 +15,8 @@ project "Sandbox"
 
     defines
     {
-        "GLFW_INCLUDE_NONE"
+        "GLFW_INCLUDE_NONE",
+        "_CRT_SECURE_NO_WARNINGS"
     }
 
     includedirs 
@@ -24,7 +25,8 @@ project "Sandbox"
         "../Animation-Engine/src",
         "../Animation-Engine/vendor",
         "../Animation-Engine/vendor/glad/include",
-        "../Animation-Engine/vendor/GLFW/include"
+        "../Animation-Engine/vendor/GLFW/include",
+        "../Animation-Engine/vendor/spdlog/include"
     }
 
     links

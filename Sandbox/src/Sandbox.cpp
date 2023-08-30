@@ -1,4 +1,5 @@
 #include "Core/Application/Application.h"
+#include "Core/Logger/Log.h"
 
 class Sandbox : public Animator::Application
 {
@@ -10,7 +11,11 @@ int main()
 {
     std::unique_ptr<Sandbox> application = std::make_unique<Sandbox>();
 
-    application->Update();
+    application->Initialize();
+
+    application->Run();
+
+    application->Shutdown();
 
     return 0;
 }

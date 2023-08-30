@@ -1,6 +1,9 @@
 #include "Application.h"
 
 #include <iostream>
+#include "Core/Logger/Log.h"
+#include "GLFW/glfw3.h"
+#include "Graphics/RenderApi.h"
 
 namespace Animator
 {
@@ -10,8 +13,10 @@ namespace Animator
 	{
 		if (!instance)
 		{
-			std::cout << "Application already exists!" << std::endl;
+			Log::Initialize();
 		}
+
+		ANIM_ASSERT(!instance, "Application Already exists!");
 		instance = this;
 
 		window = std::unique_ptr<IWindow>(IWindow::Create({ name, width, height }));
@@ -21,12 +26,17 @@ namespace Animator
 
 	void Application::Initialize()
 	{
+		
 	}
 
-	void Application::Update()
+	void Application::Run()
 	{
-		while (running)
+		while (running && !window->WindowShouldClose())
 		{
+			RenderApi::GetContext()->ClearColor();
+			RenderApi::GetContext()->ClearBuffer();
+
+			// Swap buffer and poll events
 			window->Update();
 		}
 	}

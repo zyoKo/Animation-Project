@@ -17,7 +17,8 @@ project "Animation-Engine"
     {
         sourcedir,
         vendordir .. "/GLFW/include",
-        vendordir .. "/glad/include"
+        vendordir .. "/glad/include",
+        vendordir .. "/spdlog/include"
     }
 
     defines
@@ -36,6 +37,7 @@ project "Animation-Engine"
 
     filter { "configurations:Debug" }
         buildoptions "/MTd"
+        defines "ANIM_DEBUG"
         runtime "Debug"
         symbols "on"
 

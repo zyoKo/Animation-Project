@@ -14,6 +14,8 @@ namespace Animator
 		WindowsWindow(const UniversalWindowData& winData);
 		~WindowsWindow() override;
 
+		bool WindowShouldClose() override;
+
 		void Update() override;
 
 		uint32_t GetWidth() override;

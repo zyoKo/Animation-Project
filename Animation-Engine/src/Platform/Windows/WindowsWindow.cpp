@@ -2,7 +2,9 @@
 
 #include <iostream>
 
+#include "Core/Logger/Log.h"
 #include "glad/glad.h"
+#include "Graphics/RenderApi.h"
 
 namespace Animator
 {
@@ -10,9 +12,12 @@ namespace Animator
 
 	static void GLFWErrorCallback(int error, const char* description)
 	{
-		std::cout << "Failed to Initialized GLFW!" << std::endl;
-		std::cout << "GLFW Error: " << error << " : " << description << "\n";
-		__debugbreak();
+		ANIM_ASSERT(false, "Failed to Initialize GLFW: Error: {0} : {1}", error, description);
+	}
+
+	static void FramebufferSizeCallback(GLFWwindow* window, int width, int height)
+	{
+		glViewport(0, 0, width, height);
 	}
 
 	IWindow* IWindow::Create(const UniversalWindowData& props)
@@ -30,10 +35,16 @@ namespace Animator
 		Shutdown();
 	}
 
+	bool WindowsWindow::WindowShouldClose()
+	{
+		return glfwWindowShouldClose(window);
+	}
+
 	void WindowsWindow::Update()
 	{
 		glfwPollEvents();
-		glfwSwapBuffers(window);
+
+		RenderApi::GetContext()->SwapBuffer();
 	}
 
 	uint32_t WindowsWindow::GetWidth()
@@ -88,23 +99,19 @@ namespace Animator
 
 		window = glfwCreateWindow((int)winData.width, (int)winData.height, winData.title.c_str(), nullptr, nullptr);
 
-		glfwMakeContextCurrent(window);
-		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-		if (!status)
-		{
-			std::cout << "Failed to Initialize GLAD!" << std::endl;
-			__debugbreak();
-		}
+		RenderApi::CreateContext(this);
 
-		glfwSetWindowUserPointer(window, &windowData);
 		SetVSync(true);
 
 		// TODO: Shit ton of call backs here
 		// Keyboard, WindowResize, Mouse, Scroll, Position, etc.
+		glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
+		glfwSetWindowUserPointer(window, &windowData);
 	}
 
 	void WindowsWindow::Shutdown()
 	{
 		glfwDestroyWindow(window);
+		glfwTerminate();
 	}
 }
