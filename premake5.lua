@@ -1,0 +1,44 @@
+workspace "AnimationProject"
+    architecture "x86_64"
+    startproject "Sandbox"
+
+    configurations
+    {
+        "Debug",
+        "Release"
+    }
+
+    sourcedir = "./src"
+    vendordir = "./vendor"
+    outputdir = "%{cfg.buildcfg}_%{cfg.system}_%{cfg.architecture}"
+
+    group "Dependencies"
+        include "Animation-Engine/vendor/GLFW"
+        include "Animation-Engine/vendor/glad"
+    group ""
+
+    group "Core"
+        include "Animation-Engine"
+    group ""
+
+    group "Misc"
+        include "Sandbox"
+    group ""
+
+newaction
+{
+    trigger = "clean",
+    description = "Remove all binaries, intermediate binaries, and VS Files.",
+    execute = function()
+        print("Removing binaries & intermediate binaries")
+        os.rmdir("./Animation-Engine/build")
+        os.rmdir("./Sandbox/build")
+        print("Removing project files")
+        os.rmdir("./.vs")
+        os.remove("**.sln")
+        os.remove("**.vcxproj")
+        os.remove("**.vcxproj.filters")
+        os.remove("**.vcxproj.user")
+        print("Done")
+    end
+}
