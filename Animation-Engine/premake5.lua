@@ -13,7 +13,8 @@ project "Animation-Engine"
     files 
     {
         sourcedir .. "/**.cpp",
-        sourcedir .. "/**.h"
+        sourcedir .. "/**.h",
+        sourcedir .. "/**.inl"
     }
 
     includedirs 
@@ -33,9 +34,9 @@ project "Animation-Engine"
 
     links
     {
+        "opengl32.lib",
         "GLFW",
-        "Glad",
-        "opengl32.lib"
+        "Glad"
     }
 
     filter { "configurations:Debug" }
@@ -46,5 +47,6 @@ project "Animation-Engine"
 
     filter { "configurations:Release" }
         buildoptions "/MT"
+        defines "ANIM_RELEASE"
         runtime "Release"
         optimize "on"

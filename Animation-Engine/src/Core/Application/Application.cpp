@@ -1,11 +1,16 @@
 #include "AnimationPch.h"
 
+#include <GLFW/glfw3.h>
+
 #include "Application.h"
 
+#include "Core/ApplicationCore.h"
 #include "Core/Logger/GLDebug.h"
 #include "Core/Logger/Log.h"
-#include "GLFW/glfw3.h"
 #include "Graphics/RenderApi.h"
+#include "Graphics/OpenGL/Buffers/IndexBuffer.h"
+
+#include "Graphics/OpenGL/Buffers/VertexBuffer.h"
 
 namespace Animator
 {
@@ -33,14 +38,14 @@ namespace Animator
 
 	void Application::Run()
 	{
-		const char* vertexShaderSource = "#version 330 core\n"
+		const char* vertexShaderSource = "#version 460 core\n"
 			"layout (location = 0) in vec3 aPos;\n"
 			"void main()\n"
 			"{\n"
 			"   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
 			"}\0";
 
-		const char* fragmentShaderSource = "#version 330 core\n"
+		const char* fragmentShaderSource = "#version 460 core\n"
 			"out vec4 FragColor;\n"
 			"void main()\n"
 			"{\n"
@@ -113,31 +118,36 @@ namespace Animator
 			1, 2, 3   // second Triangle
 		};
 
-		unsigned int VBO, VAO, EBO;
-		GL_CALL(glGenVertexArrays, 1, &VAO);
-		GL_CALL(glGenBuffers, 1, &VBO);
-		GL_CALL(glGenBuffers, 1, &EBO);
-		// bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
+		unsigned int VAO;
+		GL_CALL(glCreateVertexArrays, 1, &VAO);
 		GL_CALL(glBindVertexArray, VAO);
 
-		GL_CALL(glBindBuffer, GL_ARRAY_BUFFER, VBO);
-		GL_CALL(glBufferData, GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+		//VertexArray vertexArrayObject;
 
-		GL_CALL(glBindBuffer, GL_ELEMENT_ARRAY_BUFFER, EBO);
-		GL_CALL(glBufferData, GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+		VertexBuffer vertexBufferObject(vertices, sizeof(vertices));
 
-		GL_CALL(glVertexAttribPointer, 0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-		GL_CALL(glEnableVertexAttribArray, 0);
+		IndexBuffer indexBufferObject(indices, sizeof(indices));
+
+		// bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
+
+		//GL_CALL(glVertexAttribPointer, 0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+		//GL_CALL(glEnableVertexAttribArray, 0);
+
+		GL_CALL(glVertexArrayAttribBinding, VAO, 0, 0);
+		GL_CALL(glVertexArrayAttribFormat, VAO, 0, 4, GL_FLOAT, GL_FALSE, 3 * sizeof(float));
+		GL_CALL(glEnableVertexArrayAttrib, VAO, 0);
 
 		// note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
-		GL_CALL(glBindBuffer, GL_ARRAY_BUFFER, 0);
+		//GL_CALL(glBindBuffer, GL_ARRAY_BUFFER, 0);
+		//vertexBufferObject.UnBind();
 
 		// remember: do NOT unbind the EBO while a VAO is active as the bound element buffer object IS stored in the VAO; keep the EBO bound.
 		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 		// You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
 		// VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
-		GL_CALL(glBindVertexArray, 0);
+		//GL_CALL(glBindVertexArray, 0);
+		//vertexArrayObject.Bind();
 
 		// GAME LOOP ////////////////////////////
 		while (running && !window->WindowShouldClose())
@@ -145,10 +155,11 @@ namespace Animator
 			RenderApi::GetContext()->ClearColor();
 			RenderApi::GetContext()->ClearBuffer();
 
-			GL_CALL(glUseProgram, shaderProgram);
-			GL_CALL(glBindVertexArray, VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
+			//GL_CALL(glUseProgram, shaderProgram);
+			//GL_CALL(glBindVertexArray, VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
 			//glDrawArrays(GL_TRIANGLES, 0, 6);
-			GL_CALL(glDrawElements, GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+			//GL_CALL(glDrawArrays, GL_TRIANGLES, 0, 6);
+			//GL_CALL(glDrawElements, GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 			// glBindVertexArray(0); // no need to unbind it every time 
 
 			// Swap buffer and poll events
@@ -156,8 +167,8 @@ namespace Animator
 		}
 
 		GL_CALL(glDeleteVertexArrays, 1, &VAO);
-		GL_CALL(glDeleteBuffers, 1, &VBO);
-		GL_CALL(glDeleteBuffers, 1, &EBO);
+		//GL_CALL(glDeleteBuffers, 1, &VBO);
+		//GL_CALL(glDeleteBuffers, 1, &EBO);
 		GL_CALL(glDeleteProgram, shaderProgram);
 	}
 

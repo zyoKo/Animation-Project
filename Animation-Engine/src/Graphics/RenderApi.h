@@ -5,7 +5,6 @@
 #include "Core/Logger/Log.h"
 #include "Core/Window/IWindow.h"
 #include "OpenGL/OpenGLContext.h"
-#include "Platform/Windows/WindowsWindow.h"
 
 namespace Animator
 {

@@ -7,6 +7,11 @@ project "Sandbox"
     targetdir("./build/bin/" .. outputdir .. "/%{prj.name}")
     objdir("./build/obj/" .. outputdir .. "/%{prj.name}")
 
+    linkoptions 
+    {
+        "/NODEFAULTLIB:LIBCMTD.lib"
+    }
+
     files 
     {
         sourcedir .. "/**.cpp",
@@ -15,6 +20,7 @@ project "Sandbox"
 
     defines
     {
+        "APIENTRY",
         "GLFW_INCLUDE_NONE",
         "_CRT_SECURE_NO_WARNINGS"
     }
@@ -39,12 +45,12 @@ project "Sandbox"
 
     filter { "configurations:Debug" }
         buildoptions "/MTd"
-        defines "ANIMATION_DEBUG"
+        defines "ANIM_DEBUG"
         runtime "Debug"
         symbols "on"
 
     filter { "configurations:Release" }
         buildoptions "/MT"
-        defines "ANIMATION_RELEASE"
+        defines "ANIM_RELEASE"
         runtime "Release"
         optimize "on"
