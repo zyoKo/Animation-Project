@@ -4,7 +4,7 @@
 
 #include "Core/Logger/Log.h"
 
-namespace Animation::Math
+namespace Animator::Math
 {
 	template <typename T>
 	constexpr Vector2<T>::Vector2() noexcept
@@ -123,6 +123,11 @@ namespace Animation::Math
 		return x != vector.x || y != vector.y;
 	}
 
+	template <typename T>
+	const T* Vector2<T>::GetPointerToData() const
+	{
+		return variables.data();
+	}
 
 	// Core Functions
 	template <typename T>

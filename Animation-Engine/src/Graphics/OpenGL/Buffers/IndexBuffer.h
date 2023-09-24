@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Graphics/OpenGL/Interfaces/IIndexBuffer.h"
+#include "Interfaces/IIndexBuffer.h"
 
 namespace Animator
 {
@@ -9,13 +9,15 @@ namespace Animator
 	public:
 		IndexBuffer();
 
-		IndexBuffer(const void* bufferData, unsigned int bufferSize);
+		IndexBuffer(const void* bufferData, unsigned int count);
 
 		~IndexBuffer() override;
 
-		void Bind() override;
+		unsigned int GetBufferID() const override;
 
-		void UnBind() override;
+		void Bind() const override;
+
+		void UnBind() const override;
 
 		void SetSize(unsigned int bufferSize) override;
 
@@ -24,6 +26,6 @@ namespace Animator
 	private:
 		unsigned int bufferID;
 
-		unsigned int indexBufferDataSize;
+		unsigned int bufferDataSize;
 	};
 }

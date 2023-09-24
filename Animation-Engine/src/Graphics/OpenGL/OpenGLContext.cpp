@@ -2,7 +2,6 @@
 
 #include "OpenGLContext.h"
 
-#include "Core/Logger/Assertion.h"
 #include "Core/Logger/Log.h"
 #include "Core/Logger/GLDebug.h"
 

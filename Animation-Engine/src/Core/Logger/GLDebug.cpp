@@ -72,7 +72,7 @@ namespace Animator::Utilities
 	void OpenGLErrorOutput(GLenum source, GLenum type, unsigned id, GLenum severity, GLsizei length, const char* message, const void* userParam)
 	{
 		// ignore non-significant error/warning codes
-		if (id == 131169 || id == 131185 || id == 131218 || id == 131204) 
+		if (id == 131169 || id == 131185 || id == 131218 || id == 131204)
 			return;
 
 		std::string sourceMessage;

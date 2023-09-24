@@ -1,7 +1,8 @@
 #pragma once
 
-#include "GLFW/glfw3.h"
-#include "Interfaces/IContext.h"
+#include <GLFW/glfw3.h>
+
+#include "Buffers/Interfaces/IContext.h"
 
 namespace Animator
 {

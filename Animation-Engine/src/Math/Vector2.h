@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Animation::Math
+namespace Animator::Math
 {
 	template <typename T>
 	class Vector2
@@ -51,6 +51,8 @@ namespace Animation::Math
 		bool operator==(const Vector2& vector);
 
 		bool operator!=(const Vector2& vector);
+
+		const T* GetPointerToData() const;
 
 		friend std::ostream& operator<<(std::ostream& os, const Vector2& vector)
 		{

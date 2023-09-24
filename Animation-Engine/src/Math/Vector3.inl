@@ -4,7 +4,7 @@
 
 #include "Core/Logger/Log.h"
 
-namespace Animation::Math
+namespace Animator::Math
 {
 	template <typename T>
 	constexpr Vector3<T>::Vector3() noexcept
@@ -128,6 +128,12 @@ namespace Animation::Math
 		return x != vector.x || y != vector.y || z != vector.z;
 	}
 
+	template <typename T>
+	const T* Vector3<T>::GetPointerToData() const
+	{
+		return variables.data();
+	}
+
 	// Core Functions
 	template <typename T>
 	bool Vector3<T>::HasNaNs() const
@@ -173,14 +179,68 @@ namespace Animation::Math
 	}
 
 	template <typename T>
-	T Vector3<T>::Dot(const Vector3& lhs, const Vector3& rhs)
+	T Vector3<T>::Dot(const Vector3& lhsVector, const Vector3& rhsVector)
 	{
-		return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z;
+		return lhsVector.x * rhsVector.x + lhsVector.y * rhsVector.y + lhsVector.z * rhsVector.z;
 	}
 
 	template <typename T>
-	T Vector3<T>::AbsDot(const Vector3& lhs, const Vector3& rhs)
+	T Vector3<T>::AbsDot(const Vector3& lhsVector, const Vector3& rhsVector)
 	{
-		return std::abs(Dot(lhs, rhs));
+		return std::abs(Dot(lhsVector, rhsVector));
+	}
+
+	template <typename T>
+	Vector3<T> Vector3<T>::Cross(const Vector3<T>& lhsVector, const Vector3<T>& rhsVector)
+	{
+		return Vector3(
+			(lhsVector.y * rhsVector.z) - (lhsVector.z * rhsVector.y),
+			(lhsVector.z * rhsVector.x) - (lhsVector.x * rhsVector.z),
+			(lhsVector.x * rhsVector.y) - (lhsVector.y * rhsVector.x));
+	}
+
+	template <typename T>
+	T Vector3<T>::MinComponent(const Vector3& vector)
+	{
+		return std::min(vector.x, std::min(vector.y, vector.z));
+	}
+
+	template <typename T>
+	T Vector3<T>::MaxComponent(const Vector3& vector)
+	{
+		return std::max(vector.x, std::max(vector.y, vector.z));
+	}
+
+	template <typename T>
+	Vector3<T> Vector3<T>::Min(const Vector3& lhsVector, const Vector3& rhsVector)
+	{
+		return Vector3(std::min(lhsVector.x, rhsVector.x), std::min(lhsVector.y, rhsVector.y), std::min(lhsVector.z, rhsVector.z));
+	}
+
+	template <typename T>
+	Vector3<T> Vector3<T>::Max(const Vector3& lhsVector, const Vector3& rhsVector)
+	{
+		return Vector3(std::max(lhsVector.x, rhsVector.x), std::max(lhsVector.y, rhsVector.y), std::max(lhsVector.z, rhsVector.z));
+	}
+
+	template <typename T>
+	Vector3<T> Vector3<T>::Permute(const Vector3& vector, int x, int y, int z)
+	{
+		return Vector3(vector[x], vector[y], vector[z]);
+	}
+
+	template <typename T>
+	void Vector3<T>::CoordinateSystem(const Vector3& firstVector, Vector3* secondVector, Vector3* thirdVector)
+	{
+		if (std::abs(firstVector.x) > std::abs(firstVector.y))
+		{
+			*secondVector = Vector3<T>(-firstVector.z, 0, firstVector.x) / std::sqrt(firstVector.x * firstVector.x + firstVector.z * firstVector.z);
+		}
+		else
+		{
+			*secondVector = Vector3<T>(0, firstVector.z, -firstVector.y) / std::sqrt(firstVector.y * firstVector.y + firstVector.z * firstVector.z);
+		}
+
+		*thirdVector = Cross(firstVector, secondVector);
 	}
 }

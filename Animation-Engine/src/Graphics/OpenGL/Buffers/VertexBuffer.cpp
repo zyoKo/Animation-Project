@@ -9,15 +9,14 @@ namespace Animator
 	VertexBuffer::VertexBuffer()
 		:	bufferDataSize(0)
 	{
-		GL_CALL(glCreateBuffers, 1, &bufferID);
+		glCreateBuffers(1, &bufferID);
 	}
 
 	VertexBuffer::VertexBuffer(const void* bufferData, unsigned int bufferSize)
 	{
 		this->bufferDataSize = bufferSize;
 		GL_CALL(glCreateBuffers, 1, &bufferID);
-		GL_CALL(glNamedBufferData, GL_ARRAY_BUFFER, bufferSize, bufferData, GL_STATIC_DRAW);
-		GL_CALL(glBindBuffer, GL_ARRAY_BUFFER, bufferID);
+		GL_CALL(glNamedBufferData, bufferID, bufferSize, bufferData, GL_STATIC_DRAW);
 	}
 
 	VertexBuffer::~VertexBuffer()
@@ -25,12 +24,17 @@ namespace Animator
 		GL_CALL(glDeleteBuffers, 1, &bufferID);
 	}
 
-	void VertexBuffer::Bind()
+	unsigned VertexBuffer::GetBufferID() const
+	{
+		return bufferID;
+	}
+
+	void VertexBuffer::Bind() const
 	{
 		GL_CALL(glBindBuffer, GL_ARRAY_BUFFER, bufferID);
 	}
 
-	void VertexBuffer::UnBind()
+	void VertexBuffer::UnBind() const
 	{
 		GL_CALL(glBindBuffer, GL_ARRAY_BUFFER, 0);
 	}
@@ -42,6 +46,16 @@ namespace Animator
 
 	void VertexBuffer::SetData(const void* bufferData) const
 	{
-		GL_CALL(glNamedBufferSubData, bufferID, 0, bufferDataSize, bufferData);
+		GL_CALL(glNamedBufferData, bufferID, bufferDataSize, bufferData, GL_STATIC_DRAW);
+	}
+
+	void VertexBuffer::SetVertexBufferLayout(const VertexBufferLayout& layout)
+	{
+		vertexBufferLayout = layout;
+	}
+
+	VertexBufferLayout& VertexBuffer::GetVertexBufferLayout()
+	{
+		return vertexBufferLayout;
 	}
 }

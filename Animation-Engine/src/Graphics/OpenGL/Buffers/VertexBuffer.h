@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Graphics/OpenGL/Interfaces/IVertexBuffer.h"
+#include "Interfaces/IVertexBuffer.h"
 
 namespace Animator
 {
@@ -13,21 +13,25 @@ namespace Animator
 
 		~VertexBuffer() override;
 
-		void Bind() override;
+		unsigned int GetBufferID() const override;
 
-		void UnBind() override;
+		void Bind() const override;
+
+		void UnBind() const override;
 
 		void SetSize(unsigned int bufferSize) override;
 
 		void SetData(const void* bufferData) const override;
 
-		//void SetVertexBufferLayout(const )
+		void SetVertexBufferLayout(const VertexBufferLayout& layout) override;
+
+		VertexBufferLayout& GetVertexBufferLayout() override;
 
 	private:
 		unsigned int bufferID;
 
 		unsigned int bufferDataSize;
 
-		// VertexBufferLayout object here
+		VertexBufferLayout vertexBufferLayout;
 	};
 }

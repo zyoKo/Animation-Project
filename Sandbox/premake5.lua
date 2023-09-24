@@ -20,7 +20,6 @@ project "Sandbox"
 
     defines
     {
-        "APIENTRY",
         "GLFW_INCLUDE_NONE",
         "_CRT_SECURE_NO_WARNINGS"
     }
@@ -45,12 +44,10 @@ project "Sandbox"
 
     filter { "configurations:Debug" }
         buildoptions "/MTd"
-        defines "ANIM_DEBUG"
         runtime "Debug"
         symbols "on"
 
     filter { "configurations:Release" }
         buildoptions "/MT"
-        defines "ANIM_RELEASE"
         runtime "Release"
         optimize "on"
