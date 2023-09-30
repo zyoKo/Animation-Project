@@ -8,13 +8,23 @@ workspace "AnimationProject"
         "Release"
     }
 
+    flags 
+    {
+        "MultiProcessorCompile"
+    }
+
+    defines
+    {
+        "_CRT_SECURE_NO_WARNINGS"
+    }
+
     sourcedir = "./src"
     vendordir = "./vendor"
     outputdir = "%{cfg.buildcfg}_%{cfg.system}_%{cfg.architecture}"
 
     group "Dependencies"
-        include "Animation-Engine/vendor/GLFW"
         include "Animation-Engine/vendor/glad"
+        include "Animation-Engine/vendor/GLFW"
     group ""
 
     group "Core"

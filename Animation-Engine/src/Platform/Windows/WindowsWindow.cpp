@@ -1,6 +1,8 @@
 #include <AnimationPch.h>
 
 #include "WindowsWindow.h"
+
+#include "Core/Logger/GLDebug.h"
 #include "Core/Logger/Log.h"
 #include "glad/glad.h"
 #include "Graphics/RenderApi.h"
@@ -82,13 +84,10 @@ namespace Animator
 		windowData.width = winData.width;
 		windowData.height = winData.height;
 
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 		if (!isGLFWInitialized)
 		{
 			const int success = glfwInit();
-			if (success != GLFW_TRUE)
+			if (success == GLFW_TRUE)
 			{
 				glfwSetErrorCallback(GLFWErrorCallback);
 			}
@@ -96,14 +95,23 @@ namespace Animator
 			isGLFWInitialized = true;
 		}
 
-		window = glfwCreateWindow((int)winData.width, (int)winData.height, winData.title.c_str(), nullptr, nullptr);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+#ifdef ANIM_DEBUG
+		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
+#endif
+
+		window = glfwCreateWindow(static_cast<int>(winData.width), static_cast<int>(winData.height), winData.title.c_str(), nullptr, nullptr);
 
 		RenderApi::CreateContext(this);
 
+#ifdef ANIM_DEBUG
+		Utilities::EnableOpenGLDebugging();
+#endif
+
 		SetVSync(true);
 
-		// TODO: Shit ton of call backs here
-		// Keyboard, WindowResize, Mouse, Scroll, Position, etc.
 		glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
 		glfwSetWindowUserPointer(window, &windowData);
 	}

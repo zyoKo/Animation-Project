@@ -1,6 +1,7 @@
 #include <AnimationPch.h>
 
 #include "OpenGLContext.h"
+
 #include "Core/Logger/Log.h"
 #include "Core/Logger/GLDebug.h"
 
@@ -23,14 +24,14 @@ namespace Animator
 		glInfo = GL_CALL(glGetString, GL_VERSION);
 		LOG_INFO("OpenGL Version: {0}", reinterpret_cast<const char*>(glInfo));
 
-		glInfo = GL_CALL(glGetString, GL_EXTENSIONS);
-		std::string extensionsStr(reinterpret_cast<const char*>(glInfo));
-		size_t pos = 0;
-		while ((pos = extensionsStr.find(' ', pos)) != std::string::npos) {
-			extensionsStr.replace(pos, 1, "\n");
-			pos += 1; // Move past the replaced newline
-		}
-		LOG_INFO("OpenGL Supported Extension: {0}", extensionsStr);
+		//glInfo = GL_CALL(glGetString, GL_EXTENSIONS);
+		//std::string extensionsStr(reinterpret_cast<const char*>(glInfo));
+		//size_t pos = 0;
+		//while ((pos = extensionsStr.find(' ', pos)) != std::string::npos) {
+		//	extensionsStr.replace(pos, 1, "\n");
+		//	pos += 1; // Move past the replaced newline
+		//}
+		//LOG_INFO("OpenGL Supported Extension: {0}", extensionsStr);
 	}
 
 	void OpenGLContext::AddContext()

@@ -4,6 +4,10 @@
 #include <string>
 
 #include "Core/Window/IWindow.h"
+#include "Graphics/OpenGL/ITexture2D.h"
+#include "Graphics/OpenGL/Buffers/Interfaces/IIndexBuffer.h"
+#include "Graphics/OpenGL/Buffers/Interfaces/IVertexArray.h"
+#include "Graphics/OpenGL/Buffers/Interfaces/IVertexBuffer.h"
 
 namespace Animator
 {
@@ -28,6 +32,12 @@ namespace Animator
 		std::unique_ptr<IWindow> window;
 
 		bool running = true;
+
+		std::shared_ptr<IVertexArray> vertexArrayObject;
+		std::shared_ptr<IVertexBuffer> vertexBuffer;
+		std::shared_ptr<IIndexBuffer> indexBuffer;
+
+		std::shared_ptr<ITexture2D> texture;
 
 		// Singleton Class
 		static Application* instance;

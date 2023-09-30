@@ -13,7 +13,8 @@ project "Animation-Engine"
     files 
     {
         sourcedir .. "/**.cpp",
-        sourcedir .. "/**.h"
+        sourcedir .. "/**.h",
+        sourcedir .. "/**.inl"
     }
 
     includedirs 
@@ -21,21 +22,23 @@ project "Animation-Engine"
         sourcedir,
         vendordir .. "/GLFW/include",
         vendordir .. "/glad/include",
-        vendordir .. "/spdlog/include"
+        vendordir .. "/spdlog/include",
+        vendordir .. "/stb/include"
     }
 
     defines
     {
         "GLFW_INCLUDE_NONE",
         "OPEN_GL",
-        "_CRT_SECURE_NO_WARNINGS"
+        "_CRT_SECURE_NO_WARNINGS",
+        "STB_IMAGE_IMPLEMENTATION"
     }
 
     links
     {
+        "opengl32.lib",
         "GLFW",
-        "Glad",
-        "opengl32.lib"
+        "Glad"
     }
 
     filter { "configurations:Debug" }
@@ -46,5 +49,6 @@ project "Animation-Engine"
 
     filter { "configurations:Release" }
         buildoptions "/MT"
+        defines "ANIM_RELEASE"
         runtime "Release"
         optimize "on"

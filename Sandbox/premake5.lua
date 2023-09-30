@@ -7,6 +7,11 @@ project "Sandbox"
     targetdir("./build/bin/" .. outputdir .. "/%{prj.name}")
     objdir("./build/obj/" .. outputdir .. "/%{prj.name}")
 
+    linkoptions 
+    {
+        "/NODEFAULTLIB:LIBCMTD.lib"
+    }
+
     files 
     {
         sourcedir .. "/**.cpp",
@@ -39,12 +44,10 @@ project "Sandbox"
 
     filter { "configurations:Debug" }
         buildoptions "/MTd"
-        defines "ANIMATION_DEBUG"
         runtime "Debug"
         symbols "on"
 
     filter { "configurations:Release" }
         buildoptions "/MT"
-        defines "ANIMATION_RELEASE"
         runtime "Release"
         optimize "on"

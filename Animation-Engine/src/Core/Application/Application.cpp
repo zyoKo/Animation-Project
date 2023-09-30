@@ -1,15 +1,26 @@
 #include "AnimationPch.h"
 
+#include <GLFW/glfw3.h>
+
 #include "Application.h"
 
 #include "Core/Logger/GLDebug.h"
 #include "Core/Logger/Log.h"
-#include "GLFW/glfw3.h"
 #include "Graphics/RenderApi.h"
+#include "Math/Math.h"
+#include "stb_image.h"
+#include "Graphics/OpenGL/Texture2D.h"
 
 namespace Animator
 {
 	Application* Application::instance = nullptr;
+
+	struct Mesh
+	{
+		Math::Vec3F vertices;
+		Math::Vec3F colors;
+		Math::Vec2F textureCoords;
+	};
 
 	Application::Application(const std::string& name, uint32_t width, uint32_t height)
 	{
@@ -31,134 +42,132 @@ namespace Animator
 		
 	}
 
+	std::string ReadFile(const std::string& filepath)
+	{
+		std::string shaderSource;
+
+		try
+		{
+			std::ifstream stream;
+
+			stream.exceptions(std::ios::failbit | std::ios::badbit);
+			stream.open(filepath, std::ios::binary);
+
+			stream.seekg(0, std::ios::end);
+			auto fileSize = stream.tellg();
+
+			if(fileSize > 0)
+			{
+				shaderSource.resize(fileSize);
+				stream.seekg(0, std::ios::beg);
+				stream.read(shaderSource.data(), fileSize);
+			}
+			else
+			{
+				LOG_ERROR("Shader File is empty: {0}", filepath);
+				__debugbreak();
+			}
+		}
+		catch(std::exception& e)
+		{
+			LOG_ERROR("Failed to open shader source file: {0}\nException Raised: {1}", filepath, e.what());
+			__debugbreak();
+		}
+		
+		return shaderSource;
+	}
+
 	void Application::Run()
 	{
-		const char* vertexShaderSource = "#version 330 core\n"
-			"layout (location = 0) in vec3 aPos;\n"
-			"void main()\n"
-			"{\n"
-			"   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-			"}\0";
+		const std::string textureFile = "./assets/digipen.jpg";
+		int width, height, depth;
 
-		const char* fragmentShaderSource = "#version 330 core\n"
-			"out vec4 FragColor;\n"
-			"void main()\n"
-			"{\n"
-			"	FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-			"}\0";
+		stbi_set_flip_vertically_on_load(1);
 
-		// Vertex Shader
-		unsigned int vertexShader;
-		vertexShader = GL_CALL(glCreateShader, GL_VERTEX_SHADER);
+		stbi_uc* data = stbi_load(textureFile.c_str(), &width, &height, &depth, 4);
 
-		GL_CALL(glShaderSource, vertexShader, 1, &vertexShaderSource, nullptr);
-		GL_CALL(glCompileShader, vertexShader);
+		ANIM_ASSERT(data != nullptr, "Failed to load texture from file!");
 
-		int success;
-		char infoLog[512];
-		GL_CALL(glGetShaderiv, vertexShader, GL_COMPILE_STATUS, &success);
+		texture = RenderApi::CreateTexture2D(data, width, height, depth);
+		texture->Bind(0);
 
-		if (!success)
-		{
-			GL_CALL(glGetShaderInfoLog, vertexShader, 512, nullptr, infoLog);
-			ANIM_ASSERT(false, "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n{0}", infoLog);
-		}
+		stbi_image_free(data);
 
-		// Fragment Shader
-		unsigned int fragmentShader;
-		fragmentShader = GL_CALL(glCreateShader, GL_FRAGMENT_SHADER);
+		std::vector<Math::Vec3F> vertices;
+		vertices.push_back({  0.5f,  0.5f, 0.0f });
+		vertices.push_back({  0.5f, -0.5f, 0.0f });
+		vertices.push_back({ -0.5f, -0.5f, 0.0f });
+		vertices.push_back({ -0.5f,  0.5f, 0.0f });
 
-		GL_CALL(glShaderSource, fragmentShader, 1, &fragmentShaderSource, nullptr);
-		GL_CALL(glCompileShader, fragmentShader);
+		std::vector<Math::Vec3F> colors;
+		colors.push_back({ 1.0f, 0.0f, 0.0f });
+		colors.push_back({ 0.0f, 1.0f, 0.0f });
+		colors.push_back({ 0.0f, 0.0f, 1.0f });
+		colors.push_back({ 1.0f, 1.0f, 0.0f });
 
-		GL_CALL(glGetShaderiv, fragmentShader, GL_COMPILE_STATUS, &success);
+		std::vector<Math::Vec2F> textureCoords;
+		textureCoords.push_back({ 1.0f, 1.0f });
+		textureCoords.push_back({ 1.0f, 0.0f });
+		textureCoords.push_back({ 0.0f, 0.0f });
+		textureCoords.push_back({ 0.0f, 1.0f });
 
-		if (!success)
-		{
-			GL_CALL(glGetShaderInfoLog, fragmentShader, 512, nullptr, infoLog);
-			ANIM_ASSERT(false, "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n{0}", infoLog);
-		}
+		std::vector<Math::Vec3UI> indexList;
+		indexList.push_back({ 0, 1, 3 });
+		indexList.push_back({ 1, 2, 3 });
 
-		// Creating Shader Program
-		unsigned int shaderProgram;
-		shaderProgram = GL_CALL(glCreateProgram);
+		vertexArrayObject = RenderApi::CreateVertexArray();
 
-		GL_CALL(glAttachShader, shaderProgram, vertexShader);
-		GL_CALL(glAttachShader, shaderProgram, fragmentShader);
-		GL_CALL(glLinkProgram, shaderProgram);
+		// Set Index Buffer
+		indexBuffer = RenderApi::CreateIndexBuffer();
+		indexBuffer->SetSize(GetSizeofCustomType(VertexDataType::Vector3UI) * indexList.size());
+		indexBuffer->SetData(indexList.data());
 
-		GL_CALL(glGetProgramiv, shaderProgram, GL_LINK_STATUS, &success);
-		if (!success)
-		{
-			GL_CALL(glGetShaderInfoLog, fragmentShader, 512, nullptr, infoLog);
-			ANIM_ASSERT(false, "ERROR::SHADER::LINK_FAILED\n{0}", infoLog);
-		}
+		// Set Vertex Buffer
+		vertexBuffer = RenderApi::CreateVertexBuffer();
 
-		GL_CALL(glUseProgram, shaderProgram);
+		VertexBufferLayout layout;
+		layout.AddBufferElement(VertexDataType::Vector3F, 4, false);
+		layout.AddBufferElement(VertexDataType::Vector3F, 4, false);
+		layout.AddBufferElement(VertexDataType::Vector2F, 4, false);
+		vertexBuffer->SetVertexBufferLayout(layout);
 
-		GL_CALL(glDeleteShader, vertexShader);
-		GL_CALL(glDeleteShader, fragmentShader);
+		vertexBuffer->SetSize(layout.GetStride() * 4);
 
-		// set up vertex data (and buffer(s)) and configure vertex attributes
-		// ------------------------------------------------------------------
-		constexpr float vertices[] = {
-			 0.5f,  0.5f, 0.0f,  // top right
-			 0.5f, -0.5f, 0.0f,  // bottom right
-			-0.5f, -0.5f, 0.0f,  // bottom left
-			-0.5f,  0.5f, 0.0f   // top left 
-		};
+		//std::vector<std::pair<const void*, unsigned int>> test;
+		//test.reserve(3);
+		//test.emplace_back(vertices.data(),		VertexBufferElements::GetSizeofCustomType(VertexDataType::Vector3F));
+		//test.emplace_back(colors.data(),		VertexBufferElements::GetSizeofCustomType(VertexDataType::Vector3F));
+		//test.emplace_back(textureCoords.data(), VertexBufferElements::GetSizeofCustomType(VertexDataType::Vector2F));
 
-		constexpr unsigned int indices[] = {  // note that we start from 0!
-			0, 1, 3,  // first Triangle
-			1, 2, 3   // second Triangle
-		};
+		vertexBuffer->OverwriteVertexBufferData(0, vertices.data(), GetSizeofCustomType(VertexDataType::Vector3F) * vertices.size());
+		vertexBuffer->OverwriteVertexBufferData(1, colors.data(), GetSizeofCustomType(VertexDataType::Vector3F) * colors.size());
+		vertexBuffer->OverwriteVertexBufferData(2, textureCoords.data(), GetSizeofCustomType(VertexDataType::Vector2F) * textureCoords.size());
 
-		unsigned int VBO, VAO, EBO;
-		GL_CALL(glGenVertexArrays, 1, &VAO);
-		GL_CALL(glGenBuffers, 1, &VBO);
-		GL_CALL(glGenBuffers, 1, &EBO);
-		// bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
-		GL_CALL(glBindVertexArray, VAO);
+		vertexArrayObject->SetIndexBuffer(indexBuffer);
+		vertexArrayObject->SetVertexBuffer(vertexBuffer);
+		vertexArrayObject->SetBufferData();
 
-		GL_CALL(glBindBuffer, GL_ARRAY_BUFFER, VBO);
-		GL_CALL(glBufferData, GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+		const std::string vertexShaderFile = "./assets/basic.vert";
+		const std::string fragmentShaderFile = "./assets/basic.frag";
 
-		GL_CALL(glBindBuffer, GL_ELEMENT_ARRAY_BUFFER, EBO);
-		GL_CALL(glBufferData, GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+		const std::string vertexShaderSource = ReadFile(vertexShaderFile);
+		const std::string fragmentShaderSource = ReadFile(fragmentShaderFile);
 
-		GL_CALL(glVertexAttribPointer, 0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-		GL_CALL(glEnableVertexAttribArray, 0);
-
-		// note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
-		GL_CALL(glBindBuffer, GL_ARRAY_BUFFER, 0);
-
-		// remember: do NOT unbind the EBO while a VAO is active as the bound element buffer object IS stored in the VAO; keep the EBO bound.
-		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-		// You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
-		// VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
-		GL_CALL(glBindVertexArray, 0);
+		Shader shader("SimpleShader", vertexShaderSource, fragmentShaderSource);
+		shader.Bind();
+		shader.SetUniformInt(0, "ourTexture");
 
 		// GAME LOOP ////////////////////////////
 		while (running && !window->WindowShouldClose())
 		{
 			RenderApi::GetContext()->ClearColor();
 			RenderApi::GetContext()->ClearBuffer();
-
-			GL_CALL(glUseProgram, shaderProgram);
-			GL_CALL(glBindVertexArray, VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
-			//glDrawArrays(GL_TRIANGLES, 0, 6);
+			vertexArrayObject->Bind();
 			GL_CALL(glDrawElements, GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-			// glBindVertexArray(0); // no need to unbind it every time 
 
 			// Swap buffer and poll events
 			window->Update();
 		}
-
-		GL_CALL(glDeleteVertexArrays, 1, &VAO);
-		GL_CALL(glDeleteBuffers, 1, &VBO);
-		GL_CALL(glDeleteBuffers, 1, &EBO);
-		GL_CALL(glDeleteProgram, shaderProgram);
 	}
 
 	void Application::Render()
