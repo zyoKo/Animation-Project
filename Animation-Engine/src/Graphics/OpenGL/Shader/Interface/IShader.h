@@ -7,7 +7,7 @@ namespace Animator
 	class IShader
 	{
 	public:
-		virtual ~IShader() = 0;
+		virtual ~IShader() = default;
 
 		virtual void Bind() const = 0;
 
@@ -17,7 +17,7 @@ namespace Animator
 
 		//virtual void SetUniformMat4F(const Math::Mat4F& mat4, const std::string& uniformName) = 0;
 
-		//virtual void SetUniformVector4F(const Math::Vector4F& vec4, const std::string& uniformName) = 0;
+		virtual void SetUniformVector4F(const Math::Vector4F& vec4, const std::string& uniformName) = 0;
 
 		virtual void SetUniformVector3F(const Math::Vector3F& vec3, const std::string& uniformName) = 0;
 

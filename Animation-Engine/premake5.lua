@@ -22,14 +22,16 @@ project "Animation-Engine"
         sourcedir,
         vendordir .. "/GLFW/include",
         vendordir .. "/glad/include",
-        vendordir .. "/spdlog/include"
+        vendordir .. "/spdlog/include",
+        vendordir .. "/stb/include"
     }
 
     defines
     {
         "GLFW_INCLUDE_NONE",
         "OPEN_GL",
-        "_CRT_SECURE_NO_WARNINGS"
+        "_CRT_SECURE_NO_WARNINGS",
+        "STB_IMAGE_IMPLEMENTATION"
     }
 
     links

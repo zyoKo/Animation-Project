@@ -4,7 +4,7 @@
 
 #include "glad/glad.h"
 
-#include "Graphics/OpenGL/Buffers/Interfaces/IShader.h"
+#include "Interface/IShader.h"
 
 namespace Animator
 {
@@ -31,6 +31,8 @@ namespace Animator
 		unsigned GetShaderID() const override;
 
 		void SetShaderName(const std::string& name) override;
+
+		void SetUniformVector4F(const Math::Vector4F& vec4, const std::string& uniformName) override;
 
 		void SetUniformVector3F(const Math::Vector3F& vec3, const std::string& uniformName) override;
 

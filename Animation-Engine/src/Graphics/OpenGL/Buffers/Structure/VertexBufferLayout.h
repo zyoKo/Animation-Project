@@ -35,31 +35,18 @@ namespace Animator
 			return bufferElements;
 		}
 
-		template<typename T>
-		void Push(unsigned int count)
+		void AddBufferElement(VertexDataType type, unsigned int count, bool isNormalized)
 		{
-			//ANIM_ASSERT(false, "Please provide a type!");
-		}
+			const unsigned char normalized = isNormalized ? GL_TRUE : GL_FALSE;
 
-		template<>
-		void Push<float>(unsigned int count)
-		{
-			bufferElements.push_back({ GL_FLOAT, count, GL_FALSE });
-			stride += VertexBufferElements::GetSizeofType(GL_FLOAT) * count;
-		}
+			VertexBufferElements bufferElement;
+			bufferElement.type = type;
+			bufferElement.count = count;
+			bufferElement.normalized = normalized;
+			bufferElement.offset = stride;
+			bufferElements.push_back(bufferElement);
 
-		template<>
-		void Push<unsigned int>(unsigned int count)
-		{
-			bufferElements.push_back({ GL_UNSIGNED_INT, count, GL_FALSE });
-			stride += VertexBufferElements::GetSizeofType(GL_UNSIGNED_INT) * count;
-		}
-
-		template<>
-		void Push<unsigned char>(unsigned int count)
-		{
-			bufferElements.push_back({ GL_UNSIGNED_BYTE, count, GL_TRUE });
-			stride += VertexBufferElements::GetSizeofType(GL_UNSIGNED_BYTE) * count;
+			stride += GetSizeofCustomType(type);
 		}
 
 	private:

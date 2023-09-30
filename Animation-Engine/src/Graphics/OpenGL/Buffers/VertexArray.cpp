@@ -10,7 +10,7 @@ namespace Animator
 {
 	VertexArray::VertexArray()
 	{
-		GL_CALL(glGenVertexArrays, 1, &vertexArrayID);
+		GL_CALL(glCreateVertexArrays, 1, &vertexArrayID);
 	}
 
 	VertexArray::~VertexArray()
@@ -49,9 +49,11 @@ namespace Animator
 		for (unsigned int i = 0; i < elements.size(); ++i)
 		{
 			const auto& element = elements[i];
+			GL_CALL(glVertexAttribPointer, i, GetNumberOfElementsFromType(element.type), GetOpenGLTypeFromCustomType(element.type), element.normalized, vertexBuffer->GetVertexBufferLayout().GetStride(), (const void*)offset);
 			GL_CALL(glEnableVertexAttribArray, i);
-			GL_CALL(glVertexAttribPointer, i, element.count, element.type, element.normalized, vertexBuffer->GetVertexBufferLayout().GetStride(), (const void*)offset);
-			offset += element.count * VertexBufferElements::GetSizeofType(element.type);
+			offset += GetSizeofCustomType(element.type);
 		}
+
+		this->UnBind();
 	}
 }

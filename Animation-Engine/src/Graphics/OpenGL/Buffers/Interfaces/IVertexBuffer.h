@@ -21,6 +21,8 @@ namespace Animator
 
 		virtual void SetVertexBufferLayout(const VertexBufferLayout& layout) = 0;
 
+		virtual void OverwriteVertexBufferData(unsigned int layoutLocation, const void* bufferData, unsigned int bufferSize) = 0;
+
 		virtual VertexBufferLayout& GetVertexBufferLayout() = 0;
 	};
 }

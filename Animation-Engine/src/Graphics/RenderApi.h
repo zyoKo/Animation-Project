@@ -4,11 +4,13 @@
 
 #include "Core/Logger/Log.h"
 #include "Core/Window/IWindow.h"
-#include "OpenGL/OpenGLContext.h"
 #include "OpenGL/Buffers/IndexBuffer.h"
 #include "OpenGL/Buffers/VertexArray.h"
 #include "OpenGL/Buffers/VertexBuffer.h"
+#include "OpenGL/OpenGLContext/OpenGLContext.h"
+#include "OpenGL/OpenGLContext/Interfaces/IContext.h"
 #include "OpenGL/Shader/Shader.h"
+#include "Graphics/OpenGL/Texture2D.h"
 
 namespace Animator
 {
@@ -52,6 +54,12 @@ namespace Animator
 		static std::shared_ptr<IVertexBuffer> CreateVertexBuffer(Args&&... args)
 		{
 			return std::make_shared<VertexBuffer>(std::forward<Args>(args)...);
+		}
+
+		template <typename... Args>
+		static std::shared_ptr<ITexture2D> CreateTexture2D(Args&&... args)
+		{
+			return std::make_shared<Texture2D>(std::forward<Args>(args)...);
 		}
 
 	private:

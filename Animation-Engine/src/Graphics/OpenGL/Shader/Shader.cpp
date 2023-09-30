@@ -22,8 +22,8 @@ namespace Animator
 
 		ShaderErrorChecker(shaderID, ShaderErrorType::LINKER);
 
-		glDeleteShader(vertexShaderId);
-		glDeleteShader(fragmentShaderId);
+		GL_CALL(glDeleteShader, vertexShaderId);
+		GL_CALL(glDeleteShader, fragmentShaderId);
 	}
 
 	Shader::~Shader()
@@ -35,12 +35,12 @@ namespace Animator
 
 	void Shader::Bind() const
 	{
-		glUseProgram(shaderID);
+		GL_CALL(glUseProgram, shaderID);
 	}
 
 	void Shader::UnBind() const
 	{
-		glUseProgram(0);
+		GL_CALL(glUseProgram, 0);
 	}
 
 	unsigned Shader::GetShaderID() const
@@ -51,6 +51,11 @@ namespace Animator
 	void Shader::SetShaderName(const std::string& name)
 	{
 		this->shaderName = name;
+	}
+
+	void Shader::SetUniformVector4F(const Math::Vector4F& vec4, const std::string& uniformName)
+	{
+		GL_CALL(glUniform4fv, GetUniformLocation(uniformName), 1, vec4.GetPointerToData());
 	}
 
 	void Shader::SetUniformVector3F(const Math::Vector3F& vec3, const std::string& uniformName)
@@ -80,9 +85,9 @@ namespace Animator
 
 	unsigned Shader::CompileShaderSource(const std::string& shaderSource, GLenum shaderType)
 	{
-		const char* acceptableShaderSource = shaderSource.c_str();
+		const char* rawShaderSource = shaderSource.c_str();
 		const unsigned int shaderId = GL_CALL(glCreateShader, shaderType);
-		GL_CALL(glShaderSource, shaderId, 1, &acceptableShaderSource, NULL);
+		GL_CALL(glShaderSource, shaderId, 1, &rawShaderSource, nullptr);
 		GL_CALL(glCompileShader, shaderId);
 
 		ShaderErrorChecker(shaderId, ShaderErrorType::COMPILER);
@@ -96,7 +101,7 @@ namespace Animator
 		switch(errorType)
 		{
 		case ShaderErrorType::COMPILER:
-			GL_CALL(glGetProgramiv, shaderId, GL_COMPILE_STATUS, &compilationSuccessful);
+			GL_CALL(glGetShaderiv, shaderId, GL_COMPILE_STATUS, &compilationSuccessful);
 			break;
 
 		case ShaderErrorType::LINKER:
@@ -108,26 +113,25 @@ namespace Animator
 			return;
 		}
 
-		if (compilationSuccessful)
-			return;
+		if (!compilationSuccessful)
+		{
+			// Two step process to get log message
+			int errorBufferLength;
+			GL_CALL(glGetProgramiv, shaderId, GL_INFO_LOG_LENGTH, &errorBufferLength);
+			std::vector<char> errorMessage(errorBufferLength);
+			GL_CALL(glGetProgramInfoLog, shaderId, errorBufferLength, nullptr, errorMessage.data());
 
-		// Two step process to get log message
-		int errorBufferLength;
-		GL_CALL(glGetProgramiv, shaderId, GL_INFO_LOG_LENGTH, &errorBufferLength);
-		std::vector<char> errorMessage(errorBufferLength);
-		GL_CALL(glGetProgramInfoLog, shaderId, errorBufferLength, nullptr, errorMessage.data());
-
-		LOG_ERROR(errorMessage.data());
+			LOG_ERROR(errorMessage.data());
+		}
 	}
 
 	int Shader::GetUniformLocation(const std::string& uniformName)
 	{
 		// Better Optimization
-		if (uniformLocationCache.find(uniformName) != uniformLocationCache.end())
+		if (uniformLocationCache.contains(uniformName))
 			return uniformLocationCache[uniformName];
 
-		const int location = GL_CALL(glGetUniformLocation(shaderID, uniformName.c_str()));
-
+		const int location = glGetUniformLocation(shaderID, uniformName.c_str());
 		if (location == -1) 
 		{
 			LOG_WARN("Warning: Uniform '{0}' does not exists!", uniformName);

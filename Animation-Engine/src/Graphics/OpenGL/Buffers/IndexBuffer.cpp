@@ -51,6 +51,6 @@ namespace Animator
 
 	void IndexBuffer::SetData(const void* bufferData) const
 	{
-		glNamedBufferSubData(bufferID, 0, bufferDataSize, bufferData);
+		GL_CALL(glNamedBufferSubData, bufferID, 0, bufferDataSize, bufferData);
 	}
 }

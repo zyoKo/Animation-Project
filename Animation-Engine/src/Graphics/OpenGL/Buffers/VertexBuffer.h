@@ -27,10 +27,12 @@ namespace Animator
 
 		VertexBufferLayout& GetVertexBufferLayout() override;
 
+		void OverwriteVertexBufferData(unsigned int layoutLocation, const void* bufferData, unsigned int bufferSize) override;
+
 	private:
 		unsigned int bufferID;
 
-		unsigned int bufferDataSize;
+		unsigned int vertexBufferDataSize;
 
 		VertexBufferLayout vertexBufferLayout;
 	};
