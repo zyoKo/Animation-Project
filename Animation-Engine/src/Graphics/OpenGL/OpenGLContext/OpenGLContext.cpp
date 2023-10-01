@@ -58,4 +58,9 @@ namespace Animator
 	{
 		GL_CALL(glClearColor, 0.2f, 0.3f, 0.3f, 1.0f);
 	}
+
+	void OpenGLContext::EnableDepthTest(bool value)
+	{
+		GL_CALL(glEnable, GL_DEPTH_TEST);
+	}
 }

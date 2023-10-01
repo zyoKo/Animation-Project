@@ -23,7 +23,8 @@ project "Animation-Engine"
         vendordir .. "/GLFW/include",
         vendordir .. "/glad/include",
         vendordir .. "/spdlog/include",
-        vendordir .. "/stb/include"
+        vendordir .. "/stb/include",
+        vendordir .. "/glm/include"
     }
 
     defines

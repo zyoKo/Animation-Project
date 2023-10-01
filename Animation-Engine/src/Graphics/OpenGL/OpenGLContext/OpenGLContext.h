@@ -21,6 +21,8 @@ namespace Animator
 
 		void ClearColor() override;
 
+		void EnableDepthTest(bool value) override;
+
 	private:
 		GLFWwindow* window;
 	};

@@ -4,12 +4,14 @@
 
 #include "Application.h"
 
+#include <glm/ext/matrix_transform.hpp>
+
 #include "Core/Logger/GLDebug.h"
 #include "Core/Logger/Log.h"
 #include "Graphics/RenderApi.h"
 #include "Math/Math.h"
 #include "stb_image.h"
-#include "Graphics/OpenGL/Texture2D.h"
+#include "Graphics/OpenGL/Textures/Texture2D.h"
 
 namespace Animator
 {
@@ -54,7 +56,7 @@ namespace Animator
 			stream.open(filepath, std::ios::binary);
 
 			stream.seekg(0, std::ios::end);
-			auto fileSize = stream.tellg();
+			const auto fileSize = stream.tellg();
 
 			if(fileSize > 0)
 			{
@@ -157,13 +159,27 @@ namespace Animator
 		shader.Bind();
 		shader.SetUniformInt(0, "ourTexture");
 
+		glm::mat4 transform = glm::mat4(1.0f);
+		//transform = glm::rotate(transform, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		//transform = glm::scale(transform, glm::vec3(0.5f, 0.5f, 0.5f));
+		//shader.SetUniformMatrix4F(transform, "transform");
+
+		RenderApi::GetContext()->EnableDepthTest(true);
+
 		// GAME LOOP ////////////////////////////
 		while (running && !window->WindowShouldClose())
 		{
 			RenderApi::GetContext()->ClearColor();
 			RenderApi::GetContext()->ClearBuffer();
-			vertexArrayObject->Bind();
+
+			//vertexArrayObject->Bind();
+
+			transform = glm::rotate(transform, static_cast<float>(glfwGetTime() / 10.0), glm::vec3(0.0f, 0.0f, 1.0f));
+			shader.SetUniformMatrix4F(transform, "transform");
+
 			GL_CALL(glDrawElements, GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+			//vertexArrayObject->UnBind();
 
 			// Swap buffer and poll events
 			window->Update();

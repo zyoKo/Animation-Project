@@ -5,6 +5,9 @@
 #include "Core/Logger/Log.h"
 #include "Core/Logger/GLDebug.h"
 
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 namespace Animator
 {
 	Shader::Shader(const std::string& shaderName, const std::string& vertexShaderSource, const std::string& fragmentShaderSource)
@@ -51,6 +54,16 @@ namespace Animator
 	void Shader::SetShaderName(const std::string& name)
 	{
 		this->shaderName = name;
+	}
+
+	void Shader::SetUniformMatrix4F(const glm::mat4& mat4, const std::string& uniformName)
+	{
+		GL_CALL(glUniformMatrix4fv, GetUniformLocation(uniformName), 1, GL_FALSE, glm::value_ptr(mat4));
+	}
+
+	void Shader::SetUniformMatrix3F(const glm::mat3& mat3, const std::string& uniformName)
+	{
+		GL_CALL(glUniformMatrix3fv, GetUniformLocation(uniformName), 1, GL_FALSE, glm::value_ptr(mat3));
 	}
 
 	void Shader::SetUniformVector4F(const Math::Vector4F& vec4, const std::string& uniformName)

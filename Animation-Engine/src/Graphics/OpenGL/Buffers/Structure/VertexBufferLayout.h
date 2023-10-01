@@ -2,6 +2,8 @@
 
 #include <vector>
 
+#include "glad/glad.h"
+
 #include "VertexBufferElements.h"
 
 namespace Animator

@@ -1,6 +1,7 @@
 //#include <iostream>
 
 #include "Core/Application/Application.h"
+#include "Core/Logger/Log.h"
 //#include "Core/Logger/Log.h"
 
 class Sandbox : public Animator::Application
@@ -177,6 +178,8 @@ public:
 
 int main()
 {
+    
+
     Sandbox application;
     application.Initialize();
 

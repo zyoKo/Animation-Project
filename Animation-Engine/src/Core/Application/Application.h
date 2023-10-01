@@ -4,7 +4,7 @@
 #include <string>
 
 #include "Core/Window/IWindow.h"
-#include "Graphics/OpenGL/ITexture2D.h"
+#include "Graphics/OpenGL/Textures/ITexture2D.h"
 #include "Graphics/OpenGL/Buffers/Interfaces/IIndexBuffer.h"
 #include "Graphics/OpenGL/Buffers/Interfaces/IVertexArray.h"
 #include "Graphics/OpenGL/Buffers/Interfaces/IVertexBuffer.h"

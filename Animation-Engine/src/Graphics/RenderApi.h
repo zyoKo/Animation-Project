@@ -7,10 +7,10 @@
 #include "OpenGL/Buffers/IndexBuffer.h"
 #include "OpenGL/Buffers/VertexArray.h"
 #include "OpenGL/Buffers/VertexBuffer.h"
-#include "OpenGL/OpenGLContext/OpenGLContext.h"
 #include "OpenGL/OpenGLContext/Interfaces/IContext.h"
+#include "OpenGL/OpenGLContext/OpenGLContext.h"
 #include "OpenGL/Shader/Shader.h"
-#include "Graphics/OpenGL/Texture2D.h"
+#include "Graphics/OpenGL/Textures/Texture2D.h"
 
 namespace Animator
 {

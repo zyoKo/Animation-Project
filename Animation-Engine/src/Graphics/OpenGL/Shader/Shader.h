@@ -6,6 +6,8 @@
 
 #include "Interface/IShader.h"
 
+#include <glm/mat3x3.hpp>
+
 namespace Animator
 {
 	enum class ShaderErrorType
@@ -31,6 +33,10 @@ namespace Animator
 		unsigned GetShaderID() const override;
 
 		void SetShaderName(const std::string& name) override;
+
+		void SetUniformMatrix4F(const glm::mat4& mat4, const std::string& uniformName) override;
+
+		void SetUniformMatrix3F(const glm::mat3& mat3, const std::string& uniformName) override;
 
 		void SetUniformVector4F(const Math::Vector4F& vec4, const std::string& uniformName) override;
 

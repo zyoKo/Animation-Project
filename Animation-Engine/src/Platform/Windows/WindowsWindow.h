@@ -12,6 +12,7 @@ namespace Animator
 	{
 	public:
 		WindowsWindow(const UniversalWindowData& winData);
+
 		~WindowsWindow() override;
 
 		bool WindowShouldClose() override;
@@ -19,9 +20,11 @@ namespace Animator
 		void Update() override;
 
 		uint32_t GetWidth() override;
+
 		uint32_t GetHeight() override;
 
 		void SetVSync(bool enabled) override;
+
 		bool IsVSync() override;
 
 		void* GetNativeWindow() const override;
@@ -32,6 +35,7 @@ namespace Animator
 		WindowData windowData;
 
 		virtual void Init(const UniversalWindowData& winData);
+
 		virtual void Shutdown();
 	};
 }
