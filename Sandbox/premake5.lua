@@ -36,13 +36,23 @@ project "Sandbox"
         "../Animation-Engine/vendor/assimp/include"
     }
 
+    libdirs
+    {
+        "../Animation-Engine/vendor/assimp/lib"
+    }
+
     links
     {
         "Animation-Engine"
     }
 
     filter "system:windows"
-        systemversion "latest"
+		systemversion "latest"
+
+        prebuildcommands 
+        {
+            "copy \"..\\Animation-Engine\\vendor\\assimp\\lib\\*.dll\" \"$(ProjectDir)$(OutDir)\""
+        }
 
     filter { "configurations:Debug" }
         buildoptions "/MTd"

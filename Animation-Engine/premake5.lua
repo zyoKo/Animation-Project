@@ -49,6 +49,14 @@ project "Animation-Engine"
         "assimp-vc143-mt.lib"
     }
 
+    filter "system:windows"
+        systemversion "latest"
+
+        prebuildcommands 
+        {
+            "copy \"$(ProjectDir)vendor\\assimp\\lib\\*.dll\" \"$(ProjectDir)$(OutDir)\""  
+        }
+
     filter { "configurations:Debug" }
         buildoptions "/MTd"
         defines "ANIM_DEBUG"

@@ -10,8 +10,8 @@ namespace Animator
 	Mesh::Mesh()
 		:	vertices(DEFAULT_VERTICES_DATA),
 			colors(DEFAULT_COLOR_DATA),
-			textureCoordinates(DEFAULT_TEXTURE_COORDINATES_DATA),
-			indices(DEFAULT_INDICES_DATA)
+			textureCoordinates(DEFAULT_TEXTURE_COORDINATES_DATA)//,
+			//indices(DEFAULT_INDICES_DATA)
 	{
 		vertexArrayObject = RenderApi::CreateVertexArray();
 		vertexBuffer = RenderApi::CreateVertexBuffer();
@@ -27,8 +27,8 @@ namespace Animator
 		:	vertices(std::move(vertices)),
 			colors(std::move(colors)),
 			normals(std::move(normals)),
-			textureCoordinates(std::move(textureCoordinates)),
-			indices(std::move(indices))
+			textureCoordinates(std::move(textureCoordinates))//,
+			//indices(std::move(indices))
 	{
 		vertexArrayObject = RenderApi::CreateVertexArray();
 		vertexBuffer = RenderApi::CreateVertexBuffer();
@@ -39,6 +39,26 @@ namespace Animator
 
 		SetupMesh();
 	}
+
+	Mesh::Mesh(Vertices_V3F vertices, Normal_V3F normals, TexCoordinates_V2F textureCoordinates, Tangents_V3F tangents, BiTangents_V3F biTangents, std::vector<unsigned> indices)
+		:	vertices(std::move(vertices)),
+			normals(std::move(normals)),
+			textureCoordinates(std::move(textureCoordinates)),
+			tangents(std::move(tangents)),
+			biTangents(std::move(biTangents)),
+			indices(std::move(indices))
+			//indices(std::move(indices))
+	{
+		vertexArrayObject = RenderApi::CreateVertexArray();
+		vertexBuffer = RenderApi::CreateVertexBuffer();
+		indexBuffer = RenderApi::CreateIndexBuffer();
+
+		vertexArrayObject->SetIndexBuffer(indexBuffer);
+		vertexArrayObject->SetVertexBuffer(vertexBuffer);
+
+		SetupMesh();
+	}
+
 
 	void Mesh::Bind() const
 	{
@@ -90,48 +110,77 @@ namespace Animator
 		this->textureCoordinates = std::move(texCoords);
 	}
 
-	const Indices_V3UI& Mesh::GetIndices() const
+	const Tangents_V3F& Mesh::GetTangents() const
 	{
-		return indices;
+		return tangents;
 	}
 
-	void Mesh::SetIndices(Indices_V3UI indexList) noexcept
+
+	void Mesh::SetTangents(Tangents_V3F tangentsList)
 	{
-		this->indices = std::move(indexList);
+		this->tangents = std::move(tangentsList);
 	}
+
+	const BiTangents_V3F& Mesh::GetBiTangents() const
+	{
+		return biTangents;
+	}
+
+	void Mesh::SetBiTangents(BiTangents_V3F biTangentsList)
+	{
+		this->biTangents = std::move(biTangentsList);
+	}
+
+	//const Indices_V3UI& Mesh::GetIndices() const
+	//{
+	//	return indices;
+	//}
+	//
+	//void Mesh::SetIndices(Indices_V3UI indexList) noexcept
+	//{
+	//	this->indices = std::move(indexList);
+	//}
 
 	const ITexturesList& Mesh::GetTextures() const
 	{
 		return textures;
 	}
-
+	
 	void Mesh::SetTextures(ITexturesList textures)
 	{
 		this->textures = std::move(textures);
+	}
+
+	void Mesh::AddTexture(const std::shared_ptr<ITexture2D>& texture)
+	{
+		if (texture != nullptr)
+			textures.push_back(texture);
 	}
 
 	void Mesh::Draw(const std::shared_ptr<Shader>& shader) const
 	{
 		for (int i = 0; i < static_cast<int>(textures.size()); ++i)
 		{
-			textures[i].Bind(i);
+			textures[i]->Bind(i);
 
-			shader->SetUniformInt(i, textures[i].GetTextureName());
+			shader->SetUniformInt(i, textures[i]->GetTextureName());
 		}
 
 		Bind();
-		GL_CALL(glDrawElements, GL_TRIANGLES, GetSizeofCustomType(VertexDataType::Vector3UI) * indices.size(), GL_UNSIGNED_INT, 0);
+		//GL_CALL(glDrawElements, GL_TRIANGLES, GetSizeofCustomType(VertexDataType::Vector3UI) * indices.size(), GL_UNSIGNED_INT, 0);
+		GL_CALL(glDrawElements, GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 		Unbind();
 
 		for (const auto& texture : textures)
 		{
-			texture.Bind(0);
+			texture->Bind(0);
 		}
 	}
 
 	void Mesh::SetupMesh() const
 	{
-		indexBuffer->SetSize(GetSizeofCustomType(VertexDataType::Vector3UI) * static_cast<unsigned>(indices.size()));
+		//indexBuffer->SetSize(GetSizeofCustomType(VertexDataType::Vector3UI) * static_cast<unsigned>(indices.size()));
+		indexBuffer->SetSize(sizeof(unsigned) * static_cast<unsigned>(indices.size()));
 		indexBuffer->SetData(indices.data());
 
 		VertexBufferLayout layout;

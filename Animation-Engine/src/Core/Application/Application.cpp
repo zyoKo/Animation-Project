@@ -10,8 +10,10 @@
 #include "Core/Logger/Log.h"
 #include "Graphics/RenderApi.h"
 #include "AssetManager/AssetManager.h"
+#include "Components/Model.h"
 #include "Components/Camera/Camera.h"
 #include "Components/Camera/CameraConstants.h"
+#include "Core/Logger/GLDebug.h"
 
 namespace Animator
 {
@@ -42,22 +44,29 @@ namespace Animator
 
 	void Application::Run()
 	{
-		const std::string textureFile = "./assets/digipen.jpg";
+		//const std::string textureFile = "./assets/digipen.jpg";
+		const std::string textureFile = "./assets/backpack/diffuse.jpg";
 		texture = assetManager->CreateTexture(textureFile);
-		texture->Bind(0);
+		texture->SetTextureName("texture_diffuse1");
+		//texture->Bind(0);
 
-		mesh = std::make_shared<Mesh>();
+		//mesh = std::make_shared<Mesh>();
 
-		const std::string vertexShaderFile = "./assets/basic.vert";
-		const std::string fragmentShaderFile = "./assets/basic.frag";
+		Model bagModel("./assets/backpack/backpack.obj");
+		bagModel.SetDiffuseTextureForMeshes(texture);
+
+		const std::string vertexShaderFile = "./assets/shaders/backpack.vert";
+		const std::string fragmentShaderFile = "./assets/shaders/backpack.frag";
 
 		shader = assetManager->CreateShader("SimpleShader", vertexShaderFile, fragmentShaderFile);
 		shader->Bind();
-		shader->SetUniformInt(0, "ourTexture");
+		shader->SetUniformInt(0, "texture_diffuse1");
 
 		RenderApi::GetContext()->EnableDepthTest(true);
 
-		glm::mat4 transform = glm::mat4(1.0f);
+		GL_CALL(glPolygonMode, GL_FRONT_AND_BACK, GL_LINE);
+
+		//glm::mat4 transform = glm::mat4(1.0f);
 		
 		while (running && !window->WindowShouldClose())
 		{
@@ -70,8 +79,8 @@ namespace Animator
 			RenderApi::GetContext()->ClearColor();
 			RenderApi::GetContext()->ClearBuffer();
 			
-			transform = glm::rotate(transform, deltaTime * 10.0f, glm::vec3(0.0f, 0.0f, 1.0f));
-			shader->SetUniformMatrix4F(transform, "model");
+			//transform = glm::rotate(transform, deltaTime * 10.0f, glm::vec3(0.0f, 0.0f, 1.0f));
+			//shader->SetUniformMatrix4F(transform, "model");
 
 			// pass projection matrix to shader (note that in this case it could change every frame)
 			glm::mat4 projection = glm::perspective(glm::radians(camera.zoom), (float)window->GetWidth() / (float)window->GetHeight(), 0.1f, 100.0f);
@@ -81,7 +90,13 @@ namespace Animator
 			glm::mat4 view = camera.GetViewMatrix();
 			shader->SetUniformMatrix4F(view, "view");
 
-			mesh->Draw(shader);
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
+			shader->SetUniformMatrix4F(model, "model");
+			bagModel.Draw(shader);
+
+			//mesh->Draw(shader);
 
 			// Swap buffer and poll events
 			window->Update();

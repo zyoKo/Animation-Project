@@ -46,7 +46,7 @@ namespace Animator
 
 		std::unique_ptr<IWindow> window;
 
-		std::shared_ptr<Mesh> mesh;
+		//std::shared_ptr<Mesh> mesh;
 
 		Camera camera;
 

@@ -45,9 +45,9 @@ namespace Animator
 			if (direction == CameraMovement::BACKWARD)
 			    cameraPosition -= front * velocity;
 			if (direction == CameraMovement::LEFT)
-			    cameraPosition -= front * velocity;
+			    cameraPosition -= right * velocity;
 			if (direction == CameraMovement::RIGHT)
-			    cameraPosition += front * velocity;
+			    cameraPosition += right * velocity;
 		}
 
 		// processes input received from a mouse input system. Expects the offset value in both the x and y direction.
