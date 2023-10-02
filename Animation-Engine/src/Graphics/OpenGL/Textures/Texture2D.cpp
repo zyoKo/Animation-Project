@@ -13,16 +13,6 @@ namespace Animator
 			height(height),
 			depth(depth)
 	{
-		/*GL_CALL(glCreateTextures, GL_TEXTURE_2D, 1, &textureID);
-		GL_CALL(glTextureStorage2D, textureID, 1, GL_RGBA8, width, height);
-
-		GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-		GL_CALL(glTextureSubImage2D, textureID, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);*/
-
 		GL_CALL(glCreateTextures, GL_TEXTURE_2D, 1, &textureID);
 		GL_CALL(glTextureStorage2D, textureID, 1, GL_RGBA8, width, height);
 
@@ -54,6 +44,16 @@ namespace Animator
 	void Texture2D::UnBind() const
 	{
 		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
+	void Texture2D::SetTextureName(const std::string& textureName)
+	{
+		name = textureName;
+	}
+
+	const std::string& Texture2D::GetTextureName() const
+	{
+		return name;
 	}
 
 	int Texture2D::GetWidth() const

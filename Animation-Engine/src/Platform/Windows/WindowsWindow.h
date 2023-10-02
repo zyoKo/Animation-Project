@@ -29,6 +29,8 @@ namespace Animator
 
 		void* GetNativeWindow() const override;
 
+		float GetAspectRatio() override;
+
 	private:
 		GLFWwindow* window;
 

@@ -18,7 +18,7 @@ namespace Animator
 
 	static void FramebufferSizeCallback(GLFWwindow* window, int width, int height)
 	{
-		glViewport(0, 0, width, height);
+		GL_CALL(glViewport, 0, 0, width, height);
 	}
 
 	IWindow* IWindow::Create(const UniversalWindowData& props)
@@ -76,6 +76,11 @@ namespace Animator
 	void* WindowsWindow::GetNativeWindow() const
 	{
 		return window;
+	}
+
+	float WindowsWindow::GetAspectRatio()
+	{
+		return static_cast<float>(windowData.width) / static_cast<float>(windowData.height);
 	}
 
 	void WindowsWindow::Init(const UniversalWindowData& winData)

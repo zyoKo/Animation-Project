@@ -17,11 +17,17 @@ namespace Animator
 
 		void UnBind() const override;
 
+		void SetTextureName(const std::string& textureName) override;
+
+		const std::string& GetTextureName() const override;
+
 		int GetWidth() const override;
 
 		int GetHeight() const override;
 
 	private:
+		std::string name;
+
 		unsigned int textureID;
 
 		int width, height, depth;
