@@ -31,7 +31,9 @@ project "Sandbox"
         "../Animation-Engine/vendor",
         "../Animation-Engine/vendor/glad/include",
         "../Animation-Engine/vendor/GLFW/include",
-        "../Animation-Engine/vendor/spdlog/include"
+        "../Animation-Engine/vendor/spdlog/include",
+        "../Animation-Engine/vendor/glm/include",
+        "../Animation-Engine/vendor/assimp/include"
     }
 
     links

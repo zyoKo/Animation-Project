@@ -3,11 +3,18 @@
 #include <memory>
 #include <string>
 
+#include "Components/Mesh.h"
+#include "Components/Camera/Camera.h"
 #include "Core/Window/IWindow.h"
-#include "Graphics/OpenGL/ITexture2D.h"
-#include "Graphics/OpenGL/Buffers/Interfaces/IIndexBuffer.h"
-#include "Graphics/OpenGL/Buffers/Interfaces/IVertexArray.h"
-#include "Graphics/OpenGL/Buffers/Interfaces/IVertexBuffer.h"
+#include "Graphics/OpenGL/Textures/ITexture2D.h"
+//#include "Graphics/OpenGL/Buffers/Interfaces/IIndexBuffer.h"
+//#include "Graphics/OpenGL/Buffers/Interfaces/IVertexArray.h"
+//#include "Graphics/OpenGL/Buffers/Interfaces/IVertexBuffer.h"
+
+namespace Animator
+{
+	class AssetManager;
+}
 
 namespace Animator
 {
@@ -29,13 +36,21 @@ namespace Animator
 		virtual bool Shutdown();
 
 	private:
+		void ProcessInput();
+
+		float deltaTime, lastFrame;
+
+		std::shared_ptr<AssetManager> assetManager;
+
+		std::shared_ptr<Shader> shader;
+
 		std::unique_ptr<IWindow> window;
 
-		bool running = true;
+		std::shared_ptr<Mesh> mesh;
 
-		std::shared_ptr<IVertexArray> vertexArrayObject;
-		std::shared_ptr<IVertexBuffer> vertexBuffer;
-		std::shared_ptr<IIndexBuffer> indexBuffer;
+		Camera camera;
+
+		bool running = true;
 
 		std::shared_ptr<ITexture2D> texture;
 

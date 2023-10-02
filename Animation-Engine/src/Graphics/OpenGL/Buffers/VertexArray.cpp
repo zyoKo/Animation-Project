@@ -43,9 +43,9 @@ namespace Animator
 		this->Bind();
 		vertexBuffer->Bind();
 		indexBuffer->Bind();
-		const auto& elements = vertexBuffer->GetVertexBufferLayout().GetVertexBufferElements();
 
 		unsigned int offset = 0;
+		const auto& elements = vertexBuffer->GetVertexBufferLayout().GetVertexBufferElements();
 		for (unsigned int i = 0; i < elements.size(); ++i)
 		{
 			const auto& element = elements[i];
@@ -53,7 +53,5 @@ namespace Animator
 			GL_CALL(glEnableVertexAttribArray, i);
 			offset += GetSizeofCustomType(element.type);
 		}
-
-		this->UnBind();
 	}
 }

@@ -16,5 +16,7 @@ namespace Animator
 		virtual void ClearBuffer() = 0;
 
 		virtual void ClearColor() = 0;
+
+		virtual void EnableDepthTest(bool value) = 0;
 	};
 }

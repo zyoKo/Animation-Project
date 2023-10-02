@@ -2,6 +2,8 @@
 
 #include "Math/Math.h"
 
+#include <glm/glm.hpp>
+
 namespace Animator
 {
 	class IShader
@@ -15,7 +17,9 @@ namespace Animator
 
 		virtual unsigned int GetShaderID() const = 0;
 
-		//virtual void SetUniformMat4F(const Math::Mat4F& mat4, const std::string& uniformName) = 0;
+		virtual void SetUniformMatrix4F(const glm::mat4& mat4, const std::string& uniformName) = 0;
+
+		virtual void SetUniformMatrix3F(const glm::mat3& mat3, const std::string& uniformName) = 0;
 
 		virtual void SetUniformVector4F(const Math::Vector4F& vec4, const std::string& uniformName) = 0;
 

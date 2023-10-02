@@ -23,7 +23,14 @@ project "Animation-Engine"
         vendordir .. "/GLFW/include",
         vendordir .. "/glad/include",
         vendordir .. "/spdlog/include",
-        vendordir .. "/stb/include"
+        vendordir .. "/stb/include",
+        vendordir .. "/glm/include",
+        vendordir .. "/assimp/include"
+    }
+
+    libdirs
+    {
+        vendordir .. "/assimp/lib"
     }
 
     defines
@@ -38,7 +45,8 @@ project "Animation-Engine"
     {
         "opengl32.lib",
         "GLFW",
-        "Glad"
+        "Glad",
+        "assimp-vc143-mt.lib"
     }
 
     filter { "configurations:Debug" }
