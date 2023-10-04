@@ -8,10 +8,6 @@
 namespace Animator
 {
 	Mesh::Mesh()
-		:	vertices(DEFAULT_VERTICES_DATA),
-			colors(DEFAULT_COLOR_DATA),
-			textureCoordinates(DEFAULT_TEXTURE_COORDINATES_DATA)//,
-			//indices(DEFAULT_INDICES_DATA)
 	{
 		vertexArrayObject = RenderApi::CreateVertexArray();
 		vertexBuffer = RenderApi::CreateVertexBuffer();
@@ -20,34 +16,22 @@ namespace Animator
 		vertexArrayObject->SetIndexBuffer(indexBuffer);
 		vertexArrayObject->SetVertexBuffer(vertexBuffer);
 
-		SetupMesh();
-	}
-
-	Mesh::Mesh(Vertices_V3F vertices, Colors_V3F colors, Normal_V3F normals, TexCoordinates_V2F textureCoordinates, Indices_V3UI indices)
-		:	vertices(std::move(vertices)),
-			colors(std::move(colors)),
-			normals(std::move(normals)),
-			textureCoordinates(std::move(textureCoordinates))//,
-			//indices(std::move(indices))
-	{
-		vertexArrayObject = RenderApi::CreateVertexArray();
-		vertexBuffer = RenderApi::CreateVertexBuffer();
-		indexBuffer = RenderApi::CreateIndexBuffer();
-
-		vertexArrayObject->SetIndexBuffer(indexBuffer);
-		vertexArrayObject->SetVertexBuffer(vertexBuffer);
+		vertices = DEFAULT_VERTICES_DATA;
 
 		SetupMesh();
 	}
 
-	Mesh::Mesh(Vertices_V3F vertices, Normal_V3F normals, TexCoordinates_V2F textureCoordinates, Tangents_V3F tangents, BiTangents_V3F biTangents, std::vector<unsigned> indices)
+	Mesh::Mesh(
+		Vertices_V3F vertices, Normal_V3F normals, TexCoordinates_V2F textureCoordinates, 
+		Tangents_V3F tangents, BiTangents_V3F biTangents, std::vector<BoneData> boneData,
+		std::vector<unsigned> indices)
 		:	vertices(std::move(vertices)),
 			normals(std::move(normals)),
 			textureCoordinates(std::move(textureCoordinates)),
 			tangents(std::move(tangents)),
 			biTangents(std::move(biTangents)),
+			boneData(std::move(boneData)),
 			indices(std::move(indices))
-			//indices(std::move(indices))
 	{
 		vertexArrayObject = RenderApi::CreateVertexArray();
 		vertexBuffer = RenderApi::CreateVertexBuffer();
@@ -58,7 +42,6 @@ namespace Animator
 
 		SetupMesh();
 	}
-
 
 	void Mesh::Bind() const
 	{
@@ -115,8 +98,7 @@ namespace Animator
 		return tangents;
 	}
 
-
-	void Mesh::SetTangents(Tangents_V3F tangentsList)
+	void Mesh::SetTangents(Tangents_V3F tangentsList) noexcept
 	{
 		this->tangents = std::move(tangentsList);
 	}
@@ -126,20 +108,20 @@ namespace Animator
 		return biTangents;
 	}
 
-	void Mesh::SetBiTangents(BiTangents_V3F biTangentsList)
+	void Mesh::SetBiTangents(BiTangents_V3F biTangentsList) noexcept
 	{
 		this->biTangents = std::move(biTangentsList);
 	}
 
-	//const Indices_V3UI& Mesh::GetIndices() const
-	//{
-	//	return indices;
-	//}
-	//
-	//void Mesh::SetIndices(Indices_V3UI indexList) noexcept
-	//{
-	//	this->indices = std::move(indexList);
-	//}
+	const std::vector<unsigned>& Mesh::GetIndices() const
+	{
+		return indices;
+	}
+
+	void Mesh::SetIndices(std::vector<unsigned> indexList) noexcept
+	{
+		this->indices = std::move(indexList);
+	}
 
 	const ITexturesList& Mesh::GetTextures() const
 	{
@@ -167,8 +149,7 @@ namespace Animator
 		}
 
 		Bind();
-		//GL_CALL(glDrawElements, GL_TRIANGLES, GetSizeofCustomType(VertexDataType::Vector3UI) * indices.size(), GL_UNSIGNED_INT, 0);
-		GL_CALL(glDrawElements, GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+		GL_CALL(glDrawElements, GL_TRIANGLES, static_cast<GLsizei>(indices.size()), GL_UNSIGNED_INT, nullptr);
 		Unbind();
 
 		for (const auto& texture : textures)
@@ -179,7 +160,8 @@ namespace Animator
 
 	void Mesh::SetupMesh() const
 	{
-		//indexBuffer->SetSize(GetSizeofCustomType(VertexDataType::Vector3UI) * static_cast<unsigned>(indices.size()));
+		ANIM_ASSERT(!vertices.empty(), "Vertices cannot be empty in a mesh!");
+
 		indexBuffer->SetSize(sizeof(unsigned) * static_cast<unsigned>(indices.size()));
 		indexBuffer->SetData(indices.data());
 
@@ -204,12 +186,19 @@ namespace Animator
 
 		if (!tangents.empty())
 		{
-			layout.AddBufferElement(VertexDataType::Vector3F, static_cast<unsigned>(normals.size()), false);
+			layout.AddBufferElement(VertexDataType::Vector3F, static_cast<unsigned>(tangents.size()), false);
 		}
 
 		if (!biTangents.empty())
 		{
-			layout.AddBufferElement(VertexDataType::Vector3F, static_cast<unsigned>(normals.size()), false);
+			layout.AddBufferElement(VertexDataType::Vector3F, static_cast<unsigned>(biTangents.size()), false);
+		}
+
+		if (boneData.has_value())
+		{
+			layout.AddBufferElement(VertexDataType::Vector4I, static_cast<unsigned>(boneData.value().size()), false);
+
+			layout.AddBufferElement(VertexDataType::Vector4F, static_cast<unsigned>(boneData.value().size()), false);
 		}
 
 		vertexBuffer->SetVertexBufferLayout(layout);
@@ -256,10 +245,23 @@ namespace Animator
 
 		if (!biTangents.empty())
 		{
-			vertexBuffer->OverwriteVertexBufferData(
-				layoutLocation++,
-				biTangents.data(),
-				GetSizeofCustomType(VertexDataType::Vector3F) * static_cast<unsigned>(biTangents.size()));
+			const auto totalBufferSize = GetSizeofCustomType(VertexDataType::Vector3F) * static_cast<unsigned>(biTangents.size());
+
+			const auto bufferPointerStart = biTangents.data();
+
+			vertexBuffer->OverwriteVertexBufferData(layoutLocation++, bufferPointerStart, totalBufferSize);
+		}
+
+		if (boneData.has_value())
+		{
+			const auto totalBufferSize = 
+				(GetSizeofCustomType(VertexDataType::Vector4I) + GetSizeofCustomType(VertexDataType::Vector4F)) * static_cast<unsigned>(boneData.value().size());
+
+			const auto boneIdPointerStart = boneData.value()[0].boneIds.data();
+			vertexBuffer->OverwriteVertexBufferData(layoutLocation++, boneIdPointerStart, totalBufferSize);
+
+			const auto boneWeightsPointerStart = boneData.value()[0].boneWeights.data();
+			vertexBuffer->OverwriteVertexBufferData(layoutLocation++, boneWeightsPointerStart, totalBufferSize);
 		}
 
 		vertexArrayObject->SetBufferData();

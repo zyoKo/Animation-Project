@@ -2,7 +2,10 @@
 
 #include "Model.h"
 
+#include <assimp/postprocess.h>
+
 #include "AssetManager/AssetManager.h"
+#include "Core/Utilities/Utilites.h"
 
 namespace Animator
 {
@@ -37,28 +40,30 @@ namespace Animator
 	{
 		Assimp::Importer importer;
 
-		const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+		constexpr auto flags = aiProcess_Triangulate  | aiProcess_GenNormals | aiProcess_JoinIdenticalVertices /* | aiProcess_FlipUVs */;
+
+		const aiScene* scene = importer.ReadFile(path, flags);
 
 		ANIM_ASSERT(!(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode), "ERROR::ASSIMP::{0}", importer.GetErrorString());
 
 		ProcessNode(scene->mRootNode, scene);
 	}
 
-	void Model::ProcessNode(aiNode* node, const aiScene* scene)
+	void Model::ProcessNode(const aiNode* aiNode, const aiScene* scene)
 	{
-		for (unsigned int i = 0; i < node->mNumMeshes; i++)
+		for (unsigned int i = 0; i < aiNode->mNumMeshes; i++)
 		{
-			aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-			meshes.push_back(ProcessMesh(mesh, scene));
+			const aiMesh* mesh = scene->mMeshes[aiNode->mMeshes[i]];
+			meshes.emplace_back(ProcessMesh(mesh, scene));
 		}
 
-		for (unsigned int i = 0; i < node->mNumChildren; i++)
+		for (unsigned int i = 0; i < aiNode->mNumChildren; i++)
 		{
-			ProcessNode(node->mChildren[i], scene);
+			ProcessNode(aiNode->mChildren[i], scene);
 		}
 	}
 
-	Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
+	Mesh Model::ProcessMesh(const aiMesh* aiMesh, const aiScene* aiScene)
 	{
 		std::vector<Math::Vector3F> vertices;
 		std::vector<Math::Vector3F> normals;
@@ -66,50 +71,99 @@ namespace Animator
 		std::vector<Math::Vector3F> tangents;
 		std::vector<Math::Vector3F> biTangents;
 		std::vector<unsigned> indices;
+		std::vector<BoneData> boneData;
 
-		for (unsigned i = 0; i < mesh->mNumVertices; ++i)
+		for (unsigned i = 0; i < aiMesh->mNumVertices; ++i)
 		{
-			vertices.push_back({ mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z });
+			vertices.push_back({ aiMesh->mVertices[i].x, aiMesh->mVertices[i].y, aiMesh->mVertices[i].z });
 
-			if (mesh->HasNormals())
+			if (aiMesh->HasNormals())
 			{
-				normals.push_back({ mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z });
+				normals.push_back({ aiMesh->mNormals[i].x, aiMesh->mNormals[i].y, aiMesh->mNormals[i].z });
 			}
 
-			if (mesh->mTextureCoords[0])
+			if (aiMesh->mTextureCoords[0])
 			{
-				texCoords.push_back({ mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y });
+				texCoords.push_back({ aiMesh->mTextureCoords[0][i].x, aiMesh->mTextureCoords[0][i].y });
 			}
 			else
 			{
 				texCoords.push_back({ 0.0f, 0.0f });
 			}
 
-			if (mesh->HasTangentsAndBitangents())
+			if (aiMesh->HasTangentsAndBitangents())
 			{
-				tangents.push_back({ mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z });
+				tangents.push_back({ aiMesh->mTangents[i].x, aiMesh->mTangents[i].y, aiMesh->mTangents[i].z });
 
-				biTangents.push_back({ mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z });
+				biTangents.push_back({ aiMesh->mBitangents[i].x, aiMesh->mBitangents[i].y, aiMesh->mBitangents[i].z });
 			}
 		}
 
-		for (unsigned int i = 0; i < mesh->mNumFaces; ++i)
+		for (unsigned int i = 0; i < aiMesh->mNumFaces; ++i)
 		{
-			aiFace face = mesh->mFaces[i];
+			const aiFace face = aiMesh->mFaces[i];
 			for (unsigned j = 0; j < face.mNumIndices; ++j)
 			{
 				indices.push_back(face.mIndices[j]);
 			}
 		}
 
-		//aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+		//aiMaterial* material = aiScene->mMaterials[aiMesh->mMaterialIndex];
 
 		//std::vector<std::shared_ptr<ITexture2D>> diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
 
-		//Mesh tempMesh(vertices, normals, texCoords, tangents, biTangents, indices);
-		//tempMesh.AddTexture(texture);
+		boneData.resize(vertices.size());
+		ExtractBoneWeightForVertices(boneData, aiMesh, aiScene, static_cast<unsigned>(vertices.size()));
 
-		return { vertices, normals, texCoords, tangents, biTangents, indices };
+		return { vertices, normals, texCoords, tangents, biTangents, boneData, indices };
+	}
+
+	std::map<std::string, BoneInfo>& Model::GetBoneInfoMap()
+	{
+		return boneInfoMap;
+	}
+
+	int& Model::GetBoneCount()
+	{
+		return boneCounter;
+	}
+
+	void Model::ExtractBoneWeightForVertices(std::vector<BoneData>& boneData, const aiMesh* aiMesh, const aiScene* aiScene, unsigned verticesSize)
+	{
+		for (unsigned boneIndex = 0; boneIndex < aiMesh->mNumBones; ++boneIndex)
+        {
+            int boneID = -1;
+            std::string boneName = aiMesh->mBones[boneIndex]->mName.C_Str();
+            if (!boneInfoMap.contains(boneName))
+            {
+                BoneInfo newBoneInfo;
+                newBoneInfo.id = boneCounter;
+                newBoneInfo.offset = Utils::AssimpGLMHelper::ConvertMatrixToGLMFormat(aiMesh->mBones[boneIndex]->mOffsetMatrix);
+                boneInfoMap[boneName] = newBoneInfo;
+                boneID = boneCounter;
+                ++boneCounter;
+            }
+            else
+            {
+                boneID = boneInfoMap[boneName].id;
+            }
+
+			ANIM_ASSERT(boneID != -1, "Bone ID is not set right!");
+
+            const auto weights = aiMesh->mBones[boneIndex]->mWeights;
+
+            const unsigned numWeights = aiMesh->mBones[boneIndex]->mNumWeights;
+
+            for (unsigned weightIndex = 0; weightIndex < numWeights; ++weightIndex)
+            {
+                const unsigned vertexId = weights[weightIndex].mVertexId;
+                const float weight = weights[weightIndex].mWeight;
+
+				ANIM_ASSERT(vertexId <= verticesSize, "VertexId can't be greater than the total size of Vertices!");
+
+				boneData[vertexId].AddToBoneData(boneID, weight);
+            }
+        }
 	}
 
 	//std::vector<std::shared_ptr<ITexture2D>> Model::LoadMaterialTextures(aiMaterial* material, aiTextureType type, std::string textureName)

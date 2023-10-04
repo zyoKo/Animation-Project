@@ -4,16 +4,19 @@
 
 #include "Application.h"
 
+#include <assimp/postprocess.h>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
 
+#include "Animation/Animation.h"
+#include "Animation/Animator.h"
 #include "Core/Logger/Log.h"
 #include "Graphics/RenderApi.h"
 #include "AssetManager/AssetManager.h"
 #include "Components/Model.h"
 #include "Components/Camera/Camera.h"
 #include "Components/Camera/CameraConstants.h"
-#include "Core/Logger/GLDebug.h"
+#include "Core/Utilities/Utilites.h"
 
 namespace Animator
 {
@@ -23,7 +26,7 @@ namespace Animator
 		:	deltaTime(0.0f),
 			lastFrame(0.0f),
 			assetManager(std::make_shared<AssetManager>()),
-			camera(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 1.0f, 0.0f), CAMERA_YAW, CAMERA_PITCH)
+			camera(glm::vec3(0.0f, 0.0f, 200.0f), glm::vec3(0.0f, 1.0f, 0.0f), CAMERA_YAW, CAMERA_PITCH)
 	{
 		if (!instance)
 		{
@@ -44,29 +47,27 @@ namespace Animator
 
 	void Application::Run()
 	{
-		//const std::string textureFile = "./assets/digipen.jpg";
-		const std::string textureFile = "./assets/backpack/diffuse.jpg";
-		texture = assetManager->CreateTexture(textureFile);
-		texture->SetTextureName("texture_diffuse1");
-		//texture->Bind(0);
+		const std::string textureFile = "./assets/model/textures/Dreyar_diffuse.png";
+		textureDiffuse = assetManager->CreateTexture(textureFile);
+		textureDiffuse->SetTextureName("texture_diffuse1");
 
-		//mesh = std::make_shared<Mesh>();
+		const std::string modelFile = "./assets/model/Capoeira.dae";
+		Model bagModel(modelFile);
+		bagModel.SetDiffuseTextureForMeshes(textureDiffuse);
 
-		Model bagModel("./assets/backpack/backpack.obj");
-		bagModel.SetDiffuseTextureForMeshes(texture);
+		//const std::string animationFile = "./assets/vamp/dancing_vampire.dae";
+		const std::string animationFile = "./assets/model/Capoeira.dae";
+		Animation danceAnimation(animationFile, &bagModel);
 
-		const std::string vertexShaderFile = "./assets/shaders/backpack.vert";
-		const std::string fragmentShaderFile = "./assets/shaders/backpack.frag";
+		AnimatorR animator(&danceAnimation);
+
+		const std::string vertexShaderFile = "./assets/shaders/anim_model.vert";
+		const std::string fragmentShaderFile = "./assets/shaders/anim_model.frag";
 
 		shader = assetManager->CreateShader("SimpleShader", vertexShaderFile, fragmentShaderFile);
-		shader->Bind();
-		shader->SetUniformInt(0, "texture_diffuse1");
 
 		RenderApi::GetContext()->EnableDepthTest(true);
-
-		GL_CALL(glPolygonMode, GL_FRONT_AND_BACK, GL_LINE);
-
-		//glm::mat4 transform = glm::mat4(1.0f);
+		//GL_CALL(glPolygonMode, GL_FRONT_AND_BACK, GL_LINE);
 		
 		while (running && !window->WindowShouldClose())
 		{
@@ -82,8 +83,11 @@ namespace Animator
 			//transform = glm::rotate(transform, deltaTime * 10.0f, glm::vec3(0.0f, 0.0f, 1.0f));
 			//shader->SetUniformMatrix4F(transform, "model");
 
+			shader->Bind();
+			shader->SetUniformInt(0, "texture_diffuse1");
+
 			// pass projection matrix to shader (note that in this case it could change every frame)
-			glm::mat4 projection = glm::perspective(glm::radians(camera.zoom), (float)window->GetWidth() / (float)window->GetHeight(), 0.1f, 100.0f);
+			glm::mat4 projection = glm::perspective(glm::radians(camera.zoom), (float)window->GetWidth() / (float)window->GetHeight(), 0.1f, 10000.0f);
 			shader->SetUniformMatrix4F(projection, "projection");
 
 			// camera/view transformation
@@ -91,12 +95,22 @@ namespace Animator
 			shader->SetUniformMatrix4F(view, "view");
 
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
-			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
 			shader->SetUniformMatrix4F(model, "model");
+
+			animator.UpdateAnimation(deltaTime);
+
+			//auto transform = animator.GetFinalBoneMatrices();
+			for (unsigned i = 0; i < animator.GetFinalBoneMatrices().size(); ++i)
+			{
+				std::string uniformName = "finalBonesMatrices[" + std::to_string(i) + "]";
+				shader->SetUniformMatrix4F(animator.GetFinalBoneMatrices()[i], uniformName);
+			}
+
 			bagModel.Draw(shader);
 
-			//mesh->Draw(shader);
+			shader->UnBind();
 
 			// Swap buffer and poll events
 			window->Update();

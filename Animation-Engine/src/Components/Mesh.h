@@ -2,12 +2,11 @@
 
 #include <optional>
 
+#include "Animation/DataTypes/BoneData.h"
 #include "Graphics/OpenGL/Buffers/Interfaces/IIndexBuffer.h"
 #include "Graphics/OpenGL/Buffers/Interfaces/IVertexArray.h"
 #include "Graphics/OpenGL/Buffers/Interfaces/IVertexBuffer.h"
 #include "Graphics/RenderApi.h"
-
-#define MAX_BONE_INFLUENCE 4
 
 namespace Animator
 {
@@ -16,7 +15,6 @@ namespace Animator
 	using TexCoordinates_V2F	= std::vector<Math::Vector2F>;
 	using Normal_V3F			= std::vector<Math::Vector3F>;
 	using ITexturesList			= std::vector<std::shared_ptr<ITexture2D>>;
-	using Indices_V3UI			= std::vector<Math::Vector3UI>;
 	using Tangents_V3F			= std::vector<Math::Vector3F>;
 	using BiTangents_V3F		= std::vector<Math::Vector3F>;
 
@@ -27,18 +25,11 @@ namespace Animator
 
 		Mesh(
 			Vertices_V3F vertices, 
-			Colors_V3F colors, 
-			Normal_V3F normals, 
-			TexCoordinates_V2F textureCoordinates, 
-			Indices_V3UI indices);
-
-		Mesh(
-			Vertices_V3F vertices, 
 			Normal_V3F normals, 
 			TexCoordinates_V2F textureCoordinates,
 			Tangents_V3F tangents,
 			BiTangents_V3F biTangents,
-			//Indices_V3UI indices);
+			std::vector<BoneData> boneData,
 			std::vector<unsigned> indices);
 
 		void Bind() const;
@@ -65,15 +56,15 @@ namespace Animator
 
 		const Tangents_V3F& GetTangents() const;
 
-		void SetTangents(Tangents_V3F tangentsList);
+		void SetTangents(Tangents_V3F tangentsList) noexcept;
 
 		const BiTangents_V3F& GetBiTangents() const;
 
-		void SetBiTangents(BiTangents_V3F biTangentsList);
+		void SetBiTangents(BiTangents_V3F biTangentsList) noexcept;
 
-		//const Indices_V3UI& GetIndices() const;
+		const std::vector<unsigned>& GetIndices() const;
 
-		//void SetIndices(Indices_V3UI indexList) noexcept;
+		void SetIndices(std::vector<unsigned> indexList) noexcept;
 
 		const ITexturesList& GetTextures() const;
 
@@ -96,15 +87,11 @@ namespace Animator
 
 		BiTangents_V3F biTangents;
 
-		//Indices_V3UI indices;
+		std::optional<std::vector<BoneData>> boneData;
 
 		std::vector<unsigned> indices;
 
 		ITexturesList textures;
-
-		std::array<int, MAX_BONE_INFLUENCE> boneIds;
-
-		std::array<float, MAX_BONE_INFLUENCE> boneWeights;
 
 		std::shared_ptr<IVertexArray> vertexArrayObject;
 		std::shared_ptr<IVertexBuffer> vertexBuffer;

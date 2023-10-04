@@ -49,7 +49,15 @@ namespace Animator
 		for (unsigned int i = 0; i < elements.size(); ++i)
 		{
 			const auto& element = elements[i];
-			GL_CALL(glVertexAttribPointer, i, GetNumberOfElementsFromType(element.type), GetOpenGLTypeFromCustomType(element.type), element.normalized, vertexBuffer->GetVertexBufferLayout().GetStride(), (const void*)offset);
+
+			if (element.type == VertexDataType::Vector4I)
+			{
+				GL_CALL(glVertexAttribIPointer, i, GetNumberOfElementsFromType(element.type), GL_INT, vertexBuffer->GetVertexBufferLayout().GetStride(), (const void*)offset);
+			}
+			else
+			{
+				GL_CALL(glVertexAttribPointer, i, GetNumberOfElementsFromType(element.type), GetOpenGLTypeFromCustomType(element.type), element.normalized, vertexBuffer->GetVertexBufferLayout().GetStride(), (const void*)offset);
+			}
 			GL_CALL(glEnableVertexAttribArray, i);
 			offset += GetSizeofCustomType(element.type);
 		}

@@ -6,7 +6,7 @@ namespace Animator
 
 	static constexpr float CAMERA_PITCH = 0.0f;
 
-	static constexpr float CAMERA_SPEED = 2.5f;
+	static constexpr float CAMERA_SPEED = 40.0f;
 
 	static constexpr float CAMERA_SENSITIVITY = 0.1f;
 

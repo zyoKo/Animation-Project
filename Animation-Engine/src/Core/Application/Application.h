@@ -52,7 +52,7 @@ namespace Animator
 
 		bool running = true;
 
-		std::shared_ptr<ITexture2D> texture;
+		std::shared_ptr<ITexture2D> textureDiffuse;
 
 		// Singleton Class
 		static Application* instance;
