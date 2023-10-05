@@ -18,22 +18,8 @@ uniform mat4 finalBonesMatrices[MAX_BONES];
 
 out vec2 TexCoords;
 
-struct mystruct {
-
-    float a; int b;
-};
-layout (std140, binding = 0) uniform BoneData {
-
-    int BoneCount;
-    mystruct BoneMatrix[];
-
-}mybonedata;
-
 void main()
 {
- mybonedata.BoneMatrix[1];
-
-
     vec4 totalPosition = vec4(0.0f);
     for(int i = 0 ; i < MAX_BONE_INFLUENCE ; i++)
     {
@@ -51,6 +37,5 @@ void main()
 	
     mat4 viewModel = view * model;
     gl_Position =  projection * viewModel * totalPosition;
-    //gl_Position = projection * viewModel * finalBonesMatrices[0] * totalPosition;
 	TexCoords = tex;
 }

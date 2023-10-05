@@ -50,15 +50,29 @@ namespace Animator
 		{
 			const auto& element = elements[i];
 
-			if (element.type == VertexDataType::Vector4I)
+			const auto elementNumber = static_cast<int>(element.type);
+			if (elementNumber >= 1 && elementNumber <= 8)
 			{
-				GL_CALL(glVertexAttribIPointer, i, GetNumberOfElementsFromType(element.type), GL_INT, vertexBuffer->GetVertexBufferLayout().GetStride(), (const void*)offset);
+				// For Integers and Unsigned Integers
+				GL_CALL(glVertexAttribIPointer, 
+					i, 
+					GetNumberOfElementsFromType(element.type), 
+					GetOpenGLTypeFromCustomType(element.type),
+					vertexBuffer->GetVertexBufferLayout().GetStride(), 
+					(const void*)offset);
 			}
 			else
 			{
-				GL_CALL(glVertexAttribPointer, i, GetNumberOfElementsFromType(element.type), GetOpenGLTypeFromCustomType(element.type), element.normalized, vertexBuffer->GetVertexBufferLayout().GetStride(), (const void*)offset);
+				// Floating point numbers use this
+				GL_CALL(glVertexAttribPointer, 
+					i, GetNumberOfElementsFromType(element.type), 
+					GetOpenGLTypeFromCustomType(element.type), 
+					element.normalized, vertexBuffer->GetVertexBufferLayout().GetStride(), 
+					(const void*)offset);
 			}
+
 			GL_CALL(glEnableVertexAttribArray, i);
+
 			offset += GetSizeofCustomType(element.type);
 		}
 	}

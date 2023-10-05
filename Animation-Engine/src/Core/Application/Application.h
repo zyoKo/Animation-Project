@@ -36,23 +36,23 @@ namespace Animator
 		virtual bool Shutdown();
 
 	private:
-		void ProcessInput();
+		void ProcessCameraInput(Camera& camera);
 
 		float deltaTime, lastFrame;
 
 		std::shared_ptr<AssetManager> assetManager;
 
-		std::shared_ptr<Shader> shader;
+		//std::shared_ptr<Shader> shader;
 
 		std::unique_ptr<IWindow> window;
 
 		//std::shared_ptr<Mesh> mesh;
 
-		Camera camera;
+		//Camera camera;
 
 		bool running = true;
 
-		std::shared_ptr<ITexture2D> textureDiffuse;
+		//std::shared_ptr<ITexture2D> textureDiffuse;
 
 		// Singleton Class
 		static Application* instance;
