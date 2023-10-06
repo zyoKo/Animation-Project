@@ -6,6 +6,7 @@
 #include "Mesh.h"
 #include "Animation/DataTypes/BoneInfo.h"
 #include "Graphics/OpenGL/Textures/ITexture2D.h"
+#include "DebugMesh.h"
 
 namespace Animator
 {
@@ -18,16 +19,22 @@ namespace Animator
 
 		void Draw(const std::shared_ptr<Shader>& shader) const;
 
-		const std::vector<Mesh>& GetMeshes() const;
+		void DrawDebug(const std::shared_ptr<Shader>& shader) const;
 
-		void SetDiffuseTextureForMeshes(const std::shared_ptr<ITexture2D>& textures);
+		const std::vector<Mesh>& GetMeshes() const;
 
 		std::map<std::string, BoneInfo>& GetBoneInfoMap();
 
 		int& GetBoneCount();
 
+		void SetDiffuseTextureForMeshes(const std::shared_ptr<ITexture2D>& textures);
+
+		void SetJointsPosition(std::vector<Math::Vector3F> position);
+
 	private:
 		std::vector<Mesh> meshes;
+
+		std::unique_ptr<DebugMesh> debugMesh;
 
 		bool gammaCorrection;
 
@@ -42,6 +49,8 @@ namespace Animator
 		Mesh ProcessMesh(const aiMesh* aiMesh, const aiScene* aiScene);
 
 		void ExtractBoneWeightForVertices(std::vector<BoneData>& boneData, const aiMesh* aiMesh, const aiScene* aiScene, unsigned verticesSize);
+
+		void GetBoneLines(aiNode* node, const aiNode* parentNode, std::vector<Math::Vector3F>& boneLines);
 
 		//std::vector<std::shared_ptr<ITexture2D>> LoadMaterialTextures(aiMaterial* material, aiTextureType type, std::string textureName);
 	};

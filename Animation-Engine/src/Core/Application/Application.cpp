@@ -4,7 +4,6 @@
 
 #include "Application.h"
 
-#include <assimp/postprocess.h>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
 
@@ -48,12 +47,17 @@ namespace Animator
 
 		const std::string vertexShaderFile = "./assets/shaders/anim_model.vert";
 		const std::string fragmentShaderFile = "./assets/shaders/anim_model.frag";
-		assetManager->CreateShader("SimpleShader", vertexShaderFile, fragmentShaderFile);
+		assetManager->CreateShader("AnimationShader", vertexShaderFile, fragmentShaderFile);
+
+		const std::string debugVertexShaderFile = "./assets/shaders/debug_anim_model.vert";
+		const std::string debugFragShaderFile = "./assets/shaders/debug_anim_model.frag";
+		assetManager->CreateShader("DebugAnimationShader", debugVertexShaderFile, debugFragShaderFile);
 	}
 
 	void Application::Run()
 	{
-		auto shader = assetManager->RetrieveShaderFromStorage("SimpleShader");
+		auto shader = assetManager->RetrieveShaderFromStorage("AnimationShader");
+		auto debugShader = assetManager->RetrieveShaderFromStorage("DebugAnimationShader");
 		auto textureDiffuse = assetManager->RetrieveTextureFromStorage("Dreyar_diffuse");
 
 		const std::string modelAndAnimationFile = "./assets/model/Capoeira.dae";
@@ -97,6 +101,12 @@ namespace Animator
 			}
 			bagModel.Draw(shader);
 			shader->UnBind();
+
+			debugShader->Bind();
+			debugShader->SetUniformMatrix4F(projection, "projection");
+			debugShader->SetUniformMatrix4F(view, "view");
+			bagModel.DrawDebug(debugShader);
+			debugShader->UnBind();
 
 			window->Update();
 		}

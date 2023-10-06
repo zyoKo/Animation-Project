@@ -10,7 +10,8 @@
 namespace Animator
 {
 	Model::Model(const std::string& path)
-		:	gammaCorrection(false)
+		:	debugMesh(nullptr),
+			gammaCorrection(false)
 	{
 		LoadModel(path);
 	}
@@ -21,6 +22,11 @@ namespace Animator
 		{
 			mesh.Draw(shader);
 		}
+	}
+
+	void Model::DrawDebug(const std::shared_ptr<Shader>& shader) const
+	{
+		debugMesh->Draw(shader);
 	}
 
 	const std::vector<Mesh>& Model::GetMeshes() const
@@ -36,6 +42,11 @@ namespace Animator
 		}
 	}
 
+	void Model::SetJointsPosition(std::vector<Math::Vector3F> position)
+	{
+		debugMesh->OverwriteJointsPosition(std::move(position));
+	}
+
 	void Model::LoadModel(const std::string& path)
 	{
 		Assimp::Importer importer;
@@ -47,6 +58,10 @@ namespace Animator
 		ANIM_ASSERT(!(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode), "ERROR::ASSIMP::{0}", importer.GetErrorString());
 
 		ProcessNode(scene->mRootNode, scene);
+
+		std::vector<Math::Vector3F> boneLines;
+		GetBoneLines(scene->mRootNode, nullptr, boneLines);
+		debugMesh = std::make_unique<DebugMesh>(boneLines);
 	}
 
 	void Model::ProcessNode(const aiNode* aiNode, const aiScene* scene)
@@ -108,12 +123,12 @@ namespace Animator
 			}
 		}
 
+		boneData.resize(vertices.size());
+		ExtractBoneWeightForVertices(boneData, aiMesh, aiScene, static_cast<unsigned>(vertices.size()));
+
 		//aiMaterial* material = aiScene->mMaterials[aiMesh->mMaterialIndex];
 
 		//std::vector<std::shared_ptr<ITexture2D>> diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
-
-		boneData.resize(vertices.size());
-		ExtractBoneWeightForVertices(boneData, aiMesh, aiScene, static_cast<unsigned>(vertices.size()));
 
 		return { vertices, normals, texCoords, tangents, biTangents, boneData, indices };
 	}
@@ -164,6 +179,23 @@ namespace Animator
 				boneData[vertexId].AddToBoneData(boneID, weight);
             }
         }
+	}
+
+	void Model::GetBoneLines(aiNode* node, const aiNode* parentNode, std::vector<Math::Vector3F>& boneLines)
+	{
+		if (parentNode) 
+		{
+			const Math::Vector3F boneStart = { node->mTransformation.a4, node->mTransformation.b4, node->mTransformation.c4 };
+			const Math::Vector3F boneEnd = { parentNode->mTransformation.a4, parentNode->mTransformation.b4, parentNode->mTransformation.c4 };
+			
+			boneLines.push_back(boneStart);
+			boneLines.push_back(boneEnd);
+		}
+
+		for (unsigned int i = 0; i < node->mNumChildren; i++) 
+		{
+		    GetBoneLines(node->mChildren[i], node, boneLines);
+		}
 	}
 
 	//std::vector<std::shared_ptr<ITexture2D>> Model::LoadMaterialTextures(aiMaterial* material, aiTextureType type, std::string textureName)

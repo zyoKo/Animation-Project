@@ -2,6 +2,8 @@
 
 #include "glad/glad.h"
 
+#include "Graphics/OpenGL/Buffers/Structure/VertexBufferElements.h"
+
 namespace Animator
 {
 	static unsigned int GetSizeofCustomType(VertexDataType customType)

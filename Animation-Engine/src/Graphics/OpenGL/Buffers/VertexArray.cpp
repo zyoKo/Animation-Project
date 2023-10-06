@@ -42,7 +42,8 @@ namespace Animator
 	{
 		this->Bind();
 		vertexBuffer->Bind();
-		indexBuffer->Bind();
+		if (indexBuffer)
+			indexBuffer->Bind();
 
 		unsigned int offset = 0;
 		const auto& elements = vertexBuffer->GetVertexBufferLayout().GetVertexBufferElements();

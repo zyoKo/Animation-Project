@@ -4,6 +4,7 @@
 
 #include "Core/Logger/GLDebug.h"
 #include "Data/Constants.h"
+#include "Graphics/OpenGL/Utilities/Utilities.h"
 
 namespace Animator
 {

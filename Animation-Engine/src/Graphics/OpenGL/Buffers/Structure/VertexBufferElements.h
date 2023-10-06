@@ -34,5 +34,3 @@ namespace Animator
 		unsigned char normalized;
 	};
 }
-
-#include "Graphics/OpenGL/Utils/Utilities.h"
