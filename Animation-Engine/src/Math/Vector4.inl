@@ -4,6 +4,8 @@
 
 #include "Core/Logger/Log.h"
 
+#include "Vector3.h"
+
 namespace Animator::Math
 {
 	template <typename T>
@@ -32,9 +34,18 @@ namespace Animator::Math
 	}
 
 	template <typename T>
-	constexpr Vector4<T>::Vector4(const Vector4& vector) noexcept
+	constexpr Vector4<T>::Vector4(const Vector4& vector)
 		: x(vector.x), y(vector.y), z(vector.z), w(vector.w)
 	{
+	}
+
+	template <typename T>
+	constexpr Vector4<T>::Vector4(const Vector3<T>& vector, T value)
+	{
+		this->x = vector.x;
+		this->y = vector.y;
+		this->z = vector.z;
+		this->w = value;
 	}
 
 	// Operations
