@@ -2,6 +2,7 @@
 
 #include "Animator.h"
 
+#include <execution>
 #include <glm/gtx/string_cast.hpp>
 
 #include "Animation/Animation.h"
@@ -43,29 +44,32 @@ namespace Animator
 	void AnimatorR::CalculateBoneTransform(const AssimpNodeData* node, glm::mat4 parentTransform)
 	{
 		std::string nodeName = node->name;
-		glm::mat4 nodeTransform = node->transformation;
+		glm::mat4 localNodeTransform = node->transformation;
 
 		Bone* bone = currentAnimation->FindBone(nodeName);
 
 		if (bone)
 		{
 			bone->Update(currentTime);
-			nodeTransform = bone->GetLocalTransform();
+			localNodeTransform = bone->GetLocalTransform();
+
+			jointPositions.push_back(ExtractJointPosition(parentTransform));
+			jointPositions.push_back(ExtractJointPosition(parentTransform * localNodeTransform));
 		}
 
-		glm::mat4 globalTransformation = parentTransform * nodeTransform;
+		const glm::mat4 worldTransform = parentTransform * localNodeTransform;
 
 		auto boneInfoMap = currentAnimation->GetBoneIDMap();
 		if (boneInfoMap.contains(nodeName))
 		{
-			int index = boneInfoMap[nodeName].id;
-			glm::mat4 offset = boneInfoMap[nodeName].offset;
+			const int index = boneInfoMap[nodeName].id;
+			const glm::mat4 offset = boneInfoMap[nodeName].offset;
 
-			finalBoneMatrices[index] = globalTransformation * offset;
+			finalBoneMatrices[index] = worldTransform * offset;
 		}
 
 		for (int i = 0; i < node->childrenCount; ++i)
-			CalculateBoneTransform(&node->children[i], globalTransformation);
+			CalculateBoneTransform(&node->children[i], worldTransform);
 	}
 
 	const std::vector<glm::mat4>& AnimatorR::GetFinalBoneMatrices() const

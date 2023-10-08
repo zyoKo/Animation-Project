@@ -21,11 +21,11 @@ namespace Animator
 
 		const glm::mat4& GetLocalTransform() const;
 
-		int GetPositionIndex(float animationTime) const;
+		int GetPositionIndexAt(float time) const;
 
-		int GetRotationIndex(float animationTime) const;
+		int GetRotationIndexAt(float time) const;
 
-		int GetScalingIndex(float animationTime) const;
+		int GetScalingIndexAt(float time) const;
 
 	private:
 		std::string name;

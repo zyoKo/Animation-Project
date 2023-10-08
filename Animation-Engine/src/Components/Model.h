@@ -29,7 +29,7 @@ namespace Animator
 
 		void SetDiffuseTextureForMeshes(const std::shared_ptr<ITexture2D>& textures);
 
-		void SetJointsPosition(std::vector<Math::Vector3F> position);
+		void SetJointsPosition(const std::vector<Math::Vector3F>& position) const;
 
 	private:
 		std::vector<Mesh> meshes;
@@ -51,7 +51,5 @@ namespace Animator
 		void ExtractBoneWeightForVertices(std::vector<BoneData>& boneData, const aiMesh* aiMesh, const aiScene* aiScene, unsigned verticesSize);
 
 		void GetBoneLines(aiNode* node, const aiNode* parentNode, std::vector<Math::Vector3F>& boneLines);
-
-		//std::vector<std::shared_ptr<ITexture2D>> LoadMaterialTextures(aiMaterial* material, aiTextureType type, std::string textureName);
 	};
 }

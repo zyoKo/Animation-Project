@@ -6,26 +6,31 @@
 #include "Graphics/OpenGL/Buffers/Interfaces/IVertexArray.h"
 #include "Graphics/OpenGL/Buffers/Interfaces/IVertexBuffer.h"
 #include "Graphics/RenderApi.h"
+#include "Types/DebugDrawMode.h"
 
 namespace Animator
 {
+	class Camera;
+
 	class DebugMesh
 	{
 	public:
-		DebugMesh(const std::vector<Math::Vector3F>& jointsPosition);
+		DebugMesh(const std::shared_ptr<Shader>& debugShader, Camera* camera);
+
+		~DebugMesh() = default;
 
 		void Bind() const;
 
 		void Unbind() const;
 
-		~DebugMesh() = default;
+		void Update();
 
-		void Draw(const std::shared_ptr<Shader>& shader) const;
+		void Draw(DebugDrawMode mode) const;
 
 		void OverwriteJointsPosition(const std::vector<Math::Vector3F>& jointsPosition);
 
+		void SetupMesh();
 	private:
-		//std::vector<glm::vec3> jointsPosition;
 		std::vector<Math::Vector3F> jointsPosition;
 
 		std::vector<glm::quat> jointsRotation;
@@ -38,6 +43,15 @@ namespace Animator
 
 		std::shared_ptr<IVertexBuffer> vertexBuffer;
 
-		void SetupMesh() const;
+		std::shared_ptr<Shader> shader;
+
+		VertexBufferLayout layout;
+
+		Camera* camera;
+
+
+		void OverwriteDataInVertexBuffer() const;
+
+		void SetupShader();
 	};
 }

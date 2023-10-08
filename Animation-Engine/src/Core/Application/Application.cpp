@@ -4,6 +4,7 @@
 
 #include "Application.h"
 
+#include <execution>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
 
@@ -15,7 +16,28 @@
 #include "Components/Model.h"
 #include "Components/Camera/Camera.h"
 #include "Components/Camera/CameraConstants.h"
+#include "Core/Logger/GLDebug.h"
 #include "Core/Utilities/Utilites.h"
+
+namespace Animator
+{
+	static std::vector<Math::Vector3F> ExtractBonePositionsFromBoneTransformation(const std::vector<glm::mat4>& transform, int boneCount)
+	{
+		ANIM_ASSERT(transform.size() > boneCount, "Transformation size cannot be less than bone count!");
+		std::vector<Math::Vector3F> bonesPositions;
+
+		for (int i = 0; i < boneCount; ++i)
+		{
+			Math::Vector3F parentPosition = { transform[i][3][0], transform[i][3][1], transform[i][3][2] };
+			Math::Vector3F childPosition  = { transform[i + 1][3][0], transform[i + 1][3][1], transform[i + 1][3][2] };
+
+			bonesPositions.push_back(parentPosition);
+			bonesPositions.push_back(childPosition);
+		}
+
+		return bonesPositions;
+	}
+}
 
 namespace Animator
 {
@@ -41,7 +63,7 @@ namespace Animator
 
 	void Application::Initialize()
 	{
-		const std::string textureFile = "./assets/model/textures/Dreyar_diffuse.png";
+		const std::string textureFile = "./assets/dreyar/textures/Dreyar_diffuse.png";
 		const auto textureDiffuse = assetManager->CreateTexture(textureFile);
 		textureDiffuse->SetTextureName("texture_diffuse1");
 
@@ -60,16 +82,20 @@ namespace Animator
 		auto debugShader = assetManager->RetrieveShaderFromStorage("DebugAnimationShader");
 		auto textureDiffuse = assetManager->RetrieveTextureFromStorage("Dreyar_diffuse");
 
-		const std::string modelAndAnimationFile = "./assets/model/Capoeira.dae";
-		Model bagModel(modelAndAnimationFile);
-		bagModel.SetDiffuseTextureForMeshes(textureDiffuse);
-		Animation danceAnimation(modelAndAnimationFile, &bagModel);
+		const std::string modelAndAnimationFile = "./assets/dreyar/Capoeira.dae";
+		//const std::string modelAndAnimationFile = "./assets/models/Walking.dae";
+		Model animModel(modelAndAnimationFile);
+		animModel.SetDiffuseTextureForMeshes(textureDiffuse);
+		Animation danceAnimation(modelAndAnimationFile, &animModel);
 		AnimatorR animator(&danceAnimation);
 
 		RenderApi::GetContext()->EnableDepthTest(true);
 		//GL_CALL(glPolygonMode, GL_FRONT_AND_BACK, GL_LINE);
 
+		auto bonesPositions = ExtractBonePositionsFromBoneTransformation(animator.GetFinalBoneMatrices(), animModel.GetBoneCount());
 		Camera camera(glm::vec3(0.0f, 8.0f, 30.0f), glm::vec3(0.0f, 1.0f, 0.0f), CAMERA_YAW, CAMERA_PITCH);
+		DebugMesh debugMesh(debugShader, &camera);
+
 		while (running && !window->WindowShouldClose())
 		{
 			RenderApi::GetContext()->ClearColor();
@@ -89,6 +115,17 @@ namespace Animator
 			ProcessCameraInput(camera);
 			animator.UpdateAnimation(deltaTime);
 
+			//bonesPositions = ExtractBonePositionsFromBoneTransformation(animator.GetFinalBoneMatrices(), animModel.GetBoneCount());
+			debugMesh.OverwriteJointsPosition(animator.GetJointPositions());
+			animator.ClearJoints();
+			static bool firstRun = true;
+			if (firstRun)
+			{
+				debugMesh.SetupMesh();
+				firstRun = false;
+			}
+			debugMesh.Update();
+
 			shader->Bind();
 			shader->SetUniformInt(0, textureDiffuse->GetTextureName());
 			shader->SetUniformMatrix4F(projection, "projection");
@@ -99,14 +136,14 @@ namespace Animator
 				std::string uniformName = "finalBonesMatrices[" + std::to_string(i) + "]";
 				shader->SetUniformMatrix4F(animator.GetFinalBoneMatrices()[i], uniformName);
 			}
-			bagModel.Draw(shader);
+			//animModel.Draw(shader);
 			shader->UnBind();
 
-			debugShader->Bind();
-			debugShader->SetUniformMatrix4F(projection, "projection");
-			debugShader->SetUniformMatrix4F(view, "view");
-			bagModel.DrawDebug(debugShader);
-			debugShader->UnBind();
+			//debugShader->Bind();
+			//debugShader->SetUniformMatrix4F(projection, "projection");
+			//debugShader->SetUniformMatrix4F(view, "view");
+			//animModel.DrawDebug(debugShader);
+			//debugShader->UnBind();
 
 			window->Update();
 		}

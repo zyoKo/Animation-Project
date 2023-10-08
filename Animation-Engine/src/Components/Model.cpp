@@ -26,7 +26,7 @@ namespace Animator
 
 	void Model::DrawDebug(const std::shared_ptr<Shader>& shader) const
 	{
-		debugMesh->Draw(shader);
+		debugMesh->Draw(DebugDrawMode::Lines);
 	}
 
 	const std::vector<Mesh>& Model::GetMeshes() const
@@ -42,9 +42,9 @@ namespace Animator
 		}
 	}
 
-	void Model::SetJointsPosition(std::vector<Math::Vector3F> position)
+	void Model::SetJointsPosition(const std::vector<Math::Vector3F>& position) const
 	{
-		debugMesh->OverwriteJointsPosition(std::move(position));
+		debugMesh->OverwriteJointsPosition(position);
 	}
 
 	void Model::LoadModel(const std::string& path)
@@ -59,9 +59,9 @@ namespace Animator
 
 		ProcessNode(scene->mRootNode, scene);
 
-		std::vector<Math::Vector3F> boneLines;
-		GetBoneLines(scene->mRootNode, nullptr, boneLines);
-		debugMesh = std::make_unique<DebugMesh>(boneLines);
+		//std::vector<Math::Vector3F> boneLines;
+		//GetBoneLines(scene->mRootNode, nullptr, boneLines);
+		//debugMesh = std::make_unique<DebugMesh>(boneLines);
 	}
 
 	void Model::ProcessNode(const aiNode* aiNode, const aiScene* scene)
@@ -124,11 +124,8 @@ namespace Animator
 		}
 
 		boneData.resize(vertices.size());
+
 		ExtractBoneWeightForVertices(boneData, aiMesh, aiScene, static_cast<unsigned>(vertices.size()));
-
-		//aiMaterial* material = aiScene->mMaterials[aiMesh->mMaterialIndex];
-
-		//std::vector<std::shared_ptr<ITexture2D>> diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
 
 		return { vertices, normals, texCoords, tangents, biTangents, boneData, indices };
 	}
@@ -197,36 +194,4 @@ namespace Animator
 		    GetBoneLines(node->mChildren[i], node, boneLines);
 		}
 	}
-
-	//std::vector<std::shared_ptr<ITexture2D>> Model::LoadMaterialTextures(aiMaterial* material, aiTextureType type, std::string textureName)
-	//{
-	//	std::vector<std::shared_ptr<ITexture2D>> textures;
-
-	//	for(unsigned i = 0; i < material->GetTextureCount(type); ++i)
-	//	{
-	//		aiString str;
-	//		material->GetTexture(type, i, &str);
-	//		bool skip = false;
- //           for(unsigned int j = 0; j < textureLoaded.size(); j++)
- //           {
- //               if(std::strcmp(textureLoaded[j]->GetTextureName().data(), str.C_Str()) == 0)
- //               {
- //                   textures.push_back(textureLoaded[j]);
- //                   skip = true; // a texture with the same filepath has already been loaded, continue to next one. (optimization)
- //                   break;
- //               }
- //           }
- //           if(!skip)
- //           {   // if texture hasn't been loaded already, load it
- //               Texture texture;
- //               texture.id = TextureFromFile(str.C_Str(), this->directory);
- //               texture.type = typeName;
- //               texture.path = str.C_Str();
- //               textures.push_back(texture);
- //               textures_loaded.push_back(texture);  // store it as texture loaded for entire model, to ensure we won't unnecessary load duplicate textures.
- //           }
-	//	}
-
-	//	return textures;
-	//}
 }

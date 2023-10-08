@@ -69,8 +69,6 @@ namespace Animator
 		const glm::mat4 scale = InterpolationScaling(animationTime);
 
 		localTransform = translation * rotation * scale;
-
-		//LOG_ERROR("BONE TRANSFORM:\n" + glm::to_string(localTransform) + "\n");
 	}
 
 	const std::string& Bone::GetBoneName() const
@@ -88,11 +86,11 @@ namespace Animator
 		return localTransform;
 	}
 
-	int Bone::GetPositionIndex(float animationTime) const
+	int Bone::GetPositionIndexAt(float time) const
 	{
 		for (int index = 0; index < numPositions - 1; ++index)
 		{
-			if (animationTime < positions[index + 1].timeStamp)
+			if (time < positions[index + 1].timeStamp)
 			{
 				return index;
 			}
@@ -102,11 +100,11 @@ namespace Animator
 		return -1;
 	}
 
-	int Bone::GetRotationIndex(float animationTime) const
+	int Bone::GetRotationIndexAt(float time) const
 	{
 		for (int index = 0; index < numRotations - 1; ++index)
 		{
-			if (animationTime < rotations[index + 1].timeStamp)
+			if (time < rotations[index + 1].timeStamp)
 			{
 				return index;
 			}
@@ -116,11 +114,11 @@ namespace Animator
 		return -1;
 	}
 
-	int Bone::GetScalingIndex(float animationTime) const
+	int Bone::GetScalingIndexAt(float time) const
 	{
 		for (int index = 0; index < numScales - 1; ++index)
 		{
-			if (animationTime < scales[index + 1].timeStamp)
+			if (time < scales[index + 1].timeStamp)
 			{
 				return index;
 			}
@@ -143,7 +141,7 @@ namespace Animator
 		if (numPositions == 1)
 			return glm::translate(glm::mat4(1.0f), positions[0].position);
 
-		const int firstPositionIndex = GetPositionIndex(animationTime);
+		const int firstPositionIndex = GetPositionIndexAt(animationTime);
 		const int secondPositionIndex = firstPositionIndex + 1;
 
 		const float scaleFactor = GetScaleFactor(
@@ -151,6 +149,7 @@ namespace Animator
 			positions[secondPositionIndex].timeStamp, 
 			animationTime);
 
+		// glm::mix is just lerp
 		const glm::vec3 finalPosition = glm::mix(positions[firstPositionIndex].position, positions[secondPositionIndex].position, scaleFactor);
 
 		return glm::translate(glm::mat4(1.0f), finalPosition);
@@ -164,7 +163,7 @@ namespace Animator
 			return glm::toMat4(rotation);
 		}
 
-		const int firstRotationIndex = GetRotationIndex(animationTime);
+		const int firstRotationIndex = GetRotationIndexAt(animationTime);
 		const int secondRotationIndex = firstRotationIndex + 1;
 
 		const float scaleFactor = GetScaleFactor(rotations[firstRotationIndex].timeStamp, rotations[secondRotationIndex].timeStamp, animationTime);
@@ -180,7 +179,7 @@ namespace Animator
 		if (numScales == 1)
 			return glm::scale(glm::mat4(1.0f), scales[0].scale);
 
-		const int firstScalingIndex = GetScalingIndex(animationTime);
+		const int firstScalingIndex = GetScalingIndexAt(animationTime);
 		const int secondScalingIndex = firstScalingIndex + 1;
 
 		const float scaleFactor = GetScaleFactor(scales[firstScalingIndex].timeStamp, scales[secondScalingIndex].timeStamp, animationTime);

@@ -4,17 +4,22 @@
 
 #include "Core/Logger/GLDebug.h"
 
+#include "Camera/Camera.h"
+
 namespace Animator
 {
-	DebugMesh::DebugMesh(const std::vector<Math::Vector3F>& jointsPosition)
-		:	jointsPosition(jointsPosition)
+	DebugMesh::DebugMesh(const std::shared_ptr<Shader>& debugShader, Camera* camera)
+		:	shader(debugShader),
+			camera(camera)
 	{
 		vertexArrayObject = RenderApi::CreateVertexArray();
 		vertexBuffer = RenderApi::CreateVertexBuffer();
 
 		vertexArrayObject->SetVertexBuffer(vertexBuffer);
 
-		SetupMesh();
+		//SetupMesh();
+
+		//SetupShader();
 	}
 
 	void DebugMesh::Bind() const
@@ -27,11 +32,19 @@ namespace Animator
 		vertexArrayObject->UnBind();
 	}
 
-	void DebugMesh::Draw(const std::shared_ptr<Shader>& shader) const
+	void DebugMesh::Update()
+	{
+		OverwriteDataInVertexBuffer();
+
+		SetupShader();
+		//Draw(DebugDrawMode::Lines);
+	}
+
+	void DebugMesh::Draw(DebugDrawMode mode) const
 	{
 		Bind();
 
-		GL_CALL(glDrawArrays, GL_LINES, 0, static_cast<int>(jointsPosition.size()));
+		GL_CALL(glDrawArrays, DebugDrawModeToGLEnum(mode), 0, static_cast<int>(jointsPosition.size()));
 
 		Unbind();
 	}
@@ -41,9 +54,9 @@ namespace Animator
 		this->jointsPosition = jointsPosition;
 	}
 
-	void DebugMesh::SetupMesh() const
+	void DebugMesh::SetupMesh()
 	{
-		VertexBufferLayout layout;
+		//VertexBufferLayout layout;
 
 		if (!jointsPosition.empty())
 		{
@@ -54,6 +67,11 @@ namespace Animator
 
 		vertexBuffer->SetSize(layout.GetStride() * jointsPosition.size());
 
+		OverwriteDataInVertexBuffer();
+	}
+
+	void DebugMesh::OverwriteDataInVertexBuffer() const
+	{
 		int layoutLocation = -1;
 		if (!jointsPosition.empty())
 		{
@@ -63,5 +81,17 @@ namespace Animator
 		}
 
 		vertexArrayObject->SetBufferData();
+	}
+
+	void DebugMesh::SetupShader()
+	{
+		glm::mat4 projection = glm::perspective(glm::radians(camera->zoom), 1280.0f / 720.0f, 0.1f, 10000.0f);
+		glm::mat4 view = camera->GetViewMatrix();
+
+		shader->Bind();
+		shader->SetUniformMatrix4F(projection, "projection");
+		shader->SetUniformMatrix4F(view, "view");
+		Draw(DebugDrawMode::Lines);
+		shader->UnBind();
 	}
 }
