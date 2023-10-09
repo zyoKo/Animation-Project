@@ -6,6 +6,8 @@
 #include <glm/vec3.hpp>
 #include <glm/gtc/quaternion.hpp>
 
+#include "Math/Math.h"
+
 namespace Animator
 {
 	static constexpr unsigned MAX_BONE_INFLUENCE = 4;
@@ -47,7 +49,8 @@ namespace Animator
 
 	struct KeyRotation
 	{
-		glm::quat orientation;
+		Math::QuatF orientation;
+		//glm::quat orientation;
 
 		float timeStamp;
 	};

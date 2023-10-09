@@ -60,12 +60,12 @@ namespace Animator
 
 		if (!jointsPosition.empty())
 		{
-			layout.AddBufferElement(VertexDataType::Vector3F, jointsPosition.size(), false);
+			layout.AddBufferElement(VertexDataType::Vector3F, static_cast<unsigned>(jointsPosition.size()), false);
 		}
 
 		vertexBuffer->SetVertexBufferLayout(layout);
 
-		vertexBuffer->SetSize(layout.GetStride() * jointsPosition.size());
+		vertexBuffer->SetSize(layout.GetStride() * static_cast<unsigned>(jointsPosition.size()));
 
 		OverwriteDataInVertexBuffer();
 	}

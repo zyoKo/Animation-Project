@@ -1,5 +1,7 @@
 #pragma once
 
+#include <map>
+
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 

@@ -61,6 +61,18 @@ namespace Animator::Math
 
 		const T* GetPointerToData() const;
 
+		friend Vector3 operator*(T scalar, const Vector3& vector)
+		{
+			ANIM_ASSERT(!std::isnan(scalar), "Operation '/' failed, the value is NaN!");
+			return Vector3(vector.x * scalar, vector.y * scalar, vector.z * scalar);
+		}
+
+		friend Vector3 operator*(const Vector3& vector, T scalar)
+		{
+			ANIM_ASSERT(!std::isnan(scalar), "Operation '/' failed, the value is NaN!");
+			return Vector3(vector.x * scalar, vector.y * scalar, vector.z * scalar);
+		}
+
 		friend std::ostream& operator<<(std::ostream& os, const Vector3& vector)
 		{
 			os << "[" << vector.x << ", " << vector.y << ", " << vector.z << "]";
@@ -86,7 +98,7 @@ namespace Animator::Math
 
 		static T AbsDot(const Vector3& lhsVector, const Vector3& rhsVector);
 
-		Vector3 Cross(const Vector3<T>& lhsVector, const Vector3<T>& rhsVector);
+		static Vector3 Cross(const Vector3& lhsVector, const Vector3& rhsVector);
 
 		// Misc Operations
 		T MinComponent(const Vector3& vector);

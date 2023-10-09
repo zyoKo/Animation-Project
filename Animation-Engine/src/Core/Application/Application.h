@@ -3,16 +3,16 @@
 #include <memory>
 #include <string>
 
-#include "Components/Camera/Camera.h"
+#include "Animation/Animation.h"
+#include "Animation/Repository/AnimationStorage.h"
 #include "Core/Window/IWindow.h"
 
 namespace Animator
 {
-	class AssetManager;
-}
+	class AnimatorR;
 
-namespace Animator
-{
+	class AssetManager;
+
 	// --
 	// Class Type: Singleton
 	class Application
@@ -33,9 +33,9 @@ namespace Animator
 		virtual bool Shutdown();
 
 	private:
-		void ProcessCameraInput(Camera& camera);
-
 		float deltaTime, lastFrame;
+
+		std::shared_ptr<AnimatorR> animator;
 
 		static Application* instance;
 
@@ -44,5 +44,11 @@ namespace Animator
 		std::shared_ptr<AssetManager> assetManager;
 
 		bool running = true;
+
+		AnimationStorage animationStorage;
+
+		void ProcessInput(Camera& camera);
+
+		void ChangeModelAndAnimation();
 	};
 }

@@ -4,6 +4,8 @@
 #include "Components/Model.h"
 #include "DataTypes/AssimpNodeData.h"
 
+#include <map>
+
 namespace Animator
 {
 	class Animation

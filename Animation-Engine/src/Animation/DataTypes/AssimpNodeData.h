@@ -16,7 +16,8 @@ namespace Animator
 		std::vector<AssimpNodeData> children;
 
 		AssimpNodeData()
-			:	transformation(glm::mat4(1.0f))
+			:	transformation(glm::mat4(1.0f)),
+				childrenCount(0)
 		{
 		}
 	};

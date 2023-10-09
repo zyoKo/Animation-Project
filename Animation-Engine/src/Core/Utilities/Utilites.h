@@ -54,4 +54,40 @@ namespace Animator::Utils
 			return { orientation.w, orientation.x, orientation.y, orientation.z };
 		}
 	};
+
+	class GLMInternalHelper
+	{
+	public:
+		static glm::mat4 ConvertQuaternionToMatrix4(const Math::QuatF& quat)
+		{
+			const auto right	= quat * Math::Vector3F(1, 0, 0);
+			const auto up		= quat * Math::Vector3F(0, 1, 0);
+			const auto forward	= quat * Math::Vector3F(0, 0, 1);
+
+			return {
+				right.x,		right.y,		right.z,		0,
+				up.x,		up.y,		up.z,		0,
+				forward.x,	forward.y,	forward.z,	0,
+				0,			0,			0,			1
+			};
+		}
+	};
+
+	class AssimpInternalMathHelper
+	{
+	public:
+		static Math::Vector3F ConvertVectorToInternal(const aiVector3D& vector)
+		{
+			return { vector.x, vector.y, vector.z };
+		}
+
+		static Math::QuatF ConvertQuaternionToInternal(const aiQuaternion& orientation)
+		{
+			return {
+				static_cast<float>(orientation.x),
+				static_cast<float>(orientation.y),
+				static_cast<float>(orientation.z),
+				static_cast<float>(orientation.w)};
+		}
+	};
 }

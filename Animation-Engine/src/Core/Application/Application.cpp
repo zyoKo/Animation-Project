@@ -7,8 +7,9 @@
 #include <execution>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
+#include <glm/gtx/string_cast.hpp>
 
-#include "Animation/Animation.h"
+//#include "Animation/Animation.h"
 #include "Animation/Animator.h"
 #include "Core/Logger/Log.h"
 #include "Graphics/RenderApi.h"
@@ -16,7 +17,7 @@
 #include "Components/Model.h"
 #include "Components/Camera/Camera.h"
 #include "Components/Camera/CameraConstants.h"
-#include "Core/Logger/GLDebug.h"
+//#include "Core/Logger/GLDebug.h"
 #include "Core/Utilities/Utilites.h"
 
 namespace Animator
@@ -46,6 +47,7 @@ namespace Animator
 	Application::Application(const std::string& name, uint32_t width, uint32_t height)
 		:	deltaTime(0.0f),
 			lastFrame(0.0f),
+			animator(std::make_shared<AnimatorR>()),
 			assetManager(std::make_shared<AssetManager>())
 	{
 		if (!instance)
@@ -63,9 +65,13 @@ namespace Animator
 
 	void Application::Initialize()
 	{
-		const std::string textureFile = "./assets/dreyar/textures/Dreyar_diffuse.png";
-		const auto textureDiffuse = assetManager->CreateTexture(textureFile);
-		textureDiffuse->SetTextureName("texture_diffuse1");
+		const std::string dreyarDiffuseTextureFile = "./assets/dreyar/textures/Dreyar_diffuse.png";
+		const auto dreyarextureDiffuse = assetManager->CreateTexture(dreyarDiffuseTextureFile);
+		dreyarextureDiffuse->SetTextureName("texture_diffuse1");
+
+		const std::string vampireDiffuseTextureFile = "./assets/vamp/textures/Vampire_diffuse.png";
+		const auto vampireTextureDiffuse = assetManager->CreateTexture(dreyarDiffuseTextureFile);
+		vampireTextureDiffuse->SetTextureName("texture_diffuse1");
 
 		const std::string vertexShaderFile = "./assets/shaders/anim_model.vert";
 		const std::string fragmentShaderFile = "./assets/shaders/anim_model.frag";
@@ -74,6 +80,12 @@ namespace Animator
 		const std::string debugVertexShaderFile = "./assets/shaders/debug_anim_model.vert";
 		const std::string debugFragShaderFile = "./assets/shaders/debug_anim_model.frag";
 		assetManager->CreateShader("DebugAnimationShader", debugVertexShaderFile, debugFragShaderFile);
+
+		// Adding Model And Animation to Storage
+		const std::string dreyarColladaFile = "./assets/dreyar/Capoeira.dae";
+		animationStorage.AddAssetToStorage(dreyarColladaFile, dreyarextureDiffuse);
+		const std::string botColladaFile = "./assets/vamp/dancing_vampire.dae";
+		animationStorage.AddAssetToStorage(botColladaFile, vampireTextureDiffuse);
 	}
 
 	void Application::Run()
@@ -82,17 +94,20 @@ namespace Animator
 		auto debugShader = assetManager->RetrieveShaderFromStorage("DebugAnimationShader");
 		auto textureDiffuse = assetManager->RetrieveTextureFromStorage("Dreyar_diffuse");
 
-		const std::string modelAndAnimationFile = "./assets/dreyar/Capoeira.dae";
-		//const std::string modelAndAnimationFile = "./assets/models/Walking.dae";
-		Model animModel(modelAndAnimationFile);
-		animModel.SetDiffuseTextureForMeshes(textureDiffuse);
-		Animation danceAnimation(modelAndAnimationFile, &animModel);
-		AnimatorR animator(&danceAnimation);
+		//const std::string dreyarColladaFile = "./assets/dreyar/Capoeira.dae";
+		//const std::string bolColladaFile = "./assets/models/Walking.dae";
+		//Model dreyarModel(dreyarColladaFile);
+		//Model botModelFile(bolColladaFile);
+		//dreyarModel.SetDiffuseTextureForMeshes(textureDiffuse);
+		//Animation dreyarAnimation(dreyarColladaFile, &dreyarModel);
+		//Animation botAnimationFile(bolColladaFile, &dreyarModel);
+
+		//AnimatorR animator(&dreyarAnimation);
+		animator->ChangeAnimation(animationStorage.GetAnimationForCurrentlyBoundIndex());
 
 		RenderApi::GetContext()->EnableDepthTest(true);
 		//GL_CALL(glPolygonMode, GL_FRONT_AND_BACK, GL_LINE);
 
-		auto bonesPositions = ExtractBonePositionsFromBoneTransformation(animator.GetFinalBoneMatrices(), animModel.GetBoneCount());
 		Camera camera(glm::vec3(0.0f, 8.0f, 30.0f), glm::vec3(0.0f, 1.0f, 0.0f), CAMERA_YAW, CAMERA_PITCH);
 		DebugMesh debugMesh(debugShader, &camera);
 
@@ -112,12 +127,11 @@ namespace Animator
 			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
 			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
 
-			ProcessCameraInput(camera);
-			animator.UpdateAnimation(deltaTime);
+			ProcessInput(camera);
+			animator->UpdateAnimation(deltaTime);
 
-			//bonesPositions = ExtractBonePositionsFromBoneTransformation(animator.GetFinalBoneMatrices(), animModel.GetBoneCount());
-			debugMesh.OverwriteJointsPosition(animator.GetJointPositions());
-			animator.ClearJoints();
+			debugMesh.OverwriteJointsPosition(animator->GetJointPositions());
+			animator->ClearJoints();
 			static bool firstRun = true;
 			if (firstRun)
 			{
@@ -131,19 +145,14 @@ namespace Animator
 			shader->SetUniformMatrix4F(projection, "projection");
 			shader->SetUniformMatrix4F(view, "view");
 			shader->SetUniformMatrix4F(model, "model");
-			for (unsigned i = 0; i < animator.GetFinalBoneMatrices().size(); ++i)
+			for (unsigned i = 0; i < animator->GetFinalBoneMatrices().size(); ++i)
 			{
 				std::string uniformName = "finalBonesMatrices[" + std::to_string(i) + "]";
-				shader->SetUniformMatrix4F(animator.GetFinalBoneMatrices()[i], uniformName);
+				shader->SetUniformMatrix4F(animator->GetFinalBoneMatrices()[i], uniformName);
 			}
-			//animModel.Draw(shader);
+			//dreyarModel->Draw(shader);
+			animationStorage.GetModelForCurrentlyBoundIndex()->Draw(shader);
 			shader->UnBind();
-
-			//debugShader->Bind();
-			//debugShader->SetUniformMatrix4F(projection, "projection");
-			//debugShader->SetUniformMatrix4F(view, "view");
-			//animModel.DrawDebug(debugShader);
-			//debugShader->UnBind();
 
 			window->Update();
 		}
@@ -161,7 +170,7 @@ namespace Animator
 		return true;
 	}
 
-	void Application::ProcessCameraInput(Camera& camera)
+	void Application::ProcessInput(Camera& camera)
 	{
 		const auto glfwWindow = static_cast<GLFWwindow*>(window->GetNativeWindow());
 
@@ -176,5 +185,29 @@ namespace Animator
 		    camera.ProcessKeyboard(CameraMovement::LEFT, deltaTime);
 		if (glfwGetKey(glfwWindow, GLFW_KEY_D) == GLFW_PRESS)
 		    camera.ProcessKeyboard(CameraMovement::RIGHT, deltaTime);
+		if (glfwGetKey(glfwWindow, GLFW_KEY_E) == GLFW_PRESS)
+			camera.ProcessKeyboard(CameraMovement::ROTATE_LEFT, deltaTime);
+		if (glfwGetKey(glfwWindow, GLFW_KEY_Q) == GLFW_PRESS)
+			camera.ProcessKeyboard(CameraMovement::ROTATE_RIGHT, deltaTime);
+
+		static bool isKeyPressed = false;
+		if (glfwGetKey(glfwWindow, GLFW_KEY_T) == GLFW_PRESS)
+		{
+			if (!isKeyPressed)
+			{
+				animationStorage.ChangeModel();
+				animator->ChangeAnimation(animationStorage.GetAnimationForCurrentlyBoundIndex());
+				isKeyPressed = true;
+			}
+		}
+		else
+		{
+			isKeyPressed = false;
+		}
+	}
+
+	void Application::ChangeModelAndAnimation()
+	{
+
 	}
 }

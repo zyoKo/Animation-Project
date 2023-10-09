@@ -38,7 +38,9 @@ namespace Animator
 			KeyRotation rotationData;
 
 			aiQuaternion aiOrientation = channel->mRotationKeys[rotationIndex].mValue;
-			rotationData.orientation = Utils::AssimpGLMHelper::ConvertQuaternionToGLMFormat(aiOrientation);
+			// TODO: MATH CHANGES
+			//rotationData.orientation = Utils::AssimpGLMHelper::ConvertQuaternionToGLMFormat(aiOrientation);
+			rotationData.orientation = Utils::AssimpInternalMathHelper::ConvertQuaternionToInternal(aiOrientation);
 
 			const auto timeStamp = static_cast<float>(channel->mRotationKeys[rotationIndex].mTime);
 			rotationData.timeStamp = timeStamp;
@@ -159,8 +161,10 @@ namespace Animator
 	{
 		if (numRotations == 1)
 		{
-			const auto rotation = glm::normalize(rotations[0].orientation);
-			return glm::toMat4(rotation);
+			//const auto rotation = glm::normalize(rotations[0].orientation);
+			//return glm::toMat4(rotation);
+			const auto rotation = Math::QuatF::Normalize(rotations[0].orientation);
+			return Utils::GLMInternalHelper::ConvertQuaternionToMatrix4(rotation);
 		}
 
 		const int firstRotationIndex = GetRotationIndexAt(animationTime);
@@ -168,10 +172,14 @@ namespace Animator
 
 		const float scaleFactor = GetScaleFactor(rotations[firstRotationIndex].timeStamp, rotations[secondRotationIndex].timeStamp, animationTime);
 
-		glm::quat finalRotation = glm::slerp(glm::normalize(rotations[firstRotationIndex].orientation), glm::normalize(rotations[secondRotationIndex].orientation), scaleFactor);
-		finalRotation = glm::normalize(finalRotation);
+		// TODO: MATH CHANGES
+		//glm::quat finalRotation = glm::slerp(glm::normalize(rotations[firstRotationIndex].orientation), glm::normalize(rotations[secondRotationIndex].orientation), scaleFactor);
+		//finalRotation = glm::normalize(finalRotation);
+		//return glm::toMat4(finalRotation);
 
-		return glm::toMat4(finalRotation);
+		Math::QuatF finalRotation = Math::QuatF::SLerp(Math::QuatF::Normalize(rotations[firstRotationIndex].orientation), Math::QuatF::Normalize(rotations[secondRotationIndex].orientation), scaleFactor);
+		finalRotation = Math::QuatF::Normalize(finalRotation);
+		return Utils::GLMInternalHelper::ConvertQuaternionToMatrix4(finalRotation);
 	}
 
 	glm::mat4 Bone::InterpolationScaling(float animationTime)

@@ -11,9 +11,13 @@ namespace Animator
 	class AnimatorR
 	{
 	public:
+		AnimatorR();
+
 		AnimatorR(Animation* animation);
 
 		~AnimatorR() = default;
+
+		void ChangeAnimation(Animation* newAnimation);
 
 		void UpdateAnimation(float dt);
 

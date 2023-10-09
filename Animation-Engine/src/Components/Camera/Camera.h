@@ -1,7 +1,10 @@
 #pragma once
 
+#include <glm/ext/matrix_transform.hpp>
+
 #include "CameraProperties.h"
 #include "glad/glad.h"
+#include "GLFW/glfw3.h"
 
 namespace Animator
 {
@@ -13,7 +16,11 @@ namespace Animator
 
 		LEFT,
 
-		RIGHT
+		RIGHT,
+
+		ROTATE_LEFT,
+
+		ROTATE_RIGHT
 	};
 
 	class Camera
@@ -35,11 +42,15 @@ namespace Animator
 
 		void SetCameraPosition(const glm::vec3& position);
 
-		glm::mat4 GetViewMatrix() const;
+		glm::mat4 GetViewMatrix() const
+		{
+			return glm::lookAt(cameraPosition, cameraPosition + front, up);
+		}
 
 		void ProcessKeyboard(CameraMovement direction, float deltaTime)
 		{
 			float velocity = movementSpeed * deltaTime;
+
 			if (direction == CameraMovement::FORWARD)
 			    cameraPosition += front * velocity;
 			if (direction == CameraMovement::BACKWARD)
@@ -48,6 +59,16 @@ namespace Animator
 			    cameraPosition -= right * velocity;
 			if (direction == CameraMovement::RIGHT)
 			    cameraPosition += right * velocity;
+			if (direction == CameraMovement::ROTATE_LEFT)
+			{
+				yaw -= rotateSpeed * deltaTime;  // adjust rotateSpeed to control the rotation speed
+			}
+			if (direction == CameraMovement::ROTATE_RIGHT)
+			{
+				yaw += rotateSpeed * deltaTime;  // adjust rotateSpeed to control the rotation speed
+			}
+
+			UpdateCameraVectors();
 		}
 
 		// processes input received from a mouse input system. Expects the offset value in both the x and y direction.
@@ -82,6 +103,8 @@ namespace Animator
 
 		glm::vec3 worldUp;
 
+		float rotateSpeed;
+
 		float yaw, pitch;
 
 		float movementSpeed;
@@ -100,7 +123,19 @@ namespace Animator
 		void CalculateViewProjectionMatrix();*/
 
 	private:
-		void UpdateCameraVectors();
+		void UpdateCameraVectors()
+		{
+			glm::vec3 tempFront;
+
+			tempFront.x = std::cos(glm::radians(yaw)) * std::cos(glm::radians(pitch));
+			tempFront.y = std::sin(glm::radians(pitch));
+			tempFront.z = std::sin(glm::radians(yaw)) * std::cos(glm::radians(pitch));
+
+			this->front = glm::normalize(tempFront);
+
+			right = glm::normalize(glm::cross(this->front, worldUp));
+			up = glm::normalize(glm::cross(right, this->front));
+		}
 
 		/*CameraProperties cameraProperties;
 		glm::vec3 cameraOrigin;

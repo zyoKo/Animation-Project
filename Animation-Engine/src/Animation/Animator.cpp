@@ -2,14 +2,24 @@
 
 #include "Animator.h"
 
-#include <execution>
-#include <glm/gtx/string_cast.hpp>
-
 #include "Animation/Animation.h"
 #include "DataTypes/AssimpNodeData.h"
 
 namespace Animator
 {
+	AnimatorR::AnimatorR()
+		:	currentAnimation(nullptr),
+			currentTime(0.0f),
+			deltaTime(0.0f)
+	{
+		finalBoneMatrices.reserve(100);
+
+		for (int i = 0; i < 100; ++i)
+		{
+			finalBoneMatrices.emplace_back(1.0f);
+		}
+	}
+
 	AnimatorR::AnimatorR(Animation* animation)
 		:	currentAnimation(animation),
 			currentTime(0.0f),
@@ -21,6 +31,12 @@ namespace Animator
 		{
 			finalBoneMatrices.emplace_back(1.0f);
 		}
+	}
+
+	void AnimatorR::ChangeAnimation(Animation* newAnimation)
+	{
+		currentAnimation = newAnimation;
+		currentTime = 0.0f;
 	}
 
 	void AnimatorR::UpdateAnimation(float dt)

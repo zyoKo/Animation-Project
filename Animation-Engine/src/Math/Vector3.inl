@@ -51,7 +51,7 @@ namespace Animator::Math
 	Vector3<T> Vector3<T>::operator+(const Vector3& vector)
 	{
 		ANIM_ASSERT(!vector.HasNaNs(), "Operation '/' failed, the vector has NaNs!");
-		return Vector3(x - vector.x, y - vector.y, z - vector.z);
+		return Vector3(x + vector.x, y + vector.y, z + vector.z);
 	}
 
 	template <typename T>
