@@ -15,8 +15,8 @@ namespace Animator::Math
 
 		VQS(const glm::vec3& vector, const QuatF& quat, float scale);
 
-		void SetVector(const glm::vec3& vector);
-		const glm::vec3& GetVector() const;
+		void SetTranslationVector(const glm::vec3& vector);
+		const glm::vec3& GetTranslationVector() const;
 
 		void SetRotation(const QuatF& quat);
 		const QuatF& GetRotation() const;
@@ -43,7 +43,7 @@ namespace Animator::Math
 			os << "VQS:\n"		<<
 				"[Vector: "		<< glm::to_string(vqs.translationVector)	<< "]\n" <<
 				"[Rotation: "	<< vqs.quatRotation							<< "]\n" <<
-				"[Scale: "		<< glm::to_string(vqs.scaleVector)			<< "]\n";
+				"[Scale: "		<< glm::to_string(vqs.scalingVector)		<< "]\n";
 			return os;
 		}
 
@@ -52,7 +52,7 @@ namespace Animator::Math
 			VQS result;
 
 			result.translationVector = vqs.translationVector * value;
-			result.scaleVector = vqs.scaleVector * value;
+			result.scalingVector = vqs.scalingVector * value;
 			result.quatRotation = vqs.quatRotation * value;
 
 			return result;
@@ -63,13 +63,13 @@ namespace Animator::Math
 			return {
 				vqs.translationVector * value,
 				vqs.quatRotation * value,
-				(vqs.scaleVector * value).x
+				(vqs.scalingVector * value).x
 			};
 		}
 
 		friend glm::vec3 operator*(const VQS& vqs, const glm::vec3& point)
 		{
-			const auto scaledPoint = vqs.scaleVector * point;
+			const auto scaledPoint = vqs.scalingVector * point;
 			const auto scaledPointQuat = Vec4F(scaledPoint.x, scaledPoint.y, scaledPoint.z, 0.0f);
 			QuatF rotationInverse = QuatF::Inverse(vqs.quatRotation);
 
@@ -80,7 +80,7 @@ namespace Animator::Math
 
 		friend glm::vec3 operator*(const glm::vec3& point, const VQS& vqs)
 		{
-			const auto scaledPoint = vqs.scaleVector * point;
+			const auto scaledPoint = vqs.scalingVector * point;
 			const auto scaledPointQuat = QuatF(scaledPoint.x, scaledPoint.y, scaledPoint.z, 0.0f);
 
 			// Tr = q(sr)q^(-1) + v
@@ -89,11 +89,11 @@ namespace Animator::Math
 			return { subResult.x, subResult.y, subResult.z };
 		}
 
-	private:
+	//private:
 		glm::vec3 translationVector;
 
 		QuatF quatRotation;
 
-		glm::vec3 scaleVector;
+		glm::vec3 scalingVector;
 	};
 }

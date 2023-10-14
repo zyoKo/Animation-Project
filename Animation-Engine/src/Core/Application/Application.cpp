@@ -149,7 +149,7 @@ namespace Animator
 				std::string uniformName = "finalBonesMatrices[" + std::to_string(i) + "]";
 				shader->SetUniformMatrix4F(animator->GetFinalBoneMatrices()[i], uniformName);
 			}
-			//animationStorage.GetModelForCurrentlyBoundIndex()->Draw(shader);
+			animationStorage.GetModelForCurrentlyBoundIndex()->Draw(shader);
 			shader->UnBind();
 
 			gridMesh.Update(gridShader, projection, view);

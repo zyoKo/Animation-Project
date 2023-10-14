@@ -86,7 +86,6 @@ namespace Animator::Math
 		static Vector3 Cross(const Vector3& lhsVector, const Vector3& rhsVector);
 
 		static Vector3 Lerp(const Vector3& vecOne, const Vector3& vecTwo, T t);
-		static Vector3 ELerp(const Vector3& vecOne, const Vector3& vecTwo, T t);
 
 		// Misc Operations
 		T MinComponent(const Vector3& vector);

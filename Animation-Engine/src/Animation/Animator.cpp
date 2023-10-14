@@ -4,7 +4,7 @@
 
 #include "Animation/Animation.h"
 #include "DataTypes/AssimpNodeData.h"
-#include "Math/VQM.h"
+#include "Core/Utilities/Utilites.h"
 
 namespace Animator
 {
@@ -48,7 +48,8 @@ namespace Animator
 		{
 			currentTime += currentAnimation->GetTicksPerSecond() * dt;
 			currentTime = std::fmod(currentTime, currentAnimation->GetDuration());
-			CalculateBoneTransform(&currentAnimation->GetRootNode(), glm::mat4(1.0f));
+			//CalculateBoneTransform(&currentAnimation->GetRootNode(), glm::mat4(1.0f));
+			CalculateBoneTransformWithVQS(&currentAnimation->GetRootNode(), Math::VQS());
 		}
 	}
 
@@ -87,6 +88,40 @@ namespace Animator
 
 		for (int i = 0; i < node->childrenCount; ++i)
 			CalculateBoneTransform(&node->children[i], worldTransform);
+	}
+
+	void AnimatorR::CalculateBoneTransformWithVQS(const AssimpNodeData* node, Math::VQS parentVQS)
+	{
+		std::string nodeName = node->name;
+		auto localVQS = Utils::GLMInternalHelper::ConvertGLMMatrixToVQS(node->transformation);
+
+		Bone* bone = currentAnimation->FindBone(nodeName);
+
+		if (bone)
+		{
+			bone->Update(currentTime);
+			localVQS = bone->GetLocalVQS();
+
+			jointPositions.push_back(
+				ExtractJointPosition(Utils::GLMInternalHelper::ConvertVQSToGLMMatrix(parentVQS)));
+
+			jointPositions.push_back(
+				ExtractJointPosition(Utils::GLMInternalHelper::ConvertVQSToGLMMatrix(parentVQS * localVQS)));
+		}
+
+		const auto worldVQS = parentVQS * localVQS;
+
+		auto boneInfoMap = currentAnimation->GetBoneIDMap();
+		if (boneInfoMap.contains(nodeName))
+		{
+			const int index = boneInfoMap[nodeName].id;
+			const glm::mat4 offset = boneInfoMap[nodeName].offset;
+
+			finalBoneMatrices[index] = Utils::GLMInternalHelper::ConvertVQSToGLMMatrix(worldVQS) * offset;
+		}
+
+		for (int i = 0; i < node->childrenCount; ++i)
+			CalculateBoneTransformWithVQS(&node->children[i], worldVQS);
 	}
 
 	const std::vector<glm::mat4>& AnimatorR::GetFinalBoneMatrices() const

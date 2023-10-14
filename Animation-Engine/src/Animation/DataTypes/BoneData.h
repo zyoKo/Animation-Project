@@ -2,7 +2,6 @@
 
 #include <array>
 
-#include <glm/fwd.hpp>
 #include <glm/vec3.hpp>
 #include <glm/gtc/quaternion.hpp>
 
@@ -50,7 +49,6 @@ namespace Animator
 	struct KeyRotation
 	{
 		Math::QuatF orientation;
-		//glm::quat orientation;
 
 		float timeStamp;
 	};

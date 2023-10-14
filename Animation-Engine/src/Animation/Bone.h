@@ -21,6 +21,8 @@ namespace Animator
 
 		const glm::mat4& GetLocalTransform() const;
 
+		const Math::VQS& GetLocalVQS() const;
+
 		int GetPositionIndexAt(float time) const;
 
 		int GetRotationIndexAt(float time) const;
@@ -33,6 +35,8 @@ namespace Animator
 		int boneID;
 
 		glm::mat4 localTransform;
+
+		Math::VQS localVQS;
 
 		std::vector<KeyPosition> keyPositions;
 
@@ -49,12 +53,11 @@ namespace Animator
 		float GetScaleFactor(float lastTimeStamp, float nextTimeStamp, float animationTime);
 
 		glm::mat4 InterpolationPosition(float animationTime);
-		glm::mat4 InterpolationWithVQS(float animationTime);
 
 		glm::mat4 InterpolationRotation(float animationTime);
-		glm::mat4 InterpolationRotationWithVQS(float animationTime);
 
 		glm::mat4 InterpolationScaling(float animationTime);
-		glm::mat4 InterpolationScalingWithVQS(float animationTime);
+
+		Math::VQS InterpolateWithVQS(float animationTime);
 	};
 }

@@ -25,6 +25,8 @@ namespace Animator
 
 		void CalculateBoneTransform(const AssimpNodeData* node, glm::mat4 parentTransform);
 
+		void CalculateBoneTransformWithVQS(const AssimpNodeData* node, Math::VQS parentVQS);
+
 		const std::vector<glm::mat4>& GetFinalBoneMatrices() const;
 
 		const std::vector<Math::Vector3F>& GetJointPositions() const;
