@@ -93,7 +93,7 @@ namespace Animator
 		ANIM_ASSERT(sourceNode, "Source Node is Empty!");
 
 		destinationNode.name = sourceNode->mName.data;
-		destinationNode.transformation = Utils::AssimpGLMHelper::ConvertMatrixToGLMFormat(sourceNode->mTransformation);
+		destinationNode.transformation = Utils::AssimpToGLMHelper::ConvertMatrixToGLMFormat(sourceNode->mTransformation);
 		destinationNode.childrenCount = sourceNode->mNumChildren;
 
 		for (int i = 0; i < sourceNode->mNumChildren; ++i)

@@ -10,9 +10,9 @@ namespace Animator
 {
 	Mesh::Mesh()
 	{
-		vertexArrayObject = RenderApi::CreateVertexArray();
-		vertexBuffer = RenderApi::CreateVertexBuffer();
-		indexBuffer = RenderApi::CreateIndexBuffer();
+		vertexArrayObject = GraphicsAPI::CreateVertexArray();
+		vertexBuffer = GraphicsAPI::CreateVertexBuffer();
+		indexBuffer = GraphicsAPI::CreateIndexBuffer();
 
 		vertexArrayObject->SetIndexBuffer(indexBuffer);
 		vertexArrayObject->SetVertexBuffer(vertexBuffer);
@@ -34,9 +34,9 @@ namespace Animator
 			boneData(std::move(boneData)),
 			indices(std::move(indices))
 	{
-		vertexArrayObject = RenderApi::CreateVertexArray();
-		vertexBuffer = RenderApi::CreateVertexBuffer();
-		indexBuffer = RenderApi::CreateIndexBuffer();
+		vertexArrayObject = GraphicsAPI::CreateVertexArray();
+		vertexBuffer = GraphicsAPI::CreateVertexBuffer();
+		indexBuffer = GraphicsAPI::CreateIndexBuffer();
 
 		vertexArrayObject->SetIndexBuffer(indexBuffer);
 		vertexArrayObject->SetVertexBuffer(vertexBuffer);

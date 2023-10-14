@@ -11,13 +11,11 @@ namespace Animator::Math
 		// Declare variables
 		union
 		{
-			struct  // NOLINT(clang-diagnostic-nested-anon-types)
-			{
+			struct {
 				T x, y, z;
 			};
 
-			struct
-			{
+			struct {
 				T r, g, b;
 			};
 
@@ -25,13 +23,9 @@ namespace Animator::Math
 		};
 
 		constexpr Vector3() noexcept;
-
 		constexpr Vector3(T x, T y, T z) noexcept;
-
 		constexpr Vector3(T value) noexcept;
-
 		constexpr Vector3(std::initializer_list<T> data) noexcept;
-
 		explicit constexpr Vector3(const Vector3& vector) noexcept;
 
 		~Vector3() = default;
@@ -40,23 +34,18 @@ namespace Animator::Math
 		Vector3& operator=(const Vector3& vector);
 
 		Vector3 operator+(const Vector3& vector);
-
 		Vector3& operator+=(const Vector3& vector);
 
 		Vector3 operator-(const Vector3& vector);
-
 		Vector3& operator-=(const Vector3& vector);
 
 		Vector3 operator*(T value);
-
 		Vector3& operator*=(T value);
 
 		Vector3 operator/(T value);
-
 		Vector3& operator/=(T value);
 
 		bool operator==(const Vector3& vector);
-
 		bool operator!=(const Vector3& vector);
 
 		const T* GetPointerToData() const;
@@ -81,34 +70,30 @@ namespace Animator::Math
 
 		// Core Functions
 		bool HasNaNs() const;
-
 		bool HasInfinite() const;
 
 		static bool IsZero(const Vector3& vector);
 
 		T LengthSquared() const;
-
 		T Length() const;
 
 		Vector3& GetNormalize();
-
 		static Vector3 Normalize(const Vector3& vector);
 
 		static T Dot(const Vector3& lhsVector, const Vector3& rhsVector);
-
 		static T AbsDot(const Vector3& lhsVector, const Vector3& rhsVector);
 
 		static Vector3 Cross(const Vector3& lhsVector, const Vector3& rhsVector);
 
+		static Vector3 Lerp(const Vector3& vecOne, const Vector3& vecTwo, T t);
+		static Vector3 ELerp(const Vector3& vecOne, const Vector3& vecTwo, T t);
+
 		// Misc Operations
 		T MinComponent(const Vector3& vector);
-
 		T MaxComponent(const Vector3& vector);
 
 		Vector3 Min(const Vector3& lhsVector, const Vector3& rhsVector);
-
 		Vector3 Max(const Vector3& lhsVector, const Vector3& rhsVector);
-
 		Vector3 Permute(const Vector3& vector, int x, int y, int z);
 
 		// Assumes firstVector passed has already been normalized

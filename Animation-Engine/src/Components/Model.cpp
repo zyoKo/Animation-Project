@@ -150,7 +150,7 @@ namespace Animator
             {
                 BoneInfo newBoneInfo;
                 newBoneInfo.id = boneCounter;
-                newBoneInfo.offset = Utils::AssimpGLMHelper::ConvertMatrixToGLMFormat(aiMesh->mBones[boneIndex]->mOffsetMatrix);
+                newBoneInfo.offset = Utils::AssimpToGLMHelper::ConvertMatrixToGLMFormat(aiMesh->mBones[boneIndex]->mOffsetMatrix);
                 boneInfoMap[boneName] = newBoneInfo;
                 boneID = boneCounter;
                 ++boneCounter;

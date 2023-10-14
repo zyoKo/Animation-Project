@@ -15,9 +15,9 @@ namespace Animator
 	static const std::vector<Math::Vector3F> DEFAULT_COLOR_DATA = 
 	{
 		{ 1.0f, 0.0f, 0.0f },
-		{ 0.0f, 1.0f, 0.0f },
-		{ 0.0f, 0.0f, 1.0f },
-		{ 1.0f, 1.0f, 0.0f }
+		{ 1.0f, 0.0f, 0.0f },
+		{ 1.0f, 0.0f, 0.0f },
+		{ 1.0f, 0.0f, 0.0f }
 	};
 
 	static const std::vector<Math::Vector3F> DEFAULT_NORMALS_DATA = 

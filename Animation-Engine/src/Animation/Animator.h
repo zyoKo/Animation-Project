@@ -27,15 +27,9 @@ namespace Animator
 
 		const std::vector<glm::mat4>& GetFinalBoneMatrices() const;
 
-		const std::vector<Math::Vector3F>& GetJointPositions() const
-		{
-			return jointPositions;
-		}
+		const std::vector<Math::Vector3F>& GetJointPositions() const;
 
-		void ClearJoints()
-		{
-			jointPositions.clear();
-		}
+		void ClearJoints();
 
 	private:
 		std::vector<glm::mat4> finalBoneMatrices;
@@ -48,9 +42,6 @@ namespace Animator
 
 		float deltaTime;
 
-		Math::Vector3F ExtractJointPosition(const glm::mat4& transform)
-		{
-			return { transform[3][0], transform[3][1], transform[3][2] };
-		}
+		Math::Vector3F ExtractJointPosition(const glm::mat4& transform);
 	};
 }

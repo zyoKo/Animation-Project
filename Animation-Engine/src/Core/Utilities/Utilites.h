@@ -30,7 +30,7 @@ namespace Animator::Utils
 		return filepath;
 	}
 
-	class AssimpGLMHelper
+	class AssimpToGLMHelper
 	{
 	public:
 		static glm::mat4 ConvertMatrixToGLMFormat(const aiMatrix4x4& from)
@@ -71,6 +71,18 @@ namespace Animator::Utils
 				0,			0,			0,			1
 			};
 		}
+
+		static Math::Vec3F ConvertGLMVec3ToInternal(const glm::vec3& vector)
+		{
+			return { vector.x, vector.y, vector.z };
+		}
+
+		static Math::Vec4F ConvertGLMVec4ToInternal(const glm::vec4& vector)
+		{
+			return { vector.x, vector.y, vector.z, vector.w };
+		}
+
+
 	};
 
 	class AssimpInternalMathHelper

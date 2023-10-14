@@ -17,7 +17,10 @@ namespace Animator
 	{
 		const auto model = std::make_shared<Model>(filename);
 		if (textureDiffuse)
+		{
 			model->SetDiffuseTextureForMeshes(textureDiffuse);
+			diffuseTextures.push_back(textureDiffuse);
+		}
 		modelList.push_back(model);
 	
 		const auto animation = std::make_shared<Animation>(filename, model.get());
@@ -32,6 +35,11 @@ namespace Animator
 	Animation* AnimationStorage::GetAnimationForCurrentlyBoundIndex() const
 	{
 		return animationList[currentIndex].get();
+	}
+
+	ITexture2D* AnimationStorage::GetDiffuseTextureFromCurrentlyBoundIndex() const
+	{
+		return diffuseTextures[currentIndex].get();
 	}
 	
 	void AnimationStorage::ChangeModel()

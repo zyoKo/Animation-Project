@@ -34,11 +34,11 @@ namespace Animator
 
 		glm::mat4 localTransform;
 
-		std::vector<KeyPosition> positions;
+		std::vector<KeyPosition> keyPositions;
 
-		std::vector<KeyRotation> rotations;
+		std::vector<KeyRotation> keyRotations;
 
-		std::vector<KeyScale> scales;
+		std::vector<KeyScale> keyScales;
 
 		int numPositions;
 
@@ -49,9 +49,12 @@ namespace Animator
 		float GetScaleFactor(float lastTimeStamp, float nextTimeStamp, float animationTime);
 
 		glm::mat4 InterpolationPosition(float animationTime);
+		glm::mat4 InterpolationWithVQS(float animationTime);
 
 		glm::mat4 InterpolationRotation(float animationTime);
+		glm::mat4 InterpolationRotationWithVQS(float animationTime);
 
 		glm::mat4 InterpolationScaling(float animationTime);
+		glm::mat4 InterpolationScalingWithVQS(float animationTime);
 	};
 }

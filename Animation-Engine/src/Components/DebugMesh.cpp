@@ -12,8 +12,8 @@ namespace Animator
 		:	shader(debugShader),
 			camera(camera)
 	{
-		vertexArrayObject = RenderApi::CreateVertexArray();
-		vertexBuffer = RenderApi::CreateVertexBuffer();
+		vertexArrayObject = GraphicsAPI::CreateVertexArray();
+		vertexBuffer = GraphicsAPI::CreateVertexBuffer();
 
 		vertexArrayObject->SetVertexBuffer(vertexBuffer);
 

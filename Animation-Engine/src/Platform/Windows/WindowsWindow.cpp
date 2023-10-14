@@ -5,7 +5,7 @@
 #include "Core/Logger/GLDebug.h"
 #include "Core/Logger/Log.h"
 #include "glad/glad.h"
-#include "Graphics/RenderApi.h"
+#include "Graphics/GraphicsAPI.h"
 
 namespace Animator
 {
@@ -27,6 +27,9 @@ namespace Animator
 	}
 
 	WindowsWindow::WindowsWindow(const UniversalWindowData& winData)
+		:	window(nullptr),
+			lastTime(0.0),
+			nbFrames(0)
 	{
 		Init(winData);
 	}
@@ -43,9 +46,11 @@ namespace Animator
 
 	void WindowsWindow::Update()
 	{
+		SetWindowTitle();
+
 		glfwPollEvents();
 
-		RenderApi::GetContext()->SwapBuffer();
+		GraphicsAPI::GetContext()->SwapBuffer();
 	}
 
 	uint32_t WindowsWindow::GetWidth()
@@ -109,13 +114,13 @@ namespace Animator
 
 		window = glfwCreateWindow(static_cast<int>(winData.width), static_cast<int>(winData.height), winData.title.c_str(), nullptr, nullptr);
 
-		RenderApi::CreateContext(this);
+		GraphicsAPI::CreateContext(this);
 
 #ifdef ANIM_DEBUG
 		Utilities::EnableOpenGLDebugging();
 #endif
 
-		SetVSync(true);
+		SetVSync(false);
 
 		glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
 		glfwSetWindowUserPointer(window, &windowData);

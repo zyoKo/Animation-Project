@@ -200,6 +200,12 @@ namespace Animator::Math
 	}
 
 	template <typename T>
+	Vector3<T> Vector3<T>::Lerp(const Vector3& vecOne, const Vector3& vecTwo, T t)
+	{
+		return (vecOne * (1 - t) + vecTwo * t);
+	}
+
+	template <typename T>
 	T Vector3<T>::MinComponent(const Vector3& vector)
 	{
 		return std::min(vector.x, std::min(vector.y, vector.z));

@@ -4,6 +4,7 @@
 
 #include "Animation/Animation.h"
 #include "DataTypes/AssimpNodeData.h"
+#include "Math/VQM.h"
 
 namespace Animator
 {
@@ -91,5 +92,20 @@ namespace Animator
 	const std::vector<glm::mat4>& AnimatorR::GetFinalBoneMatrices() const
 	{
 		return finalBoneMatrices;
+	}
+
+	const std::vector<Math::Vector3F>& AnimatorR::GetJointPositions() const
+	{
+		return jointPositions;
+	}
+
+	void AnimatorR::ClearJoints()
+	{
+		jointPositions.clear();
+	}
+
+	Math::Vector3F AnimatorR::ExtractJointPosition(const glm::mat4& transform)
+	{
+		return { transform[3][0], transform[3][1], transform[3][2] };
 	}
 }

@@ -5,7 +5,7 @@
 
 #include "Graphics/OpenGL/Buffers/Interfaces/IVertexArray.h"
 #include "Graphics/OpenGL/Buffers/Interfaces/IVertexBuffer.h"
-#include "Graphics/RenderApi.h"
+#include "Graphics/GraphicsAPI.h"
 #include "Types/DebugDrawMode.h"
 
 namespace Animator

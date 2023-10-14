@@ -142,7 +142,7 @@ namespace Animator::Math
 		static void Conjugate(Quaternion& quat);
 		static Quaternion Conjugate(const Quaternion& quat);
 
-		static void Inverse(Quaternion& quat);
+		void MakeInverse();
 		static Quaternion Inverse(const Quaternion& quat);
 
 		static Quaternion Lerp(const Quaternion& fromQuat, const Quaternion& toQuat, T t);

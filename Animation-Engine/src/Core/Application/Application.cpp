@@ -9,15 +9,14 @@
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-//#include "Animation/Animation.h"
 #include "Animation/Animator.h"
 #include "Core/Logger/Log.h"
-#include "Graphics/RenderApi.h"
+#include "Graphics/GraphicsAPI.h"
 #include "AssetManager/AssetManager.h"
+#include "Components/GridMesh.h"
 #include "Components/Model.h"
 #include "Components/Camera/Camera.h"
 #include "Components/Camera/CameraConstants.h"
-//#include "Core/Logger/GLDebug.h"
 #include "Core/Utilities/Utilites.h"
 
 namespace Animator
@@ -81,40 +80,40 @@ namespace Animator
 		const std::string debugFragShaderFile = "./assets/shaders/debug_anim_model.frag";
 		assetManager->CreateShader("DebugAnimationShader", debugVertexShaderFile, debugFragShaderFile);
 
+		const std::string gridVertexShaderFile = "./assets/shaders/inf_grid.vert";
+		const std::string gridFragmentShaderFile = "./assets/shaders/inf_grid.frag";
+		assetManager->CreateShader("GridShader", gridVertexShaderFile, gridFragmentShaderFile);
+
 		// Adding Model And Animation to Storage
-		const std::string dreyarColladaFile = "./assets/dreyar/Capoeira.dae";
-		animationStorage.AddAssetToStorage(dreyarColladaFile, dreyarextureDiffuse);
-		const std::string botColladaFile = "./assets/vamp/dancing_vampire.dae";
-		animationStorage.AddAssetToStorage(botColladaFile, vampireTextureDiffuse);
+		const std::string dreyar1ColladaFile = "./assets/dreyar/Capoeira.dae";
+		const std::string dreyar2ColladaFile = "./assets/dreyar/Dying.dae";
+		const std::string dreyar3ColladaFile = "./assets/dreyar/JumpPushUp.dae";
+		animationStorage.AddAssetToStorage(dreyar1ColladaFile, dreyarextureDiffuse);
+		animationStorage.AddAssetToStorage(dreyar2ColladaFile, dreyarextureDiffuse);
+		animationStorage.AddAssetToStorage(dreyar3ColladaFile, dreyarextureDiffuse);
 	}
 
 	void Application::Run()
 	{
 		auto shader = assetManager->RetrieveShaderFromStorage("AnimationShader");
 		auto debugShader = assetManager->RetrieveShaderFromStorage("DebugAnimationShader");
+		auto gridShader = assetManager->RetrieveShaderFromStorage("GridShader");
+
 		auto textureDiffuse = assetManager->RetrieveTextureFromStorage("Dreyar_diffuse");
 
-		//const std::string dreyarColladaFile = "./assets/dreyar/Capoeira.dae";
-		//const std::string bolColladaFile = "./assets/models/Walking.dae";
-		//Model dreyarModel(dreyarColladaFile);
-		//Model botModelFile(bolColladaFile);
-		//dreyarModel.SetDiffuseTextureForMeshes(textureDiffuse);
-		//Animation dreyarAnimation(dreyarColladaFile, &dreyarModel);
-		//Animation botAnimationFile(bolColladaFile, &dreyarModel);
-
-		//AnimatorR animator(&dreyarAnimation);
 		animator->ChangeAnimation(animationStorage.GetAnimationForCurrentlyBoundIndex());
 
-		RenderApi::GetContext()->EnableDepthTest(true);
+		GraphicsAPI::GetContext()->EnableDepthTest(true);
 		//GL_CALL(glPolygonMode, GL_FRONT_AND_BACK, GL_LINE);
 
 		Camera camera(glm::vec3(0.0f, 8.0f, 30.0f), glm::vec3(0.0f, 1.0f, 0.0f), CAMERA_YAW, CAMERA_PITCH);
 		DebugMesh debugMesh(debugShader, &camera);
+		GridMesh gridMesh;
 
 		while (running && !window->WindowShouldClose())
 		{
-			RenderApi::GetContext()->ClearColor();
-			RenderApi::GetContext()->ClearBuffer();
+			GraphicsAPI::GetContext()->ClearColor();
+			GraphicsAPI::GetContext()->ClearBuffer();
 
 			const auto currentFrame = static_cast<float>(glfwGetTime());
 			deltaTime = currentFrame - lastFrame;
@@ -141,7 +140,7 @@ namespace Animator
 			debugMesh.Update();
 
 			shader->Bind();
-			shader->SetUniformInt(0, textureDiffuse->GetTextureName());
+			shader->SetUniformInt(0, animationStorage.GetDiffuseTextureFromCurrentlyBoundIndex()->GetTextureName());
 			shader->SetUniformMatrix4F(projection, "projection");
 			shader->SetUniformMatrix4F(view, "view");
 			shader->SetUniformMatrix4F(model, "model");
@@ -150,9 +149,10 @@ namespace Animator
 				std::string uniformName = "finalBonesMatrices[" + std::to_string(i) + "]";
 				shader->SetUniformMatrix4F(animator->GetFinalBoneMatrices()[i], uniformName);
 			}
-			//dreyarModel->Draw(shader);
-			animationStorage.GetModelForCurrentlyBoundIndex()->Draw(shader);
+			//animationStorage.GetModelForCurrentlyBoundIndex()->Draw(shader);
 			shader->UnBind();
+
+			gridMesh.Update(gridShader, projection, view);
 
 			window->Update();
 		}
@@ -204,10 +204,5 @@ namespace Animator
 		{
 			isKeyPressed = false;
 		}
-	}
-
-	void Application::ChangeModelAndAnimation()
-	{
-
 	}
 }

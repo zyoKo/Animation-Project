@@ -97,10 +97,10 @@ namespace Animator::Math
 	template <typename T>
 	Quaternion<T>& Quaternion<T>::operator*=(const Quaternion& quat)
 	{
-		this*w = w * quat.w - x * quat.x - y * quat.y - z * quat.z;
-		this*x = w * quat.x + x * quat.w + y * quat.z - z * quat.y;
-		this*y = w * quat.y - x * quat.z + y * quat.w + z * quat.x;
-		this*z = w * quat.z + x * quat.y - y * quat.x + z * quat.w;
+		this->w = w * quat.w - x * quat.x - y * quat.y - z * quat.z;
+		this->x = w * quat.x + x * quat.w + y * quat.z - z * quat.y;
+		this->y = w * quat.y - x * quat.z + y * quat.w + z * quat.x;
+		this->z = w * quat.z + x * quat.y - y * quat.x + z * quat.w;
 		return (*this);
 	}
 
@@ -265,23 +265,23 @@ namespace Animator::Math
 	}
 
 	template <typename T>
-	void Quaternion<T>::Inverse(Quaternion& quat)
+	void Quaternion<T>::MakeInverse()
 	{
-		T lengthSquared = LengthSquared(quat);
+		T lengthSquared = LengthSquared(*this);
 		if (lengthSquared < static_cast<T>(MATH_EPSILON))
 		{
-			quat.x = 0;
-			quat.y = 0;
-			quat.z = 0;
-			quat.w = 0;
+			this->x = 0;
+			this->y = 0;
+			this->z = 0;
+			this->w = 0;
 		}
-
+		
 		float inverseLengthSquared = static_cast<T>(1) / lengthSquared;
 		
-		quat.x *= -1 * inverseLengthSquared;
-		quat.y *= -1 * inverseLengthSquared;
-		quat.z *= -1 * inverseLengthSquared;
-		quat.w *= inverseLengthSquared;
+		this->x *= -1 * inverseLengthSquared;
+		this->y *= -1 * inverseLengthSquared;
+		this->z *= -1 * inverseLengthSquared;
+		this->w *= inverseLengthSquared;
 	}
 
 	template <typename T>
