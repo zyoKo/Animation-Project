@@ -21,26 +21,6 @@
 
 namespace Animator
 {
-	static std::vector<Math::Vector3F> ExtractBonePositionsFromBoneTransformation(const std::vector<glm::mat4>& transform, int boneCount)
-	{
-		ANIM_ASSERT(transform.size() > boneCount, "Transformation size cannot be less than bone count!");
-		std::vector<Math::Vector3F> bonesPositions;
-
-		for (int i = 0; i < boneCount; ++i)
-		{
-			Math::Vector3F parentPosition = { transform[i][3][0], transform[i][3][1], transform[i][3][2] };
-			Math::Vector3F childPosition  = { transform[i + 1][3][0], transform[i + 1][3][1], transform[i + 1][3][2] };
-
-			bonesPositions.push_back(parentPosition);
-			bonesPositions.push_back(childPosition);
-		}
-
-		return bonesPositions;
-	}
-}
-
-namespace Animator
-{
 	Application* Application::instance = nullptr;
 
 	Application::Application(const std::string& name, uint32_t width, uint32_t height)
@@ -68,9 +48,9 @@ namespace Animator
 		const auto dreyarextureDiffuse = assetManager->CreateTexture(dreyarDiffuseTextureFile);
 		dreyarextureDiffuse->SetTextureName("texture_diffuse1");
 
-		const std::string vampireDiffuseTextureFile = "./assets/vamp/textures/Vampire_diffuse.png";
-		const auto vampireTextureDiffuse = assetManager->CreateTexture(dreyarDiffuseTextureFile);
-		vampireTextureDiffuse->SetTextureName("texture_diffuse1");
+		const std::string gridTextureFile = "./assets/grid.png";
+		const auto gridTexture = assetManager->CreateTexture(gridTextureFile);
+		gridTexture->SetTextureName("gridTexture");
 
 		const std::string vertexShaderFile = "./assets/shaders/anim_model.vert";
 		const std::string fragmentShaderFile = "./assets/shaders/anim_model.frag";
@@ -100,6 +80,7 @@ namespace Animator
 		auto gridShader = assetManager->RetrieveShaderFromStorage("GridShader");
 
 		auto textureDiffuse = assetManager->RetrieveTextureFromStorage("Dreyar_diffuse");
+		auto gridTexture = assetManager->RetrieveTextureFromStorage("grid");
 
 		animator->ChangeAnimation(animationStorage.GetAnimationForCurrentlyBoundIndex());
 
@@ -109,6 +90,7 @@ namespace Animator
 		Camera camera(glm::vec3(0.0f, 8.0f, 30.0f), glm::vec3(0.0f, 1.0f, 0.0f), CAMERA_YAW, CAMERA_PITCH);
 		DebugMesh debugMesh(debugShader, &camera);
 		GridMesh gridMesh;
+		gridMesh.SetGridTexture(gridTexture);
 
 		while (running && !window->WindowShouldClose())
 		{
@@ -190,19 +172,19 @@ namespace Animator
 		if (glfwGetKey(glfwWindow, GLFW_KEY_Q) == GLFW_PRESS)
 			camera.ProcessKeyboard(CameraMovement::ROTATE_RIGHT, deltaTime);
 
-		static bool isKeyPressed = false;
+		static bool isChangeModelKeyPressed = false;
 		if (glfwGetKey(glfwWindow, GLFW_KEY_T) == GLFW_PRESS)
 		{
-			if (!isKeyPressed)
+			if (!isChangeModelKeyPressed)
 			{
 				animationStorage.ChangeModel();
 				animator->ChangeAnimation(animationStorage.GetAnimationForCurrentlyBoundIndex());
-				isKeyPressed = true;
+				isChangeModelKeyPressed = true;
 			}
 		}
 		else
 		{
-			isKeyPressed = false;
+			isChangeModelKeyPressed = false;
 		}
 	}
 }

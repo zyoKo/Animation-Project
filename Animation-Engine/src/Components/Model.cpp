@@ -58,10 +58,6 @@ namespace Animator
 		ANIM_ASSERT(!(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode), "ERROR::ASSIMP::{0}", importer.GetErrorString());
 
 		ProcessNode(scene->mRootNode, scene);
-
-		//std::vector<Math::Vector3F> boneLines;
-		//GetBoneLines(scene->mRootNode, nullptr, boneLines);
-		//debugMesh = std::make_unique<DebugMesh>(boneLines);
 	}
 
 	void Model::ProcessNode(const aiNode* aiNode, const aiScene* scene)

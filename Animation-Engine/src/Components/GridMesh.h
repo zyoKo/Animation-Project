@@ -1,8 +1,7 @@
 #pragma once
 
-#include <glm/fwd.hpp>
-
 #include "Graphics/OpenGL/Buffers/Interfaces/IVertexBuffer.h"
+#include "Graphics/OpenGL/Textures/ITexture2D.h"
 
 namespace Animator
 {
@@ -16,7 +15,9 @@ namespace Animator
 	public:
 		GridMesh();
 
-		GridMesh(const std::vector<Math::Vector3F>& colorData);
+		GridMesh(const std::vector<Math::Vector3F>& vertices, 
+			const std::vector<Math::Vector2F>& textureCoordinates,
+			const std::vector<unsigned>& indices);
 
 		~GridMesh() = default;
 
@@ -26,13 +27,25 @@ namespace Animator
 
 		void Update(const std::shared_ptr<Shader>& shader, const glm::mat4& projection, const glm::mat4& view);
 
-		void SetColor(const std::vector<Math::Vector3F>& colorData);
+		void SetVertices(const std::vector<Math::Vector3F>& vertices);
+
+		void SetTextureCoordinates(const std::vector<Math::Vector2F>& textureCoordinates);
+
+		void SetIndices(const std::vector<unsigned>& indices);
+
+		void SetGridTexture(const std::shared_ptr<ITexture2D>& texture);
 
 	private:
-		std::vector<Math::Vector3F> gridColor;
+		std::vector<Math::Vector3F> vertices;
+		std::vector<Math::Vector2F> textureCoordinates;
+
+		std::vector<unsigned> indices;
 
 		std::shared_ptr<IVertexArray> vertexArrayObject;
 		std::shared_ptr<IVertexBuffer> vertexBuffer;
+		std::shared_ptr<IIndexBuffer> indexBuffer;
+
+		std::shared_ptr<ITexture2D> gridTexture;
 
 		bool dirtyFlag;
 
