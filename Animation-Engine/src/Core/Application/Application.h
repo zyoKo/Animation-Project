@@ -45,6 +45,8 @@ namespace Animator
 
 		bool running = true;
 
+		bool enableModelMesh = false;
+
 		AnimationStorage animationStorage;
 
 		void ProcessInput(Camera& camera);

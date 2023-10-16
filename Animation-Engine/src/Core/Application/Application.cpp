@@ -120,18 +120,21 @@ namespace Animator
 			}
 			debugMesh.Update();
 
-			shader->Bind();
-			shader->SetUniformInt(0, animationStorage.GetDiffuseTextureFromCurrentlyBoundIndex()->GetTextureName());
-			shader->SetUniformMatrix4F(projection, "projection");
-			shader->SetUniformMatrix4F(view, "view");
-			shader->SetUniformMatrix4F(model, "model");
-			for (unsigned i = 0; i < animator->GetFinalBoneMatrices().size(); ++i)
+			if (enableModelMesh)
 			{
-				std::string uniformName = "finalBonesMatrices[" + std::to_string(i) + "]";
-				shader->SetUniformMatrix4F(animator->GetFinalBoneMatrices()[i], uniformName);
+				shader->Bind();
+				shader->SetUniformInt(0, animationStorage.GetDiffuseTextureFromCurrentlyBoundIndex()->GetTextureName());
+				shader->SetUniformMatrix4F(projection, "projection");
+				shader->SetUniformMatrix4F(view, "view");
+				shader->SetUniformMatrix4F(model, "model");
+				for (unsigned i = 0; i < animator->GetFinalBoneMatrices().size(); ++i)
+				{
+					std::string uniformName = "finalBonesMatrices[" + std::to_string(i) + "]";
+					shader->SetUniformMatrix4F(animator->GetFinalBoneMatrices()[i], uniformName);
+				}
+				animationStorage.GetModelForCurrentlyBoundIndex()->Draw(shader);
+				shader->UnBind();
 			}
-			animationStorage.GetModelForCurrentlyBoundIndex()->Draw(shader);
-			shader->UnBind();
 
 			gridMesh.Update(gridShader, projection, view);
 
@@ -184,6 +187,20 @@ namespace Animator
 		else
 		{
 			isChangeModelKeyPressed = false;
+		}
+
+		static bool isEnableModelKeyPressed = false;
+		if (glfwGetKey(glfwWindow, GLFW_KEY_ENTER) == GLFW_PRESS)
+		{
+			if (!isEnableModelKeyPressed)
+			{
+				enableModelMesh = !enableModelMesh;
+				isEnableModelKeyPressed = true;
+			}
+		}
+		else
+		{
+			isEnableModelKeyPressed = false;
 		}
 	}
 }
