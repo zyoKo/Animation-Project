@@ -17,13 +17,16 @@ namespace Animator::Math
 
 		void SetTranslationVector(const glm::vec3& vector);
 		const glm::vec3& GetTranslationVector() const;
+		glm::vec3 GetTranslationVector();
 
 		void SetRotation(const QuatF& quat);
 		const QuatF& GetRotation() const;
+		QuatF GetRotation();
 
 		void SetScaleVector(float scale);
 		float GetScale() const;
 		const glm::vec3& GetScaleVector() const;
+		glm::vec3 GetScaleVector();
 
 		VQS& operator+(const VQS& vqs);
 
@@ -89,6 +92,7 @@ namespace Animator::Math
 			return { subResult.x, subResult.y, subResult.z };
 		}
 
+		// TODO: Fix the problem when these becomes private
 	//private:
 		glm::vec3 translationVector;
 

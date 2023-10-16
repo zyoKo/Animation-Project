@@ -37,12 +37,22 @@ namespace Animator::Math
 		return translationVector;
 	}
 
+	glm::vec3 VQS::GetTranslationVector()
+	{
+		return translationVector;
+	}
+
 	inline void VQS::SetRotation(const QuatF& quat)
 	{
 		this->quatRotation = quat;
 	}
 
 	inline const QuatF& VQS::GetRotation() const
+	{
+		return quatRotation;
+	}
+
+	QuatF VQS::GetRotation()
 	{
 		return quatRotation;
 	}
@@ -60,6 +70,11 @@ namespace Animator::Math
 	}
 
 	inline const glm::vec3& VQS::GetScaleVector() const
+	{
+		return scalingVector;
+	}
+
+	glm::vec3 VQS::GetScaleVector()
 	{
 		return scalingVector;
 	}
