@@ -5,4 +5,8 @@
 #include <memory>
 #include <sstream>
 #include <fstream>
+#include <map>
 #include <unordered_map>
+#include <optional>
+
+#include <Math/Math.h>

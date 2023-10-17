@@ -56,7 +56,7 @@ namespace Animator
 
 	void OpenGLContext::ClearColor()
 	{
-		GL_CALL(glClearColor, 0.2f, 0.3f, 0.3f, 1.0f);
+		GL_CALL(glClearColor, 0.25f, 0.25f, 0.25f, 1.0f);
 	}
 
 	void OpenGLContext::EnableDepthTest(bool value)

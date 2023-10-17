@@ -7,7 +7,7 @@
 namespace Animator::Math
 {
 	template<typename T>
-	Matrix3x3<T>::Matrix3x3()
+	constexpr Matrix3x3<T>::Matrix3x3() noexcept
 		:	array(0)
 	{
 	}

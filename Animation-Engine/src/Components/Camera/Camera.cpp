@@ -13,6 +13,7 @@ namespace Animator
 	Camera::Camera(glm::vec3 position = CAMERA_DEFAULT_POSITION, glm::vec3 worldUp = CAMERA_DEFAULT_WORLD_UP, float yaw = CAMERA_YAW, float pitch = CAMERA_PITCH)
 		:	cameraPosition(position),
 			worldUp(worldUp),
+			rotateSpeed(30.0f),
 			yaw(yaw),
 			pitch(pitch),
 			movementSpeed(CAMERA_SPEED),
@@ -37,24 +38,24 @@ namespace Animator
 		this->cameraPosition = position;
 	}
 
-	glm::mat4 Camera::GetViewMatrix() const
-	{
-		return glm::lookAt(cameraPosition, cameraPosition + front, up);
-	}
+	//glm::mat4 Camera::GetViewMatrix() const
+	//{
+	//	return glm::lookAt(cameraPosition, cameraPosition + front, up);
+	//}
 
-	void Camera::UpdateCameraVectors()
-	{
-		glm::vec3 tempFront;
-
-		tempFront.x = std::cos(glm::radians(yaw)) * std::cos(glm::radians(pitch));
-		tempFront.y = std::sin(glm::radians(pitch));
-		tempFront.z = std::sin(glm::radians(yaw)) * std::cos(glm::radians(pitch));
-
-		this->front = glm::normalize(tempFront);
-
-		right = glm::normalize(glm::cross(this->front, worldUp));
-		up = glm::normalize(glm::cross(right, this->front));
-	}
+	//void Camera::UpdateCameraVectors()
+	//{
+	//	glm::vec3 tempFront;
+	//
+	//	tempFront.x = std::cos(glm::radians(yaw)) * std::cos(glm::radians(pitch));
+	//	tempFront.y = std::sin(glm::radians(pitch));
+	//	tempFront.z = std::sin(glm::radians(yaw)) * std::cos(glm::radians(pitch));
+	//
+	//	this->front = glm::normalize(tempFront);
+	//
+	//	right = glm::normalize(glm::cross(this->front, worldUp));
+	//	up = glm::normalize(glm::cross(right, this->front));
+	//}
 
 	//Camera::Camera(float width, float height, float fieldOfView, float nearPlane, float farPlane)
 	//	:	cameraProperties{fieldOfView, width, height, nearPlane, farPlane }

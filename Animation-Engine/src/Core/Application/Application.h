@@ -3,21 +3,18 @@
 #include <memory>
 #include <string>
 
-#include "Components/Mesh.h"
-#include "Components/Camera/Camera.h"
+#include "Animation/Animation.h"
+#include "Animation/Repository/AnimationStorage.h"
 #include "Core/Window/IWindow.h"
-#include "Graphics/OpenGL/Textures/ITexture2D.h"
-//#include "Graphics/OpenGL/Buffers/Interfaces/IIndexBuffer.h"
-//#include "Graphics/OpenGL/Buffers/Interfaces/IVertexArray.h"
-//#include "Graphics/OpenGL/Buffers/Interfaces/IVertexBuffer.h"
 
 namespace Animator
 {
+	class AnimatorR;
+
 	class AssetManager;
-}
 
-namespace Animator
-{
+	// --
+	// Class Type: Singleton
 	class Application
 	{
 	public:
@@ -36,25 +33,24 @@ namespace Animator
 		virtual bool Shutdown();
 
 	private:
-		void ProcessInput();
-
 		float deltaTime, lastFrame;
 
-		std::shared_ptr<AssetManager> assetManager;
+		std::shared_ptr<AnimatorR> animator;
 
-		std::shared_ptr<Shader> shader;
+		static Application* instance;
 
 		std::unique_ptr<IWindow> window;
 
-		std::shared_ptr<Mesh> mesh;
-
-		Camera camera;
+		std::shared_ptr<AssetManager> assetManager;
 
 		bool running = true;
 
-		std::shared_ptr<ITexture2D> texture;
+		bool enableModelMesh = false;
 
-		// Singleton Class
-		static Application* instance;
+		AnimationStorage animationStorage;
+
+		void ProcessInput(Camera& camera);
+
+		void ChangeModelAndAnimation();
 	};
 }

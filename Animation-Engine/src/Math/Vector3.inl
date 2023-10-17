@@ -51,7 +51,7 @@ namespace Animator::Math
 	Vector3<T> Vector3<T>::operator+(const Vector3& vector)
 	{
 		ANIM_ASSERT(!vector.HasNaNs(), "Operation '/' failed, the vector has NaNs!");
-		return Vector3(x - vector.x, y - vector.y, z - vector.z);
+		return Vector3(x + vector.x, y + vector.y, z + vector.z);
 	}
 
 	template <typename T>
@@ -197,6 +197,12 @@ namespace Animator::Math
 			(lhsVector.y * rhsVector.z) - (lhsVector.z * rhsVector.y),
 			(lhsVector.z * rhsVector.x) - (lhsVector.x * rhsVector.z),
 			(lhsVector.x * rhsVector.y) - (lhsVector.y * rhsVector.x));
+	}
+
+	template <typename T>
+	Vector3<T> Vector3<T>::Lerp(const Vector3& vecOne, const Vector3& vecTwo, T t)
+	{
+		return (vecOne * (1 - t) + vecTwo * t);
 	}
 
 	template <typename T>

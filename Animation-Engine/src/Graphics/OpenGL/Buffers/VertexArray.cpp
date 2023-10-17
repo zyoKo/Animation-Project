@@ -42,15 +42,38 @@ namespace Animator
 	{
 		this->Bind();
 		vertexBuffer->Bind();
-		indexBuffer->Bind();
+		if (indexBuffer)
+			indexBuffer->Bind();
 
 		unsigned int offset = 0;
 		const auto& elements = vertexBuffer->GetVertexBufferLayout().GetVertexBufferElements();
 		for (unsigned int i = 0; i < elements.size(); ++i)
 		{
 			const auto& element = elements[i];
-			GL_CALL(glVertexAttribPointer, i, GetNumberOfElementsFromType(element.type), GetOpenGLTypeFromCustomType(element.type), element.normalized, vertexBuffer->GetVertexBufferLayout().GetStride(), (const void*)offset);
+
+			const auto elementNumber = static_cast<int>(element.type);
+			if (elementNumber >= 1 && elementNumber <= 8)
+			{
+				// For Integers and Unsigned Integers
+				GL_CALL(glVertexAttribIPointer, 
+					i, 
+					GetNumberOfElementsFromType(element.type), 
+					GetOpenGLTypeFromCustomType(element.type),
+					vertexBuffer->GetVertexBufferLayout().GetStride(), 
+					(const void*)offset);
+			}
+			else
+			{
+				// Floating point numbers use this
+				GL_CALL(glVertexAttribPointer, 
+					i, GetNumberOfElementsFromType(element.type), 
+					GetOpenGLTypeFromCustomType(element.type), 
+					element.normalized, vertexBuffer->GetVertexBufferLayout().GetStride(), 
+					(const void*)offset);
+			}
+
 			GL_CALL(glEnableVertexAttribArray, i);
+
 			offset += GetSizeofCustomType(element.type);
 		}
 	}

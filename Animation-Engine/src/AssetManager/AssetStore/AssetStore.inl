@@ -26,7 +26,7 @@ namespace Animator
 			return nullptr;
 		}
 
-		LOG_INFO("Successfully retrivied asset[{0}] from Asset Storage!", assetName);
+		LOG_INFO("Successfully retrived asset[{0}] from Asset Storage!", assetName);
 		return assetStorage.at(assetName);
 	}
 

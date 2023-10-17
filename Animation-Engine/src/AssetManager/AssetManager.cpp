@@ -14,7 +14,7 @@ namespace Animator
 		int width, height, depth;
 		auto textureData = LoadTexture(filepath, &width, &height, &depth);
 
-		auto texture2D = RenderApi::CreateTexture2D(textureData, width, height, depth);
+		auto texture2D = GraphicsAPI::CreateTexture2D(textureData, width, height, depth);
 		texture2D->SetTextureName(textureName);
 
 		textureStore.AddToStorage(textureName, texture2D);

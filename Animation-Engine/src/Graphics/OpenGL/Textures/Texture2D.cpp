@@ -13,16 +13,20 @@ namespace Animator
 			height(height),
 			depth(depth)
 	{
-		GL_CALL(glCreateTextures, GL_TEXTURE_2D, 1, &textureID);
-		GL_CALL(glTextureStorage2D, textureID, 1, GL_RGBA8, width, height);
+		// TODO: Fix this for general vs other required textures
+		const int levels = 1 + static_cast<int>(floor(std::log2(std::max(width, height))));
 
-		GL_CALL(glTextureParameteri, textureID, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		GL_CALL(glTextureParameteri, textureID, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		GL_CALL(glCreateTextures, GL_TEXTURE_2D, 1, &textureID);
+		GL_CALL(glTextureStorage2D, textureID, levels, GL_RGBA8, width, height);
+
+		GL_CALL(glTextureParameteri, textureID, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		GL_CALL(glTextureParameteri, textureID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 		GL_CALL(glTextureParameteri, textureID, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 		GL_CALL(glTextureParameteri, textureID, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 
 		GL_CALL(glTextureSubImage2D, textureID, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+		GL_CALL(glGenerateTextureMipmap, textureID);
 	}
 
 	Texture2D::~Texture2D()

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <ostream>
+
 namespace Animator::Math
 {
 	template <typename T>

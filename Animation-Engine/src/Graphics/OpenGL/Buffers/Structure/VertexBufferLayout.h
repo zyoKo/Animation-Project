@@ -5,6 +5,7 @@
 #include "glad/glad.h"
 
 #include "VertexBufferElements.h"
+#include "Graphics/OpenGL/Utilities/Utilities.h"
 
 namespace Animator
 {

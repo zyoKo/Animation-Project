@@ -39,5 +39,29 @@ namespace Animator
 		virtual void Init(const UniversalWindowData& winData);
 
 		virtual void Shutdown();
+
+		double lastTime;
+
+		int nbFrames;
+
+		void SetWindowTitle()
+		{
+			// Measure speed
+			const double currentTime = glfwGetTime();
+			const double delta = currentTime - lastTime;
+			nbFrames++;
+			if ( delta >= 1.0 )
+			{
+			    double fps = double(nbFrames) / delta;
+
+			    std::stringstream ss;
+			    ss << "Animation Project: [" << fps << " FPS]";
+
+			    glfwSetWindowTitle(window, ss.str().c_str());
+
+			    nbFrames = 0;
+			    lastTime = currentTime;
+			}
+		}
 	};
 }

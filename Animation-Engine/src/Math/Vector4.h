@@ -5,6 +5,9 @@
 namespace Animator::Math
 {
 	template <typename T>
+	class Vector3;
+
+	template <typename T>
 	class Vector4
 	{
 	public:
@@ -32,7 +35,9 @@ namespace Animator::Math
 
 		constexpr Vector4(std::initializer_list<T> data) noexcept;
 
-		explicit constexpr Vector4(const Vector4& vector) noexcept;
+		explicit constexpr Vector4(const Vector4& vector);
+
+		constexpr Vector4(const Vector3<T>& vector, T value);
 
 		~Vector4() = default;
 

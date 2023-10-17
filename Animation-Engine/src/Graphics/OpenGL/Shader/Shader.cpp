@@ -115,26 +115,35 @@ namespace Animator
 		{
 		case ShaderErrorType::COMPILER:
 			GL_CALL(glGetShaderiv, shaderId, GL_COMPILE_STATUS, &compilationSuccessful);
+			if (!compilationSuccessful)
+			{
+				// Two step process to get log message
+				int errorBufferLength;
+				GL_CALL(glGetShaderiv, shaderId, GL_INFO_LOG_LENGTH, &errorBufferLength);
+				std::vector<char> errorMessage(errorBufferLength);
+				GL_CALL(glGetShaderInfoLog, shaderId, errorBufferLength, nullptr, errorMessage.data());
+
+				LOG_ERROR(errorMessage.data());
+			}
 			break;
 
 		case ShaderErrorType::LINKER:
 			GL_CALL(glGetProgramiv, shaderId, GL_LINK_STATUS, &compilationSuccessful);
+			if (!compilationSuccessful)
+			{
+				// Two step process to get log message
+				int errorBufferLength;
+				GL_CALL(glGetProgramiv, shaderId, GL_INFO_LOG_LENGTH, &errorBufferLength);
+				std::vector<char> errorMessage(errorBufferLength);
+				GL_CALL(glGetProgramInfoLog, shaderId, errorBufferLength, nullptr, errorMessage.data());
+
+				LOG_ERROR(errorMessage.data());
+			}
 			break;
 
 		case ShaderErrorType::NONE:
 			LOG_INFO("Please specify Shader Error Type for the shader error checking");
 			return;
-		}
-
-		if (!compilationSuccessful)
-		{
-			// Two step process to get log message
-			int errorBufferLength;
-			GL_CALL(glGetProgramiv, shaderId, GL_INFO_LOG_LENGTH, &errorBufferLength);
-			std::vector<char> errorMessage(errorBufferLength);
-			GL_CALL(glGetProgramInfoLog, shaderId, errorBufferLength, nullptr, errorMessage.data());
-
-			LOG_ERROR(errorMessage.data());
 		}
 	}
 

@@ -16,7 +16,7 @@ namespace Animator
 	{
 		this->vertexBufferDataSize = bufferSize;
 		GL_CALL(glCreateBuffers, 1, &bufferID);
-		GL_CALL(glNamedBufferData, bufferID, bufferSize, bufferData, GL_STATIC_DRAW);
+		GL_CALL(glNamedBufferData, bufferID, bufferSize, bufferData, GL_DYNAMIC_DRAW);
 	}
 
 	VertexBuffer::~VertexBuffer()
@@ -42,7 +42,7 @@ namespace Animator
 	void VertexBuffer::SetSize(unsigned int bufferSize)
 	{
 		this->vertexBufferDataSize = bufferSize;
-		GL_CALL(glNamedBufferData, bufferID, bufferSize, nullptr, GL_STATIC_DRAW);
+		GL_CALL(glNamedBufferData, bufferID, bufferSize, nullptr, GL_DYNAMIC_DRAW);
 	}
 
 	// Offset is 0
@@ -69,49 +69,18 @@ namespace Animator
 		unsigned int offset = element.offset;
 		const auto bytesToRead = GetSizeofCustomType(element.type);
 
-		const char* bufferDataStartPointer = static_cast<const char*>(bufferData);
-		const char* bufferDataPointerEnd = bufferDataStartPointer + bufferSize;
+		int customOffset = 0;
+		if (layoutLocation == 3 || layoutLocation == 4)
+			customOffset = sizeof(int) * 4;
 
-		while (bufferDataStartPointer < bufferDataPointerEnd)
+		auto bufferStart = static_cast<const char*>(bufferData);
+		const auto bufferEnd = bufferStart + bufferSize;
+
+		while (bufferStart < bufferEnd)
 		{
-			GL_CALL(glNamedBufferSubData, bufferID, offset, bytesToRead, bufferDataStartPointer);
-			bufferDataStartPointer += bytesToRead;
+			GL_CALL(glNamedBufferSubData, bufferID, offset, bytesToRead, static_cast<const void*>(bufferStart));
+			bufferStart += (bytesToRead + customOffset);
 			offset += vertexBufferLayout.GetStride();
 		}
-
-		/*const char* bufferPointerBegin = static_cast<const char*>(bufferData);
-		const char* bufferPointerEnd = bufferPointerBegin + vertexBufferDataSize;
-
-		while (bufferPointerBegin < bufferPointerEnd)
-		{
-			glNamedBufferSubData(bufferID, offset, element.GetSizeofCustomType(element.type), bufferPointerBegin);
-			bufferPointerBegin += element.GetSizeofCustomType(element.type);
-			offset += vertexBufferLayout.GetStride();
-		}*/
-
-		//glNamedBufferSubData(bufferID, offset, bufferSize, bufferData);
-
-		//glNamedBufferSubData(
-		//vertexBuffer,
-		//0,
-		//sizeof(glm::vec3) * vertexData.positions.size(),
-		//vertexData.positions.data());
-
-		//glNamedBufferSubData(
-		//vertexBuffer,
-		//sizeof(glm::vec3) * vertexData.positions.size(),
-		//sizeof(glm::vec3) * vertexData.colors.size(),
-		//vertexData.colors.data());
-
-		//glNamedBufferSubData(
-		//vertexBuffer,
-		//sizeof(glm::vec3) * vertexData.positions.size() + sizeof(glm::vec3) * vertexData.colors.size(),
-		//sizeof(glm::vec2) * vertexData.texCoords.size(),
-		//vertexData.texCoords.data());
 	}
-
-	/*void VertexBuffer::OverwriteVertexBufferData(unsigned int layoutLocation, )
-	{
-		
-	}*/
 }
