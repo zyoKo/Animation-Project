@@ -2,7 +2,7 @@
 
 #include "ITexture2D.h"
 
-namespace Animator
+namespace AnimationEngine
 {
 	class Texture2D : public ITexture2D
 	{

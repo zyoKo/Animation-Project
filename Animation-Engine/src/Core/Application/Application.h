@@ -7,19 +7,20 @@
 #include "Animation/Repository/AnimationStorage.h"
 #include "Core/Window/IWindow.h"
 
-namespace Animator
+namespace AnimationEngine
 {
-	class AnimatorR;
+	class Animator;
 
-	class AssetManager;
+	class IAssetManager;
+}
 
-	// --
-	// Class Type: Singleton
+namespace AnimationEngine
+{
 	class Application
 	{
 	public:
 		Application(const std::string& name = "Animation Window", uint32_t width = 1280, uint32_t height = 720);
-		virtual ~Application() = default;
+		virtual ~Application();
 
 		Application(const Application&) = delete;
 		Application& operator=(const Application&) = delete;
@@ -33,15 +34,15 @@ namespace Animator
 		virtual bool Shutdown();
 
 	private:
-		float deltaTime, lastFrame;
-
-		std::shared_ptr<AnimatorR> animator;
-
 		static Application* instance;
+
+		//float deltaTime, lastFrame;
+
+		std::shared_ptr<Animator> animator;
 
 		std::unique_ptr<IWindow> window;
 
-		std::shared_ptr<AssetManager> assetManager;
+		IAssetManager* assetManager;
 
 		bool running = true;
 
@@ -49,8 +50,6 @@ namespace Animator
 
 		AnimationStorage animationStorage;
 
-		void ProcessInput(Camera& camera);
-
-		void ChangeModelAndAnimation();
+		void ProcessInput();
 	};
 }

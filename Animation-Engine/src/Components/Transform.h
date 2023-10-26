@@ -2,7 +2,7 @@
 
 #include "Math/Math.h"
 
-namespace Animator
+namespace AnimationEngine
 {
 	enum class TransformSpace
 	{

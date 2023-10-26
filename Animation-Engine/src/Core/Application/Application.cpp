@@ -14,19 +14,19 @@
 #include "Graphics/GraphicsAPI.h"
 #include "AssetManager/AssetManager.h"
 #include "Components/GridMesh.h"
-#include "Components/Model.h"
+#include "Animation/Model.h"
 #include "Components/Camera/Camera.h"
-#include "Components/Camera/CameraConstants.h"
+#include "Components/Camera/Constants/CameraConstants.h"
+#include "Core/ServiceLocators/AssetManagerLocator.h"
+#include "Core/Utilities/Time.h"
 
-namespace Animator
+namespace AnimationEngine
 {
 	Application* Application::instance = nullptr;
 
 	Application::Application(const std::string& name, uint32_t width, uint32_t height)
-		:	deltaTime(0.0f),
-			lastFrame(0.0f),
-			animator(std::make_shared<AnimatorR>()),
-			assetManager(std::make_shared<AssetManager>())
+		:	animator(std::make_shared<Animator>()),
+			assetManager(new AssetManager())
 	{
 		if (!instance)
 		{
@@ -39,13 +39,27 @@ namespace Animator
 		window = std::unique_ptr<IWindow>(IWindow::Create({ name, width, height }));
 
 		// Bind Event Callback here
+
+		AssetManagerLocator::Initialize();
+
+		AssetManagerLocator::Provide(assetManager);
+	}
+
+	Application::~Application()
+	{
+		delete assetManager;
+		assetManager = nullptr;
 	}
 
 	void Application::Initialize()
 	{
+		Camera::GetInstance()->Initialize();
+
+		const auto assetManager = AssetManagerLocator::GetAssetManager();
+
 		const std::string dreyarDiffuseTextureFile = "./assets/dreyar/textures/Dreyar_diffuse.png";
-		const auto dreyarextureDiffuse = assetManager->CreateTexture(dreyarDiffuseTextureFile);
-		dreyarextureDiffuse->SetTextureName("texture_diffuse1");
+		const auto dreyarTextureDiffuse = assetManager->CreateTexture(dreyarDiffuseTextureFile);
+		dreyarTextureDiffuse->SetTextureName("texture_diffuse1");
 
 		const std::string gridTextureFile = "./assets/grid.png";
 		const auto gridTexture = assetManager->CreateTexture(gridTextureFile);
@@ -67,13 +81,15 @@ namespace Animator
 		const std::string dreyar1ColladaFile = "./assets/dreyar/Capoeira.dae";
 		const std::string dreyar2ColladaFile = "./assets/dreyar/Dying.dae";
 		const std::string dreyar3ColladaFile = "./assets/dreyar/JumpPushUp.dae";
-		animationStorage.AddAssetToStorage(dreyar1ColladaFile, dreyarextureDiffuse);
-		animationStorage.AddAssetToStorage(dreyar2ColladaFile, dreyarextureDiffuse);
-		animationStorage.AddAssetToStorage(dreyar3ColladaFile, dreyarextureDiffuse);
+		animationStorage.AddAssetToStorage(dreyar1ColladaFile, dreyarTextureDiffuse);
+		animationStorage.AddAssetToStorage(dreyar2ColladaFile, dreyarTextureDiffuse);
+		animationStorage.AddAssetToStorage(dreyar3ColladaFile, dreyarTextureDiffuse);
 	}
 
 	void Application::Run()
 	{
+		const auto assetManager = AssetManagerLocator::GetAssetManager();
+
 		auto shader = assetManager->RetrieveShaderFromStorage("AnimationShader");
 		auto debugShader = assetManager->RetrieveShaderFromStorage("DebugAnimationShader");
 		auto gridShader = assetManager->RetrieveShaderFromStorage("GridShader");
@@ -84,10 +100,11 @@ namespace Animator
 		animator->ChangeAnimation(animationStorage.GetAnimationForCurrentlyBoundIndex());
 
 		GraphicsAPI::GetContext()->EnableDepthTest(true);
-		//GL_CALL(glPolygonMode, GL_FRONT_AND_BACK, GL_LINE);
+		GraphicsAPI::GetContext()->EnableWireFrameMode(true);
 
-		Camera camera(glm::vec3(0.0f, 8.0f, 30.0f), glm::vec3(0.0f, 1.0f, 0.0f), CAMERA_YAW, CAMERA_PITCH);
-		DebugMesh debugMesh(debugShader, &camera);
+		auto camera = Camera::GetInstance();
+		camera->SetCameraPosition(glm::vec3(0.0f, 8.0f, 30.0f));
+		DebugMesh debugMesh(debugShader);
 		GridMesh gridMesh;
 		gridMesh.SetGridTexture(gridTexture);
 
@@ -96,19 +113,17 @@ namespace Animator
 			GraphicsAPI::GetContext()->ClearColor();
 			GraphicsAPI::GetContext()->ClearBuffer();
 
-			const auto currentFrame = static_cast<float>(glfwGetTime());
-			deltaTime = currentFrame - lastFrame;
-			lastFrame = currentFrame;
+			Time::Update();
 
 			// camera/view transformation
-			glm::mat4 projection = glm::perspective(glm::radians(camera.GetZoom()), (float)window->GetWidth() / (float)window->GetHeight(), CAMERA_NEAR_CLIPPING_PLANE, CAMERA_FAR_CLIPPING_PLANE);
-			glm::mat4 view = camera.GetViewMatrix();
+			glm::mat4 projection = glm::perspective(glm::radians(camera->GetZoom()), (float)window->GetWidth() / (float)window->GetHeight(), CAMERA_NEAR_CLIPPING_PLANE, CAMERA_FAR_CLIPPING_PLANE);
+			glm::mat4 view = camera->GetViewMatrix();
 			glm::mat4 model = glm::mat4(1.0f);
 			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
 			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
 
-			ProcessInput(camera);
-			animator->UpdateAnimation(deltaTime);
+			ProcessInput();
+			animator->UpdateAnimation();
 
 			debugMesh.OverwriteJointsPosition(animator->GetJointPositions());
 			animator->ClearJoints();
@@ -154,30 +169,32 @@ namespace Animator
 		return true;
 	}
 
-	void Application::ProcessInput(Camera& camera)
+	void Application::ProcessInput()
 	{
+		const auto camera = Camera::GetInstance();
+
 		const auto glfwWindow = static_cast<GLFWwindow*>(window->GetNativeWindow());
 
 		if (glfwGetKey(glfwWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		    glfwSetWindowShouldClose(glfwWindow, true);
 
 		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_8) == GLFW_PRESS)
-		    camera.ProcessKeyboard(CameraMovement::FORWARD, deltaTime);
+		    camera->ProcessKeyboard(CameraMovement::FORWARD);
 		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_2) == GLFW_PRESS)
-		    camera.ProcessKeyboard(CameraMovement::BACKWARD, deltaTime);
+		    camera->ProcessKeyboard(CameraMovement::BACKWARD);
 		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_4) == GLFW_PRESS)
-		    camera.ProcessKeyboard(CameraMovement::LEFT, deltaTime);
+		    camera->ProcessKeyboard(CameraMovement::LEFT);
 		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_6) == GLFW_PRESS)
-		    camera.ProcessKeyboard(CameraMovement::RIGHT, deltaTime);
+		    camera->ProcessKeyboard(CameraMovement::RIGHT);
 
 		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_DECIMAL) == GLFW_PRESS)
-			camera.ProcessKeyboard(CameraMovement::ROTATE_LEFT, deltaTime);
+			camera->ProcessKeyboard(CameraMovement::ROTATE_LEFT);
 		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_0) == GLFW_PRESS)
-			camera.ProcessKeyboard(CameraMovement::ROTATE_RIGHT, deltaTime);
+			camera->ProcessKeyboard(CameraMovement::ROTATE_RIGHT);
 		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_ADD) == GLFW_PRESS)
-			camera.ProcessKeyboard(CameraMovement::ZOOM_IN, deltaTime);
+			camera->ProcessKeyboard(CameraMovement::ZOOM_IN);
 		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_SUBTRACT) == GLFW_PRESS)
-			camera.ProcessKeyboard(CameraMovement::ZOOM_OUT, deltaTime);
+			camera->ProcessKeyboard(CameraMovement::ZOOM_OUT);
 
 		static bool isChangeModelKeyPressed = false;
 		if (glfwGetKey(glfwWindow, GLFW_KEY_SPACE) == GLFW_PRESS)
@@ -213,7 +230,7 @@ namespace Animator
 		{
 			if (!isCameraResetKeyPressed)
 			{
-				camera.Reset();
+				camera->Reset();
 				isCameraResetKeyPressed = true;
 			}
 		}

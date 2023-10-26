@@ -1,14 +1,8 @@
-#include "Core/Application/Application.h"
-
-class Sandbox : public Animator::Application
-{
-public:
-    Sandbox() = default;
-};
+#include "Sandbox.h"
 
 int main()
 {
-    Sandbox application;
+    Sandbox::SandboxApp application;
 
     application.Initialize();
 

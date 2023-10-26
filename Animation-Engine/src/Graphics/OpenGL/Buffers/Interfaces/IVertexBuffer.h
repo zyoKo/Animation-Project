@@ -2,7 +2,7 @@
 
 #include "Graphics/OpenGL/Buffers/Structure/VertexBufferLayout.h"
 
-namespace Animator
+namespace AnimationEngine
 {
 	class IVertexBuffer
 	{

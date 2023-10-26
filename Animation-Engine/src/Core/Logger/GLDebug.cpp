@@ -3,7 +3,7 @@
 #include "GLDebug.h"
 #include "Log.h"
 
-namespace Animator::Utilities
+namespace AnimationEngine::Utilities
 {
 	static OpenGLDebugLogLevel debugLogLevel = OpenGLDebugLogLevel::HighAssert;
 

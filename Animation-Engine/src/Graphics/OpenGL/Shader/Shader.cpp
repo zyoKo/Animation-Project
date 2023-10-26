@@ -8,7 +8,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-namespace Animator
+namespace AnimationEngine
 {
 	Shader::Shader(const std::string& shaderName, const std::string& vertexShaderSource, const std::string& fragmentShaderSource)
 		:	shaderID(0),

@@ -4,7 +4,7 @@
 
 #include "UniversalWindowConstants.h"
 
-namespace Animator
+namespace AnimationEngine
 {
 	struct UniversalWindowData
 	{

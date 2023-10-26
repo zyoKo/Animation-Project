@@ -5,12 +5,12 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 
-#include "Mesh.h"
+#include "Components/Mesh.h"
+#include "Components/DebugMesh.h"
 #include "Animation/DataTypes/BoneInfo.h"
 #include "Graphics/OpenGL/Textures/ITexture2D.h"
-#include "DebugMesh.h"
 
-namespace Animator
+namespace AnimationEngine
 {
 	class Shader;
 

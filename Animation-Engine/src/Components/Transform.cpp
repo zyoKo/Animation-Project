@@ -2,7 +2,7 @@
 
 #include "Transform.h"
 
-namespace Animator
+namespace AnimationEngine
 {
 	Transform::Transform()
 		:	localPosition{ 0.0f },

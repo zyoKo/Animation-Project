@@ -5,7 +5,7 @@
 #include "AssetManager.h"
 #include "Core/Utilities/Utilites.h"
 
-namespace Animator
+namespace AnimationEngine
 {
 	std::shared_ptr<ITexture2D> AssetManager::CreateTexture(const std::string& filepath)
 	{

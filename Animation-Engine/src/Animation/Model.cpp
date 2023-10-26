@@ -7,7 +7,7 @@
 #include "AssetManager/AssetManager.h"
 #include "Core/Utilities/Utilites.h"
 
-namespace Animator
+namespace AnimationEngine
 {
 	Model::Model(const std::string& path)
 		:	debugMesh(nullptr),

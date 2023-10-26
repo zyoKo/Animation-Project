@@ -2,24 +2,25 @@
 
 #include "AssetStore/AssetStore.h"
 
+#include "Interface/IAssetManager.h"
 #include "Graphics/GraphicsAPI.h"
 
-namespace Animator
+namespace AnimationEngine
 {
 	using stbi_uc = unsigned char;
 
-	class AssetManager
+	class AssetManager : public IAssetManager
 	{
 	public:
-		std::shared_ptr<ITexture2D> CreateTexture(const std::string& filepath);
+		std::shared_ptr<ITexture2D> CreateTexture(const std::string& filepath) override;
 
-		std::shared_ptr<Shader> CreateShader(const std::string& shaderName, const std::string& vertexFilepath, const std::string& fragmentFilepath);
+		std::shared_ptr<Shader> CreateShader(const std::string& shaderName, const std::string& vertexFilepath, const std::string& fragmentFilepath) override;
 
-		std::shared_ptr<ITexture2D> RetrieveTextureFromStorage(const std::string& textureName);
+		std::shared_ptr<ITexture2D> RetrieveTextureFromStorage(const std::string& textureName) override;
 
-		std::shared_ptr<Shader> RetrieveShaderFromStorage(const std::string& shaderName);
+		std::shared_ptr<Shader> RetrieveShaderFromStorage(const std::string& shaderName) override;
 
-		void ClearStores();
+		void ClearStores() override;
 
 	private:
 		AssetStore<ITexture2D> textureStore;
@@ -30,4 +31,9 @@ namespace Animator
 
 		static std::string ReadShaderFile(const std::string& filepath);
 	};
+
+	static std::shared_ptr<IAssetManager> CreateAssetManager()
+	{
+		return std::make_shared<AssetManager>();
+	}
 }

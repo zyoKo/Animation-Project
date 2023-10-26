@@ -6,7 +6,7 @@
 #include "Data/Constants.h"
 #include "Graphics/OpenGL/Utilities/Utilities.h"
 
-namespace Animator
+namespace AnimationEngine
 {
 	Mesh::Mesh()
 	{

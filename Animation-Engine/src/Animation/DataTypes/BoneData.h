@@ -7,7 +7,7 @@
 
 #include "Math/Math.h"
 
-namespace Animator
+namespace AnimationEngine
 {
 	static constexpr unsigned MAX_BONE_INFLUENCE = 4;
 

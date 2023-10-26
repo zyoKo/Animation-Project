@@ -7,7 +7,7 @@
 #include "VertexBufferElements.h"
 #include "Graphics/OpenGL/Utilities/Utilities.h"
 
-namespace Animator
+namespace AnimationEngine
 {
 	class VertexBufferLayout
 	{

@@ -4,7 +4,7 @@
 
 #include "Interfaces/IContext.h"
 
-namespace Animator
+namespace AnimationEngine
 {
 	class OpenGLContext : public IContext
 	{
@@ -22,6 +22,8 @@ namespace Animator
 		void ClearColor() override;
 
 		void EnableDepthTest(bool value) override;
+
+		void EnableWireFrameMode(bool value) override;
 
 	private:
 		GLFWwindow* window;

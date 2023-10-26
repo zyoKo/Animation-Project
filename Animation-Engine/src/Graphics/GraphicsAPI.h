@@ -12,7 +12,7 @@
 #include "OpenGL/Shader/Shader.h"
 #include "Graphics/OpenGL/Textures/Texture2D.h"
 
-namespace Animator
+namespace AnimationEngine
 {
 	class GraphicsAPI
 	{

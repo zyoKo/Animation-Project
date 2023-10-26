@@ -4,7 +4,7 @@
 
 #include "Vector3.h"
 
-namespace Animator::Math
+namespace AnimationEngine::Math
 {
 	template<typename T>
 	constexpr Matrix3x3<T>::Matrix3x3() noexcept

@@ -8,7 +8,7 @@
 #include "Graphics/OpenGL/Buffers/Interfaces/IVertexBuffer.h"
 #include "Graphics/GraphicsAPI.h"
 
-namespace Animator
+namespace AnimationEngine
 {
 	using Vertices_V3F			= std::vector<Math::Vector3F>;
 	using Colors_V3F			= std::vector<Math::Vector3F>;

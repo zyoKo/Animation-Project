@@ -3,7 +3,7 @@
 #include "Interfaces/IIndexBuffer.h"
 #include "Interfaces/IVertexArray.h"
 
-namespace Animator
+namespace AnimationEngine
 {
 	class VertexArray : public IVertexArray
 	{

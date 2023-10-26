@@ -6,7 +6,7 @@
 
 #include "Core/Utilities/Utilites.h"
 
-namespace Animator
+namespace AnimationEngine
 {
 	Animation::Animation(const std::string& animationPath, Model* model)
 	{

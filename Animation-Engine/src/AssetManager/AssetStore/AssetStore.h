@@ -2,7 +2,7 @@
 
 #include "Core/Logger/Log.h"
 
-namespace Animator
+namespace AnimationEngine
 {
 	template <typename T>
 	class AssetStore

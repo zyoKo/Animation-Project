@@ -8,7 +8,7 @@
 
 #include <glm/mat3x3.hpp>
 
-namespace Animator
+namespace AnimationEngine
 {
 	enum class ShaderErrorType
 	{

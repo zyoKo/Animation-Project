@@ -7,7 +7,7 @@
 #include "Core/Logger/GLDebug.h"
 #include "Core/Logger/Log.h"
 
-namespace Animator
+namespace AnimationEngine
 {
 	IndexBuffer::IndexBuffer()
 		:	bufferDataSize(0)
