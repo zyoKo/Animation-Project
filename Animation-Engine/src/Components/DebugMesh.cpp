@@ -5,6 +5,7 @@
 #include "Core/Logger/GLDebug.h"
 
 #include "Camera/Camera.h"
+#include "Camera/CameraConstants.h"
 
 namespace Animator
 {
@@ -85,7 +86,8 @@ namespace Animator
 
 	void DebugMesh::SetupShader()
 	{
-		glm::mat4 projection = glm::perspective(glm::radians(camera->zoom), 1280.0f / 720.0f, 0.1f, 10000.0f);
+		// TODO: Remove hard coding
+		glm::mat4 projection = glm::perspective(glm::radians(camera->GetZoom()), 1280.0f / 720.0f, CAMERA_NEAR_CLIPPING_PLANE, CAMERA_FAR_CLIPPING_PLANE);
 		glm::mat4 view = camera->GetViewMatrix();
 
 		shader->Bind();

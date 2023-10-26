@@ -292,7 +292,7 @@ namespace Animator::Math
 		{
 			return Quaternion();
 		}
-
+		
 		float inverseLengthSquared = static_cast<T>(1) / lengthSquared;
 
 		return {

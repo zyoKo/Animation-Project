@@ -48,7 +48,6 @@ namespace Animator
 		{
 			currentTime += currentAnimation->GetTicksPerSecond() * dt;
 			currentTime = std::fmod(currentTime, currentAnimation->GetDuration());
-			//CalculateBoneTransform(&currentAnimation->GetRootNode(), glm::mat4(1.0f));
 			CalculateBoneTransformWithVQS(&currentAnimation->GetRootNode(), Math::VQS());
 		}
 	}
@@ -57,37 +56,6 @@ namespace Animator
 	{
 		currentAnimation = animation;
 		currentTime = 0.0f;
-	}
-
-	void AnimatorR::CalculateBoneTransform(const AssimpNodeData* node, glm::mat4 parentTransform)
-	{
-		std::string nodeName = node->name;
-		glm::mat4 localNodeTransform = node->transformation;
-
-		Bone* bone = currentAnimation->FindBone(nodeName);
-
-		if (bone)
-		{
-			bone->Update(currentTime);
-			localNodeTransform = bone->GetLocalTransform();
-
-			jointPositions.push_back(ExtractJointPosition(parentTransform));
-			jointPositions.push_back(ExtractJointPosition(parentTransform * localNodeTransform));
-		}
-
-		const glm::mat4 worldTransform = parentTransform * localNodeTransform;
-
-		auto boneInfoMap = currentAnimation->GetBoneIDMap();
-		if (boneInfoMap.contains(nodeName))
-		{
-			const int index = boneInfoMap[nodeName].id;
-			const glm::mat4 offset = boneInfoMap[nodeName].offset;
-
-			finalBoneMatrices[index] = worldTransform * offset;
-		}
-
-		for (int i = 0; i < node->childrenCount; ++i)
-			CalculateBoneTransform(&node->children[i], worldTransform);
 	}
 
 	void AnimatorR::CalculateBoneTransformWithVQS(const AssimpNodeData* node, Math::VQS parentVQS)
@@ -102,11 +70,9 @@ namespace Animator
 			bone->Update(currentTime);
 			localVQS = bone->GetLocalVQS();
 
-			jointPositions.push_back(
-				ExtractJointPosition(Utils::GLMInternalHelper::ConvertVQSToGLMMatrix(parentVQS)));
+			jointPositions.push_back(ExtractJointPosition(Utils::GLMInternalHelper::ConvertVQSToGLMMatrix(parentVQS)));
 
-			jointPositions.push_back(
-				ExtractJointPosition(Utils::GLMInternalHelper::ConvertVQSToGLMMatrix(parentVQS * localVQS)));
+			jointPositions.push_back(ExtractJointPosition(Utils::GLMInternalHelper::ConvertVQSToGLMMatrix(parentVQS * localVQS)));
 		}
 
 		const auto worldVQS = parentVQS * localVQS;

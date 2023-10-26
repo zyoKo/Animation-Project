@@ -101,7 +101,7 @@ namespace Animator
 			lastFrame = currentFrame;
 
 			// camera/view transformation
-			glm::mat4 projection = glm::perspective(glm::radians(camera.zoom), (float)window->GetWidth() / (float)window->GetHeight(), 0.1f, 10000.0f);
+			glm::mat4 projection = glm::perspective(glm::radians(camera.GetZoom()), (float)window->GetWidth() / (float)window->GetHeight(), CAMERA_NEAR_CLIPPING_PLANE, CAMERA_FAR_CLIPPING_PLANE);
 			glm::mat4 view = camera.GetViewMatrix();
 			glm::mat4 model = glm::mat4(1.0f);
 			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
@@ -161,21 +161,26 @@ namespace Animator
 		if (glfwGetKey(glfwWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		    glfwSetWindowShouldClose(glfwWindow, true);
 
-		if (glfwGetKey(glfwWindow, GLFW_KEY_W) == GLFW_PRESS)
+		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_8) == GLFW_PRESS)
 		    camera.ProcessKeyboard(CameraMovement::FORWARD, deltaTime);
-		if (glfwGetKey(glfwWindow, GLFW_KEY_S) == GLFW_PRESS)
+		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_2) == GLFW_PRESS)
 		    camera.ProcessKeyboard(CameraMovement::BACKWARD, deltaTime);
-		if (glfwGetKey(glfwWindow, GLFW_KEY_A) == GLFW_PRESS)
+		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_4) == GLFW_PRESS)
 		    camera.ProcessKeyboard(CameraMovement::LEFT, deltaTime);
-		if (glfwGetKey(glfwWindow, GLFW_KEY_D) == GLFW_PRESS)
+		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_6) == GLFW_PRESS)
 		    camera.ProcessKeyboard(CameraMovement::RIGHT, deltaTime);
-		if (glfwGetKey(glfwWindow, GLFW_KEY_E) == GLFW_PRESS)
+
+		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_DECIMAL) == GLFW_PRESS)
 			camera.ProcessKeyboard(CameraMovement::ROTATE_LEFT, deltaTime);
-		if (glfwGetKey(glfwWindow, GLFW_KEY_Q) == GLFW_PRESS)
+		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_0) == GLFW_PRESS)
 			camera.ProcessKeyboard(CameraMovement::ROTATE_RIGHT, deltaTime);
+		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_ADD) == GLFW_PRESS)
+			camera.ProcessKeyboard(CameraMovement::ZOOM_IN, deltaTime);
+		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_SUBTRACT) == GLFW_PRESS)
+			camera.ProcessKeyboard(CameraMovement::ZOOM_OUT, deltaTime);
 
 		static bool isChangeModelKeyPressed = false;
-		if (glfwGetKey(glfwWindow, GLFW_KEY_T) == GLFW_PRESS)
+		if (glfwGetKey(glfwWindow, GLFW_KEY_SPACE) == GLFW_PRESS)
 		{
 			if (!isChangeModelKeyPressed)
 			{
@@ -201,6 +206,20 @@ namespace Animator
 		else
 		{
 			isEnableModelKeyPressed = false;
+		}
+
+		static bool isCameraResetKeyPressed = false;
+		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_5) == GLFW_PRESS)
+		{
+			if (!isCameraResetKeyPressed)
+			{
+				camera.Reset();
+				isCameraResetKeyPressed = true;
+			}
+		}
+		else
+		{
+			isCameraResetKeyPressed = false;
 		}
 	}
 }
