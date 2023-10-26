@@ -18,15 +18,14 @@
 #include "Components/Camera/Camera.h"
 #include "Components/Camera/Constants/CameraConstants.h"
 #include "Core/ServiceLocators/AssetManagerLocator.h"
+#include "Core/Utilities/Time.h"
 
 namespace AnimationEngine
 {
 	Application* Application::instance = nullptr;
 
 	Application::Application(const std::string& name, uint32_t width, uint32_t height)
-		:	deltaTime(0.0f),
-			lastFrame(0.0f),
-			animator(std::make_shared<Animator>()),
+		:	animator(std::make_shared<Animator>()),
 			assetManager(new AssetManager())
 	{
 		if (!instance)
@@ -54,6 +53,8 @@ namespace AnimationEngine
 
 	void Application::Initialize()
 	{
+		Camera::GetInstance()->Initialize();
+
 		const auto assetManager = AssetManagerLocator::GetAssetManager();
 
 		const std::string dreyarDiffuseTextureFile = "./assets/dreyar/textures/Dreyar_diffuse.png";
@@ -99,10 +100,11 @@ namespace AnimationEngine
 		animator->ChangeAnimation(animationStorage.GetAnimationForCurrentlyBoundIndex());
 
 		GraphicsAPI::GetContext()->EnableDepthTest(true);
-		//GL_CALL(glPolygonMode, GL_FRONT_AND_BACK, GL_LINE);
+		GraphicsAPI::GetContext()->EnableWireFrameMode(true);
 
-		Camera camera(glm::vec3(0.0f, 8.0f, 30.0f), glm::vec3(0.0f, 1.0f, 0.0f), CAMERA_YAW, CAMERA_PITCH);
-		DebugMesh debugMesh(debugShader, &camera);
+		auto camera = Camera::GetInstance();
+		camera->SetCameraPosition(glm::vec3(0.0f, 8.0f, 30.0f));
+		DebugMesh debugMesh(debugShader);
 		GridMesh gridMesh;
 		gridMesh.SetGridTexture(gridTexture);
 
@@ -111,19 +113,17 @@ namespace AnimationEngine
 			GraphicsAPI::GetContext()->ClearColor();
 			GraphicsAPI::GetContext()->ClearBuffer();
 
-			const auto currentFrame = static_cast<float>(glfwGetTime());
-			deltaTime = currentFrame - lastFrame;
-			lastFrame = currentFrame;
+			Time::Update();
 
 			// camera/view transformation
-			glm::mat4 projection = glm::perspective(glm::radians(camera.GetZoom()), (float)window->GetWidth() / (float)window->GetHeight(), CAMERA_NEAR_CLIPPING_PLANE, CAMERA_FAR_CLIPPING_PLANE);
-			glm::mat4 view = camera.GetViewMatrix();
+			glm::mat4 projection = glm::perspective(glm::radians(camera->GetZoom()), (float)window->GetWidth() / (float)window->GetHeight(), CAMERA_NEAR_CLIPPING_PLANE, CAMERA_FAR_CLIPPING_PLANE);
+			glm::mat4 view = camera->GetViewMatrix();
 			glm::mat4 model = glm::mat4(1.0f);
 			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
 			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
 
-			ProcessInput(camera);
-			animator->UpdateAnimation(deltaTime);
+			ProcessInput();
+			animator->UpdateAnimation();
 
 			debugMesh.OverwriteJointsPosition(animator->GetJointPositions());
 			animator->ClearJoints();
@@ -169,30 +169,32 @@ namespace AnimationEngine
 		return true;
 	}
 
-	void Application::ProcessInput(Camera& camera)
+	void Application::ProcessInput()
 	{
+		const auto camera = Camera::GetInstance();
+
 		const auto glfwWindow = static_cast<GLFWwindow*>(window->GetNativeWindow());
 
 		if (glfwGetKey(glfwWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		    glfwSetWindowShouldClose(glfwWindow, true);
 
 		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_8) == GLFW_PRESS)
-		    camera.ProcessKeyboard(CameraMovement::FORWARD, deltaTime);
+		    camera->ProcessKeyboard(CameraMovement::FORWARD);
 		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_2) == GLFW_PRESS)
-		    camera.ProcessKeyboard(CameraMovement::BACKWARD, deltaTime);
+		    camera->ProcessKeyboard(CameraMovement::BACKWARD);
 		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_4) == GLFW_PRESS)
-		    camera.ProcessKeyboard(CameraMovement::LEFT, deltaTime);
+		    camera->ProcessKeyboard(CameraMovement::LEFT);
 		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_6) == GLFW_PRESS)
-		    camera.ProcessKeyboard(CameraMovement::RIGHT, deltaTime);
+		    camera->ProcessKeyboard(CameraMovement::RIGHT);
 
 		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_DECIMAL) == GLFW_PRESS)
-			camera.ProcessKeyboard(CameraMovement::ROTATE_LEFT, deltaTime);
+			camera->ProcessKeyboard(CameraMovement::ROTATE_LEFT);
 		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_0) == GLFW_PRESS)
-			camera.ProcessKeyboard(CameraMovement::ROTATE_RIGHT, deltaTime);
+			camera->ProcessKeyboard(CameraMovement::ROTATE_RIGHT);
 		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_ADD) == GLFW_PRESS)
-			camera.ProcessKeyboard(CameraMovement::ZOOM_IN, deltaTime);
+			camera->ProcessKeyboard(CameraMovement::ZOOM_IN);
 		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_SUBTRACT) == GLFW_PRESS)
-			camera.ProcessKeyboard(CameraMovement::ZOOM_OUT, deltaTime);
+			camera->ProcessKeyboard(CameraMovement::ZOOM_OUT);
 
 		static bool isChangeModelKeyPressed = false;
 		if (glfwGetKey(glfwWindow, GLFW_KEY_SPACE) == GLFW_PRESS)
@@ -228,7 +230,7 @@ namespace AnimationEngine
 		{
 			if (!isCameraResetKeyPressed)
 			{
-				camera.Reset();
+				camera->Reset();
 				isCameraResetKeyPressed = true;
 			}
 		}

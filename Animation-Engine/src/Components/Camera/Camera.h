@@ -7,21 +7,34 @@ namespace AnimationEngine
 	class Camera
 	{
 	public:
-		Camera(glm::vec3 position, glm::vec3 worldUp, float yaw, float pitch);
+		static Camera* GetInstance();
 
-		static Camera* GetInstance() { return &instance; }
-
-		const glm::vec3& GetCameraPosition() const;
-
-		glm::vec3& GetCameraPosition();
+		void Initialize();
 
 		void SetCameraPosition(const glm::vec3& position);
+		const glm::vec3& GetCameraPosition() const;
 
+		void SetYaw(float yaw);
+		float GetYaw() const;
+
+		void SetPitch(float pitch);
+		float GetPitch() const;
+
+		void SetMovementSpeed(float speed);
+		float GetMovementSpeed() const;
+
+		void SetMouseSensitivity(float sensitivity);
+		float GetMouseSensitivity() const;
+
+		void SetZoom(float zoom);
 		float GetZoom() const;
+
+		void SetZoomSpeed(float speed);
+		float GetZoomSpeed() const;
 
 		glm::mat4 GetViewMatrix() const;
 
-		void ProcessKeyboard(CameraMovement direction, float deltaTime);
+		void ProcessKeyboard(CameraMovement direction);
 
 		void Reset();
 

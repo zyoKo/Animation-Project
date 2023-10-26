@@ -19,7 +19,7 @@ namespace AnimationEngine
 
 		void ChangeAnimation(Animation* newAnimation);
 
-		void UpdateAnimation(float dt);
+		void UpdateAnimation();
 
 		void PlayAnimation(Animation* animation);
 
@@ -39,8 +39,6 @@ namespace AnimationEngine
 		Animation* currentAnimation;
 
 		float currentTime;
-
-		float deltaTime;
 
 		Math::Vector3F ExtractJointPosition(const glm::mat4& transform);
 	};

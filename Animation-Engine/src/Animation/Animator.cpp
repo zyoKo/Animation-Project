@@ -3,6 +3,7 @@
 #include "Animator.h"
 
 #include "Animation/Animation.h"
+#include "Core/Utilities/Time.h"
 #include "DataTypes/AssimpNodeData.h"
 #include "Core/Utilities/Utilites.h"
 
@@ -10,8 +11,7 @@ namespace AnimationEngine
 {
 	Animator::Animator()
 		:	currentAnimation(nullptr),
-			currentTime(0.0f),
-			deltaTime(0.0f)
+			currentTime(0.0f)
 	{
 		finalBoneMatrices.reserve(100);
 
@@ -23,8 +23,7 @@ namespace AnimationEngine
 
 	Animator::Animator(Animation* animation)
 		:	currentAnimation(animation),
-			currentTime(0.0f),
-			deltaTime(0.0f)
+			currentTime(0.0f)
 	{
 		finalBoneMatrices.reserve(100);
 
@@ -40,9 +39,9 @@ namespace AnimationEngine
 		currentTime = 0.0f;
 	}
 
-	void Animator::UpdateAnimation(float dt)
+	void Animator::UpdateAnimation()
 	{
-		deltaTime = dt;
+		const auto dt = Time::GetDeltaTime();
 
 		if (currentAnimation)
 		{

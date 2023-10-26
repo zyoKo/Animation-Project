@@ -23,6 +23,8 @@ namespace AnimationEngine
 
 		void EnableDepthTest(bool value) override;
 
+		void EnableWireFrameMode(bool value) override;
+
 	private:
 		GLFWwindow* window;
 	};

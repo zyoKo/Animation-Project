@@ -9,9 +9,8 @@
 
 namespace AnimationEngine
 {
-	DebugMesh::DebugMesh(const std::shared_ptr<Shader>& debugShader, Camera* camera)
-		:	shader(debugShader),
-			camera(camera)
+	DebugMesh::DebugMesh(const std::shared_ptr<Shader>& debugShader)
+		:	shader(debugShader)
 	{
 		vertexArrayObject = GraphicsAPI::CreateVertexArray();
 		vertexBuffer = GraphicsAPI::CreateVertexBuffer();
@@ -87,8 +86,9 @@ namespace AnimationEngine
 	void DebugMesh::SetupShader()
 	{
 		// TODO: Remove hard coding
-		glm::mat4 projection = glm::perspective(glm::radians(camera->GetZoom()), 1280.0f / 720.0f, CAMERA_NEAR_CLIPPING_PLANE, CAMERA_FAR_CLIPPING_PLANE);
-		glm::mat4 view = camera->GetViewMatrix();
+		const auto camera = Camera::GetInstance();
+		const glm::mat4 projection = glm::perspective(glm::radians(camera->GetZoom()), 1280.0f / 720.0f, CAMERA_NEAR_CLIPPING_PLANE, CAMERA_FAR_CLIPPING_PLANE);
+		const glm::mat4 view = camera->GetViewMatrix();
 
 		shader->Bind();
 		shader->SetUniformMatrix4F(projection, "projection");

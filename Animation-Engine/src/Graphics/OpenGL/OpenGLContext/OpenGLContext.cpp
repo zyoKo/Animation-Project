@@ -61,6 +61,25 @@ namespace AnimationEngine
 
 	void OpenGLContext::EnableDepthTest(bool value)
 	{
-		GL_CALL(glEnable, GL_DEPTH_TEST);
+		if (value)
+		{
+			GL_CALL(glEnable, GL_DEPTH_TEST);
+		}
+		else
+		{
+			GL_CALL(glDisable, GL_DEPTH_TEST);
+		}
+	}
+
+	void OpenGLContext::EnableWireFrameMode(bool value)
+	{
+		if (value)
+		{
+			GL_CALL(glPolygonMode, GL_FRONT_AND_BACK, GL_LINE);
+		}
+		else
+		{
+			GL_CALL(glPolygonMode, GL_FRONT_AND_BACK, GL_FILL);
+		}
 	}
 }

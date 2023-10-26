@@ -10,12 +10,10 @@
 
 namespace AnimationEngine
 {
-	class Camera;
-
 	class DebugMesh
 	{
 	public:
-		DebugMesh(const std::shared_ptr<Shader>& debugShader, Camera* camera);
+		DebugMesh(const std::shared_ptr<Shader>& debugShader);
 
 		~DebugMesh() = default;
 
@@ -46,9 +44,6 @@ namespace AnimationEngine
 		std::shared_ptr<Shader> shader;
 
 		VertexBufferLayout layout;
-
-		Camera* camera;
-
 
 		void OverwriteDataInVertexBuffer() const;
 

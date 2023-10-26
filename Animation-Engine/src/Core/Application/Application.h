@@ -36,7 +36,7 @@ namespace AnimationEngine
 	private:
 		static Application* instance;
 
-		float deltaTime, lastFrame;
+		//float deltaTime, lastFrame;
 
 		std::shared_ptr<Animator> animator;
 
@@ -50,6 +50,6 @@ namespace AnimationEngine
 
 		AnimationStorage animationStorage;
 
-		void ProcessInput(Camera& camera);
+		void ProcessInput();
 	};
 }

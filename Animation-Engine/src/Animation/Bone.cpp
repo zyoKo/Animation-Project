@@ -62,12 +62,6 @@ namespace AnimationEngine
 
 	void Bone::Update(float animationTime)
 	{
-		//const glm::mat4 translation = InterpolationPosition(animationTime);
-		//const glm::mat4 rotation = InterpolationRotation(animationTime);
-		//const glm::mat4 scale = InterpolationScaling(animationTime);
-		//
-		//localTransform = translation * rotation * scale;
-
 		localVQS = InterpolateWithVQS(animationTime);
 	}
 
@@ -139,59 +133,6 @@ namespace AnimationEngine
 		const float framesDiff = nextTimeStamp - lastTimeStamp;
 
 		return midWayLength / framesDiff;
-	}
-
-	glm::mat4 Bone::InterpolationPosition(float animationTime)
-	{
-		if (numPositions == 1)
-			return glm::translate(glm::mat4(1.0f), keyPositions[0].position);
-
-		const int firstPositionIndex = GetPositionIndexAt(animationTime);
-		const int secondPositionIndex = firstPositionIndex + 1;
-
-		const float scaleFactor = GetScaleFactor(
-			keyPositions[firstPositionIndex].timeStamp, 
-			keyPositions[secondPositionIndex].timeStamp, 
-			animationTime);
-
-		// glm::mix is just Lerp
-		const glm::vec3 finalPosition = glm::mix(keyPositions[firstPositionIndex].position, keyPositions[secondPositionIndex].position, scaleFactor);
-
-		return glm::translate(glm::mat4(1.0f), finalPosition);
-	}
-
-	glm::mat4 Bone::InterpolationRotation(float animationTime)
-	{
-		if (numRotations == 1)
-		{
-			const auto rotation = Math::QuatF::Normalize(keyRotations[0].orientation);
-			return Utils::GLMInternalHelper::ConvertQuaternionToGLMMatrix(rotation);
-		}
-
-		const int firstRotationIndex = GetRotationIndexAt(animationTime);
-		const int secondRotationIndex = firstRotationIndex + 1;
-
-		const float scaleFactor = GetScaleFactor(keyRotations[firstRotationIndex].timeStamp, keyRotations[secondRotationIndex].timeStamp, animationTime);
-
-		Math::QuatF finalRotation = Math::QuatF::SLerp(Math::QuatF::Normalize(keyRotations[firstRotationIndex].orientation), Math::QuatF::Normalize(keyRotations[secondRotationIndex].orientation), scaleFactor);
-		finalRotation = Math::QuatF::Normalize(finalRotation);
-
-		return Utils::GLMInternalHelper::ConvertQuaternionToGLMMatrix(finalRotation);
-	}
-
-	glm::mat4 Bone::InterpolationScaling(float animationTime)
-	{
-		if (numScales == 1)
-			return glm::scale(glm::mat4(1.0f), keyScales[0].scale);
-
-		const int firstScalingIndex = GetScalingIndexAt(animationTime);
-		const int secondScalingIndex = firstScalingIndex + 1;
-
-		const float scaleFactor = GetScaleFactor(keyScales[firstScalingIndex].timeStamp, keyScales[secondScalingIndex].timeStamp, animationTime);
-
-		const glm::vec3 finalScale = glm::mix(keyScales[firstScalingIndex].scale, keyScales[secondScalingIndex].scale, scaleFactor);
-
-		return glm::scale(glm::mat4(1.0f), finalScale);
 	}
 
 	Math::VQS Bone::InterpolateWithVQS(float animationTime)
