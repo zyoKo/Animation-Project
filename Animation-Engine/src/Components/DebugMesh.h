@@ -8,7 +8,7 @@
 #include "Graphics/GraphicsAPI.h"
 #include "Types/DebugDrawMode.h"
 
-namespace Animator
+namespace AnimationEngine
 {
 	class Camera;
 

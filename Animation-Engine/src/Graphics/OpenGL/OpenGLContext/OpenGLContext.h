@@ -4,7 +4,7 @@
 
 #include "Interfaces/IContext.h"
 
-namespace Animator
+namespace AnimationEngine
 {
 	class OpenGLContext : public IContext
 	{

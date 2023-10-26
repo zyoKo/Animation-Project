@@ -2,14 +2,12 @@
 
 #include "Bone.h"
 
-#include <glm/ext/quaternion_common.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-#include "Components/Model.h"
 #include "Core/Utilities/Utilites.h"
 
-namespace Animator
+namespace AnimationEngine
 {
 	Bone::Bone(std::string name, int boneID, const aiNodeAnim* channel)
 		:	name(std::move(name)),

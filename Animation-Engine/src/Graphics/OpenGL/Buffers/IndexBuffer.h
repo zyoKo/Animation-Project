@@ -2,7 +2,7 @@
 
 #include "Interfaces/IIndexBuffer.h"
 
-namespace Animator
+namespace AnimationEngine
 {
 	class IndexBuffer : public IIndexBuffer
 	{

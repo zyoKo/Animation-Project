@@ -6,7 +6,7 @@
 
 #include "DataTypes/BoneData.h"
 
-namespace Animator
+namespace AnimationEngine
 {
 	class Bone
 	{

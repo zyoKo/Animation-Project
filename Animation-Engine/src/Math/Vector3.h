@@ -2,7 +2,7 @@
 
 #include <array>
 
-namespace Animator::Math
+namespace AnimationEngine::Math
 {
 	template <typename T>
 	class Vector3

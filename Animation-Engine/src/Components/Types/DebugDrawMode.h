@@ -2,7 +2,7 @@
 
 #include "glad/glad.h"
 
-namespace Animator
+namespace AnimationEngine
 {
 	enum class DebugDrawMode
 	{

@@ -2,7 +2,7 @@
 
 #include "Interfaces/IVertexBuffer.h"
 
-namespace Animator
+namespace AnimationEngine
 {
 	class VertexBuffer : public IVertexBuffer
 	{

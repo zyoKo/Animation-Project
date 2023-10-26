@@ -2,20 +2,20 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-namespace Animator
+namespace AnimationEngine
 {
 	struct AssimpNodeData;
 
 	class Animation;
 
-	class AnimatorR
+	class Animator
 	{
 	public:
-		AnimatorR();
+		Animator();
 
-		AnimatorR(Animation* animation);
+		Animator(Animation* animation);
 
-		~AnimatorR() = default;
+		~Animator() = default;
 
 		void ChangeAnimation(Animation* newAnimation);
 

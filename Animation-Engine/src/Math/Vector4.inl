@@ -6,7 +6,7 @@
 
 #include "Vector3.h"
 
-namespace Animator::Math
+namespace AnimationEngine::Math
 {
 	template <typename T>
 	constexpr Vector4<T>::Vector4() noexcept

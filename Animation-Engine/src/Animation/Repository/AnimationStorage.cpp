@@ -3,10 +3,10 @@
 #include "AnimationStorage.h"
 
 #include "Graphics/OpenGL/Textures/ITexture2D.h"
-#include "Components/Model.h"
+#include "Animation/Model.h"
 #include "Animation/Animation.h"
 
-namespace Animator
+namespace AnimationEngine
 {
 	AnimationStorage::AnimationStorage()
 		: currentIndex(0)

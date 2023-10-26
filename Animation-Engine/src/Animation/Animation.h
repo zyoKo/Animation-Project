@@ -1,12 +1,12 @@
 #pragma once
 
 #include "Bone.h"
-#include "Components/Model.h"
+#include "Animation/Model.h"
 #include "DataTypes/AssimpNodeData.h"
 
 #include <map>
 
-namespace Animator
+namespace AnimationEngine
 {
 	class Animation
 	{

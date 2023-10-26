@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Animator
+namespace AnimationEngine
 {
 	class Material
 	{

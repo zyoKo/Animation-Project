@@ -14,19 +14,20 @@
 #include "Graphics/GraphicsAPI.h"
 #include "AssetManager/AssetManager.h"
 #include "Components/GridMesh.h"
-#include "Components/Model.h"
+#include "Animation/Model.h"
 #include "Components/Camera/Camera.h"
-#include "Components/Camera/CameraConstants.h"
+#include "Components/Camera/Constants/CameraConstants.h"
+#include "Core/ServiceLocators/AssetManagerLocator.h"
 
-namespace Animator
+namespace AnimationEngine
 {
 	Application* Application::instance = nullptr;
 
 	Application::Application(const std::string& name, uint32_t width, uint32_t height)
 		:	deltaTime(0.0f),
 			lastFrame(0.0f),
-			animator(std::make_shared<AnimatorR>()),
-			assetManager(std::make_shared<AssetManager>())
+			animator(std::make_shared<Animator>()),
+			assetManager(new AssetManager())
 	{
 		if (!instance)
 		{
@@ -39,13 +40,25 @@ namespace Animator
 		window = std::unique_ptr<IWindow>(IWindow::Create({ name, width, height }));
 
 		// Bind Event Callback here
+
+		AssetManagerLocator::Initialize();
+
+		AssetManagerLocator::Provide(assetManager);
+	}
+
+	Application::~Application()
+	{
+		delete assetManager;
+		assetManager = nullptr;
 	}
 
 	void Application::Initialize()
 	{
+		const auto assetManager = AssetManagerLocator::GetAssetManager();
+
 		const std::string dreyarDiffuseTextureFile = "./assets/dreyar/textures/Dreyar_diffuse.png";
-		const auto dreyarextureDiffuse = assetManager->CreateTexture(dreyarDiffuseTextureFile);
-		dreyarextureDiffuse->SetTextureName("texture_diffuse1");
+		const auto dreyarTextureDiffuse = assetManager->CreateTexture(dreyarDiffuseTextureFile);
+		dreyarTextureDiffuse->SetTextureName("texture_diffuse1");
 
 		const std::string gridTextureFile = "./assets/grid.png";
 		const auto gridTexture = assetManager->CreateTexture(gridTextureFile);
@@ -67,13 +80,15 @@ namespace Animator
 		const std::string dreyar1ColladaFile = "./assets/dreyar/Capoeira.dae";
 		const std::string dreyar2ColladaFile = "./assets/dreyar/Dying.dae";
 		const std::string dreyar3ColladaFile = "./assets/dreyar/JumpPushUp.dae";
-		animationStorage.AddAssetToStorage(dreyar1ColladaFile, dreyarextureDiffuse);
-		animationStorage.AddAssetToStorage(dreyar2ColladaFile, dreyarextureDiffuse);
-		animationStorage.AddAssetToStorage(dreyar3ColladaFile, dreyarextureDiffuse);
+		animationStorage.AddAssetToStorage(dreyar1ColladaFile, dreyarTextureDiffuse);
+		animationStorage.AddAssetToStorage(dreyar2ColladaFile, dreyarTextureDiffuse);
+		animationStorage.AddAssetToStorage(dreyar3ColladaFile, dreyarTextureDiffuse);
 	}
 
 	void Application::Run()
 	{
+		const auto assetManager = AssetManagerLocator::GetAssetManager();
+
 		auto shader = assetManager->RetrieveShaderFromStorage("AnimationShader");
 		auto debugShader = assetManager->RetrieveShaderFromStorage("DebugAnimationShader");
 		auto gridShader = assetManager->RetrieveShaderFromStorage("GridShader");

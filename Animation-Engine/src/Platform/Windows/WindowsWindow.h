@@ -6,7 +6,7 @@
 
 #include "Structures/WindowData.h"
 
-namespace Animator
+namespace AnimationEngine
 {
 	class WindowsWindow : public IWindow
 	{

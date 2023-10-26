@@ -4,11 +4,17 @@
 
 #include <glm/ext/matrix_transform.hpp>
 
-#include "CameraConstants.h"
+#include "Constants/CameraConstants.h"
 
-namespace Animator
+namespace AnimationEngine
 {
-	Camera::Camera(glm::vec3 position = CAMERA_DEFAULT_POSITION, glm::vec3 worldUp = CAMERA_DEFAULT_WORLD_UP, float yaw = CAMERA_YAW, float pitch = CAMERA_PITCH)
+	Camera Camera::instance;
+
+	Camera::Camera(
+		glm::vec3 position = CAMERA_DEFAULT_POSITION,
+		glm::vec3 worldUp = CAMERA_DEFAULT_WORLD_UP,
+		float yaw = CAMERA_YAW,
+		float pitch = CAMERA_PITCH)
 		:	cameraPosition(position),
 			worldUp(worldUp),
 			rotateSpeed(CAMERA_ROTATE_SPEED),

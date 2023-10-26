@@ -4,7 +4,7 @@
 
 #include "Core/Utilities/Utilites.h"
 
-namespace Animator::Math
+namespace AnimationEngine::Math
 {
 	VQS::VQS()
 		:	translationVector(),

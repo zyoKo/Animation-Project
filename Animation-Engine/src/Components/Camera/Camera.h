@@ -1,38 +1,15 @@
 #pragma once
 
-#include <glm/ext/matrix_transform.hpp>
+#include "Type/CameraMovement.h"
 
-#include "CameraProperties.h"
-#include "glad/glad.h"
-#include "GLFW/glfw3.h"
-
-namespace Animator
+namespace AnimationEngine
 {
-	enum class CameraMovement
-	{
-		FORWARD,
-
-		BACKWARD,
-
-		LEFT,
-
-		RIGHT,
-
-		ROTATE_LEFT,
-
-		ROTATE_RIGHT,
-
-		ZOOM_IN,
-
-		ZOOM_OUT
-	};
-
 	class Camera
 	{
 	public:
 		Camera(glm::vec3 position, glm::vec3 worldUp, float yaw, float pitch);
 
-		~Camera() = default;
+		static Camera* GetInstance() { return &instance; }
 
 		const glm::vec3& GetCameraPosition() const;
 
@@ -49,6 +26,8 @@ namespace Animator
 		void Reset();
 
 	private:
+		static Camera instance;
+
 		glm::vec3 cameraPosition;
 
 		glm::vec3 front;
@@ -79,6 +58,8 @@ namespace Animator
 		float initialYaw, initialPitch;
 
 		float initialZoom;
+
+		Camera() = default;
 
 		void UpdateCameraVectors();
 	};

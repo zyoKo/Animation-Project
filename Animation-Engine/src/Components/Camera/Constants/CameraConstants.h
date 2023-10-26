@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Animator
+namespace AnimationEngine
 {
 	static constexpr float CAMERA_YAW = -90.0f;
 

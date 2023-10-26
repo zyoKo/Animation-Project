@@ -5,7 +5,7 @@
 #include "Core/Logger/Log.h"
 #include "Core/Logger/GLDebug.h"
 
-namespace Animator
+namespace AnimationEngine
 {
 	OpenGLContext::OpenGLContext(GLFWwindow* window)
 		:	window(window)

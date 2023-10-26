@@ -5,9 +5,9 @@
 #include "Core/Logger/GLDebug.h"
 
 #include "Camera/Camera.h"
-#include "Camera/CameraConstants.h"
+#include "Camera/Constants/CameraConstants.h"
 
-namespace Animator
+namespace AnimationEngine
 {
 	DebugMesh::DebugMesh(const std::shared_ptr<Shader>& debugShader, Camera* camera)
 		:	shader(debugShader),

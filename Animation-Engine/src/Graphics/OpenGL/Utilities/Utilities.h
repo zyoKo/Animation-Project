@@ -4,7 +4,7 @@
 
 #include "Graphics/OpenGL/Buffers/Structure/VertexBufferElements.h"
 
-namespace Animator
+namespace AnimationEngine
 {
 	static unsigned int GetSizeofCustomType(VertexDataType customType)
 	{

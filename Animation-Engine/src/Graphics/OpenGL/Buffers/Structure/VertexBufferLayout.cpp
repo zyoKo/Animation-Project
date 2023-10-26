@@ -2,7 +2,7 @@
 
 #include "VertexBufferLayout.h"
 
-namespace Animator
+namespace AnimationEngine
 {
 	
 }

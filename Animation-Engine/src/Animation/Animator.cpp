@@ -6,9 +6,9 @@
 #include "DataTypes/AssimpNodeData.h"
 #include "Core/Utilities/Utilites.h"
 
-namespace Animator
+namespace AnimationEngine
 {
-	AnimatorR::AnimatorR()
+	Animator::Animator()
 		:	currentAnimation(nullptr),
 			currentTime(0.0f),
 			deltaTime(0.0f)
@@ -21,7 +21,7 @@ namespace Animator
 		}
 	}
 
-	AnimatorR::AnimatorR(Animation* animation)
+	Animator::Animator(Animation* animation)
 		:	currentAnimation(animation),
 			currentTime(0.0f),
 			deltaTime(0.0f)
@@ -34,13 +34,13 @@ namespace Animator
 		}
 	}
 
-	void AnimatorR::ChangeAnimation(Animation* newAnimation)
+	void Animator::ChangeAnimation(Animation* newAnimation)
 	{
 		currentAnimation = newAnimation;
 		currentTime = 0.0f;
 	}
 
-	void AnimatorR::UpdateAnimation(float dt)
+	void Animator::UpdateAnimation(float dt)
 	{
 		deltaTime = dt;
 
@@ -52,13 +52,13 @@ namespace Animator
 		}
 	}
 
-	void AnimatorR::PlayAnimation(Animation* animation)
+	void Animator::PlayAnimation(Animation* animation)
 	{
 		currentAnimation = animation;
 		currentTime = 0.0f;
 	}
 
-	void AnimatorR::CalculateBoneTransformWithVQS(const AssimpNodeData* node, Math::VQS parentVQS)
+	void Animator::CalculateBoneTransformWithVQS(const AssimpNodeData* node, Math::VQS parentVQS)
 	{
 		std::string nodeName = node->name;
 		auto localVQS = Utils::GLMInternalHelper::ConvertGLMMatrixToVQS(node->transformation);
@@ -90,22 +90,22 @@ namespace Animator
 			CalculateBoneTransformWithVQS(&node->children[i], worldVQS);
 	}
 
-	const std::vector<glm::mat4>& AnimatorR::GetFinalBoneMatrices() const
+	const std::vector<glm::mat4>& Animator::GetFinalBoneMatrices() const
 	{
 		return finalBoneMatrices;
 	}
 
-	const std::vector<Math::Vector3F>& AnimatorR::GetJointPositions() const
+	const std::vector<Math::Vector3F>& Animator::GetJointPositions() const
 	{
 		return jointPositions;
 	}
 
-	void AnimatorR::ClearJoints()
+	void Animator::ClearJoints()
 	{
 		jointPositions.clear();
 	}
 
-	Math::Vector3F AnimatorR::ExtractJointPosition(const glm::mat4& transform)
+	Math::Vector3F Animator::ExtractJointPosition(const glm::mat4& transform)
 	{
 		return { transform[3][0], transform[3][1], transform[3][2] };
 	}
