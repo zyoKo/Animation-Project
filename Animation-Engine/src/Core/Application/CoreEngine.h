@@ -9,6 +9,8 @@
 
 namespace AnimationEngine
 {
+	class IApplication;
+
 	class Animator;
 
 	class IAssetManager;
@@ -16,27 +18,25 @@ namespace AnimationEngine
 
 namespace AnimationEngine
 {
-	class Application
+	class CoreEngine
 	{
 	public:
-		Application(const std::string& name = "Animation Window", uint32_t width = 1280, uint32_t height = 720);
-		virtual ~Application();
+		CoreEngine(const std::string& name = "Animation Window", uint32_t width = 1280, uint32_t height = 720);
+		~CoreEngine();
 
-		Application(const Application&) = delete;
-		Application& operator=(const Application&) = delete;
+		CoreEngine(const CoreEngine&) = delete;
+		CoreEngine& operator=(const CoreEngine&) = delete;
 
-		virtual void Initialize();
+		void SetApplication(const std::shared_ptr<IApplication>& app);
 
-		virtual void Run();
+		void Initialize();
 
-		virtual void Render();
+		void Update();
 
-		virtual bool Shutdown();
+		bool Shutdown();
 
 	private:
-		static Application* instance;
-
-		//float deltaTime, lastFrame;
+		std::shared_ptr<IApplication> application;
 
 		std::shared_ptr<Animator> animator;
 

@@ -70,6 +70,11 @@ namespace AnimationEngine
 		OverwriteDataInVertexBuffer();
 	}
 
+	void DebugMesh::SetShader(const std::shared_ptr<Shader>& shader)
+	{
+		this->shader = shader;
+	}
+
 	void DebugMesh::OverwriteDataInVertexBuffer() const
 	{
 		int layoutLocation = -1;

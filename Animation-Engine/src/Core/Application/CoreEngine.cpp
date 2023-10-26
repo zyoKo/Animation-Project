@@ -1,9 +1,8 @@
 #include <AnimationPch.h>
 
+#include "CoreEngine.h"
+
 #include <GLFW/glfw3.h>
-
-#include "Application.h"
-
 #include <execution>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
@@ -19,22 +18,15 @@
 #include "Components/Camera/Constants/CameraConstants.h"
 #include "Core/ServiceLocators/AssetManagerLocator.h"
 #include "Core/Utilities/Time.h"
+#include "Interface/IApplication.h"
 
 namespace AnimationEngine
 {
-	Application* Application::instance = nullptr;
-
-	Application::Application(const std::string& name, uint32_t width, uint32_t height)
+	CoreEngine::CoreEngine(const std::string& name, uint32_t width, uint32_t height)
 		:	animator(std::make_shared<Animator>()),
 			assetManager(new AssetManager())
 	{
-		if (!instance)
-		{
-			Log::Initialize();
-		}
-
-		ANIM_ASSERT(!instance, "Application Already exists!");
-		instance = this;
+		Log::Initialize();
 
 		window = std::unique_ptr<IWindow>(IWindow::Create({ name, width, height }));
 
@@ -45,15 +37,22 @@ namespace AnimationEngine
 		AssetManagerLocator::Provide(assetManager);
 	}
 
-	Application::~Application()
+	CoreEngine::~CoreEngine()
 	{
 		delete assetManager;
 		assetManager = nullptr;
 	}
 
-	void Application::Initialize()
+	void CoreEngine::SetApplication(const std::shared_ptr<IApplication>& app)
+	{
+		this->application = app;
+	}
+
+	void CoreEngine::Initialize()
 	{
 		Camera::GetInstance()->Initialize();
+
+		application->Initialize();
 
 		const auto assetManager = AssetManagerLocator::GetAssetManager();
 
@@ -86,7 +85,7 @@ namespace AnimationEngine
 		animationStorage.AddAssetToStorage(dreyar3ColladaFile, dreyarTextureDiffuse);
 	}
 
-	void Application::Run()
+	void CoreEngine::Update()
 	{
 		const auto assetManager = AssetManagerLocator::GetAssetManager();
 
@@ -114,6 +113,8 @@ namespace AnimationEngine
 			GraphicsAPI::GetContext()->ClearBuffer();
 
 			Time::Update();
+
+			application->Update();
 
 			// camera/view transformation
 			glm::mat4 projection = glm::perspective(glm::radians(camera->GetZoom()), (float)window->GetWidth() / (float)window->GetHeight(), CAMERA_NEAR_CLIPPING_PLANE, CAMERA_FAR_CLIPPING_PLANE);
@@ -159,17 +160,13 @@ namespace AnimationEngine
 		assetManager->ClearStores();
 	}
 
-	void Application::Render()
-	{
-	}
-
-	bool Application::Shutdown()
+	bool CoreEngine::Shutdown()
 	{
 		running = false;
 		return true;
 	}
 
-	void Application::ProcessInput()
+	void CoreEngine::ProcessInput()
 	{
 		const auto camera = Camera::GetInstance();
 

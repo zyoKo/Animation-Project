@@ -28,6 +28,8 @@ namespace AnimationEngine
 		void OverwriteJointsPosition(const std::vector<Math::Vector3F>& jointsPosition);
 
 		void SetupMesh();
+
+		void SetShader(const std::shared_ptr<Shader>& shader);
 	private:
 		std::vector<Math::Vector3F> jointsPosition;
 

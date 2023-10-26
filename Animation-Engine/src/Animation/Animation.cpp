@@ -75,13 +75,11 @@ namespace AnimationEngine
 			const auto channel = animation->mChannels[i];
 
 			std::string boneName = channel->mNodeName.data;
-
 			if (!boneInfoMap.contains(boneName))
 			{
 				boneInfoMap[boneName].id = boneCount;
 				boneCount++;
 			}
-
 			bones.emplace_back(channel->mNodeName.data, boneInfoMap[channel->mNodeName.data].id, channel);
 		}
 
@@ -96,7 +94,7 @@ namespace AnimationEngine
 		destinationNode.transformation = Utils::AssimpToGLMHelper::ConvertMatrixToGLMFormat(sourceNode->mTransformation);
 		destinationNode.childrenCount = sourceNode->mNumChildren;
 
-		for (int i = 0; i < sourceNode->mNumChildren; ++i)
+		for (unsigned i = 0; i < sourceNode->mNumChildren; ++i)
 		{
 			AssimpNodeData newAssimpNodeData;
 			ReadHierarchyData(newAssimpNodeData, sourceNode->mChildren[i]);

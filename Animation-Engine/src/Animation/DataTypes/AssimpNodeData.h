@@ -1,6 +1,5 @@
 #pragma once
 
-#include <glm/fwd.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace AnimationEngine
@@ -11,7 +10,7 @@ namespace AnimationEngine
 
 		glm::mat4 transformation;
 
-		int childrenCount;
+		unsigned childrenCount;
 
 		std::vector<AssimpNodeData> children;
 
