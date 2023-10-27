@@ -26,7 +26,7 @@ namespace AnimationEngine::Math
 		constexpr Vector3(T x, T y, T z) noexcept;
 		constexpr Vector3(T value) noexcept;
 		constexpr Vector3(std::initializer_list<T> data) noexcept;
-		explicit constexpr Vector3(const Vector3& vector) noexcept;
+		constexpr Vector3(const Vector3& vector) noexcept;
 
 		~Vector3() = default;
 

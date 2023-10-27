@@ -14,6 +14,7 @@
 #include "AssetManager/AssetManager.h"
 #include "Components/GridMesh.h"
 #include "Animation/Model.h"
+#include "Components/CurveMesh.h"
 #include "Components/Camera/Camera.h"
 #include "Components/Camera/Constants/CameraConstants.h"
 #include "Core/ServiceLocators/AssetManagerLocator.h"
@@ -83,6 +84,11 @@ namespace AnimationEngine
 		animationStorage.AddAssetToStorage(dreyar1ColladaFile, dreyarTextureDiffuse);
 		animationStorage.AddAssetToStorage(dreyar2ColladaFile, dreyarTextureDiffuse);
 		animationStorage.AddAssetToStorage(dreyar3ColladaFile, dreyarTextureDiffuse);
+
+		// Spline
+		const std::string splineVertShader = "./assets/shaders/spline.vert";
+		const std::string splineFragShader = "./assets/shaders/spline.frag";
+		assetManager->CreateShader("SplineShader", splineVertShader, splineFragShader);
 	}
 
 	void CoreEngine::Update()
@@ -92,6 +98,7 @@ namespace AnimationEngine
 		auto shader = assetManager->RetrieveShaderFromStorage("AnimationShader");
 		auto debugShader = assetManager->RetrieveShaderFromStorage("DebugAnimationShader");
 		auto gridShader = assetManager->RetrieveShaderFromStorage("GridShader");
+		auto splineShader = assetManager->RetrieveShaderFromStorage("SplineShader");
 
 		auto textureDiffuse = assetManager->RetrieveTextureFromStorage("Dreyar_diffuse");
 		auto gridTexture = assetManager->RetrieveTextureFromStorage("grid");
@@ -99,13 +106,16 @@ namespace AnimationEngine
 		animator->ChangeAnimation(animationStorage.GetAnimationForCurrentlyBoundIndex());
 
 		GraphicsAPI::GetContext()->EnableDepthTest(true);
-		GraphicsAPI::GetContext()->EnableWireFrameMode(true);
+		GraphicsAPI::GetContext()->EnableWireFrameMode(false);
 
 		auto camera = Camera::GetInstance();
 		camera->SetCameraPosition(glm::vec3(0.0f, 8.0f, 30.0f));
 		DebugMesh debugMesh(debugShader);
 		GridMesh gridMesh;
 		gridMesh.SetGridTexture(gridTexture);
+
+		CurveMesh curveMesh;
+		curveMesh.SetShader(splineShader);
 
 		while (running && !window->WindowShouldClose())
 		{
@@ -153,6 +163,8 @@ namespace AnimationEngine
 			}
 
 			gridMesh.Update(gridShader, projection, view);
+
+			curveMesh.Draw();
 
 			window->Update();
 		}
