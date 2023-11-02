@@ -130,7 +130,7 @@ namespace AnimationEngine::Math
 	Quaternion<T> Quaternion<T>::AngleAxis(const Vector3<T>& axis, T angle)
 	{
 		Vector3<T> normalized = Vector3<T>::Normalize(axis);
-		T sinValue = std::sin(angle, static_cast<T>(0.5));
+		T sinValue = std::sin(angle * static_cast<T>(0.5));
 		return Quaternion(
 			normalized.x * sinValue, 
 			normalized.y * sinValue, 
@@ -141,7 +141,7 @@ namespace AnimationEngine::Math
 	template <typename T>
 	Quaternion<T> Quaternion<T>::AngleAxis(T angle, const Vector3<T>& axis)
 	{
-		return AngleAxis(axis, scalar);
+		return AngleAxis(axis, angle);
 	}
 
 	template <typename T>

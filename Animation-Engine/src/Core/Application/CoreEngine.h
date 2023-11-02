@@ -5,6 +5,7 @@
 
 #include "Animation/Animation.h"
 #include "Animation/Repository/AnimationStorage.h"
+#include "Components/PointMesh.h"
 #include "Core/Window/IWindow.h"
 
 namespace AnimationEngine
@@ -49,6 +50,8 @@ namespace AnimationEngine
 		bool enableModelMesh = false;
 
 		AnimationStorage animationStorage;
+
+		PointMesh* point;
 
 		void ProcessInput();
 	};

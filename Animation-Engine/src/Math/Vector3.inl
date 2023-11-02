@@ -64,7 +64,7 @@ namespace AnimationEngine::Math
 	}
 
 	template <typename T>
-	Vector3<T> Vector3<T>::operator-(const Vector3& vector)
+	Vector3<T> Vector3<T>::operator-(const Vector3& vector) const
 	{
 		ANIM_ASSERT(!vector.HasNaNs(), "Operation '/' failed, the vector has NaNs!");
 		return Vector3(x - vector.x, y - vector.y, z - vector.z);
@@ -145,6 +145,24 @@ namespace AnimationEngine::Math
 	bool Vector3<T>::HasInfinite() const
 	{
 		return std::isinf(x) || std::isinf(y) || std::isinf(z);
+	}
+
+	template <typename T>
+	Vector3<T> Vector3<T>::GetForward()
+	{
+		return Vector3(static_cast<T>(0), static_cast<T>(0), static_cast<T>(1));
+	}
+
+	template <typename T>
+	Vector3<T> Vector3<T>::GetRight()
+	{
+		return Vector3(static_cast<T>(1), static_cast<T>(0), static_cast<T>(0));
+	}
+
+	template <typename T>
+	Vector3<T> Vector3<T>::GetUp()
+	{
+		return Vector3(static_cast<T>(0), static_cast<T>(1), static_cast<T>(0));
 	}
 
 	template <typename T>

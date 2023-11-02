@@ -19,8 +19,6 @@ namespace AnimationEngine
 
 		int GetBoneID() const;
 
-		const glm::mat4& GetLocalTransform() const;
-
 		const Math::VQS& GetLocalVQS() const;
 
 		int GetPositionIndexAt(float time) const;
@@ -33,8 +31,6 @@ namespace AnimationEngine
 		std::string name;
 
 		int boneID;
-
-		glm::mat4 localTransform;
 
 		Math::VQS localVQS;
 

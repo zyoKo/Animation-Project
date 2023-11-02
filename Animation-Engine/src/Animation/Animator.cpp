@@ -62,15 +62,13 @@ namespace AnimationEngine
 		std::string nodeName = node->name;
 		auto localVQS = Utils::GLMInternalHelper::ConvertGLMMatrixToVQS(node->transformation);
 
-		Bone* bone = currentAnimation->FindBone(nodeName);
-
+		auto bone = currentAnimation->FindBone(nodeName);
 		if (bone)
 		{
 			bone->Update(currentTime);
 			localVQS = bone->GetLocalVQS();
 
 			jointPositions.push_back(ExtractJointPosition(Utils::GLMInternalHelper::ConvertVQSToGLMMatrix(parentVQS)));
-
 			jointPositions.push_back(ExtractJointPosition(Utils::GLMInternalHelper::ConvertVQSToGLMMatrix(parentVQS * localVQS)));
 		}
 
@@ -85,7 +83,7 @@ namespace AnimationEngine
 			finalBoneMatrices[index] = Utils::GLMInternalHelper::ConvertVQSToGLMMatrix(worldVQS) * offset;
 		}
 
-		for (int i = 0; i < node->childrenCount; ++i)
+		for (unsigned i = 0; i < node->childrenCount; ++i)
 			CalculateBoneTransformWithVQS(&node->children[i], worldVQS);
 	}
 

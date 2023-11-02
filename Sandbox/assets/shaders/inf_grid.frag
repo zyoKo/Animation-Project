@@ -8,5 +8,5 @@ out vec4 FragColor;
 
 void main()
 {
-    FragColor = texture(gridTexture, TexCoords);
+    FragColor =  texture(gridTexture, TexCoords);
 }

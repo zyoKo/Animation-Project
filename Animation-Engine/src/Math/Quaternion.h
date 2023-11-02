@@ -117,8 +117,8 @@ namespace AnimationEngine::Math
 			return os;
 		}
 
-		Vector3<T> GetAxis(const Quaternion& quat);
-		T GetAngle(const Quaternion& quat);
+		static Vector3<T> GetAxis(const Quaternion& quat);
+		static T GetAngle(const Quaternion& quat);
 
 		static Quaternion Power(const Quaternion& quat, T power);
 

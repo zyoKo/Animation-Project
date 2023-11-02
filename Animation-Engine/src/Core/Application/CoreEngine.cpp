@@ -5,7 +5,8 @@
 #include <GLFW/glfw3.h>
 #include <execution>
 #include <glm/ext/matrix_clip_space.hpp>
-#include <glm/ext/matrix_transform.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/string_cast.hpp>
 
 #include "Animation/Animator.h"
@@ -19,13 +20,15 @@
 #include "Components/Camera/Constants/CameraConstants.h"
 #include "Core/ServiceLocators/AssetManagerLocator.h"
 #include "Core/Utilities/Time.h"
+#include "Core/Utilities/Utilites.h"
 #include "Interface/IApplication.h"
 
 namespace AnimationEngine
 {
 	CoreEngine::CoreEngine(const std::string& name, uint32_t width, uint32_t height)
 		:	animator(std::make_shared<Animator>()),
-			assetManager(new AssetManager())
+			assetManager(new AssetManager()),
+			point(nullptr)
 	{
 		Log::Initialize();
 
@@ -78,10 +81,10 @@ namespace AnimationEngine
 		assetManager->CreateShader("GridShader", gridVertexShaderFile, gridFragmentShaderFile);
 
 		// Adding Model And Animation to Storage
-		const std::string dreyar1ColladaFile = "./assets/dreyar/Capoeira.dae";
-		const std::string dreyar2ColladaFile = "./assets/dreyar/Dying.dae";
-		const std::string dreyar3ColladaFile = "./assets/dreyar/JumpPushUp.dae";
-		animationStorage.AddAssetToStorage(dreyar1ColladaFile, dreyarTextureDiffuse);
+		//const std::string dreyar1ColladaFile = "./assets/dreyar/Capoeira.dae";
+		const std::string dreyar2ColladaFile = "./assets/dreyar/Walking.dae";
+		const std::string dreyar3ColladaFile = "./assets/dreyar/Running.dae";
+		//animationStorage.AddAssetToStorage(dreyar1ColladaFile, dreyarTextureDiffuse);
 		animationStorage.AddAssetToStorage(dreyar2ColladaFile, dreyarTextureDiffuse);
 		animationStorage.AddAssetToStorage(dreyar3ColladaFile, dreyarTextureDiffuse);
 
@@ -93,9 +96,11 @@ namespace AnimationEngine
 
 	void CoreEngine::Update()
 	{
+		application->PreUpdate();
+
 		const auto assetManager = AssetManagerLocator::GetAssetManager();
 
-		auto shader = assetManager->RetrieveShaderFromStorage("AnimationShader");
+		auto animationShader = assetManager->RetrieveShaderFromStorage("AnimationShader");
 		auto debugShader = assetManager->RetrieveShaderFromStorage("DebugAnimationShader");
 		auto gridShader = assetManager->RetrieveShaderFromStorage("GridShader");
 		auto splineShader = assetManager->RetrieveShaderFromStorage("SplineShader");
@@ -109,13 +114,16 @@ namespace AnimationEngine
 		GraphicsAPI::GetContext()->EnableWireFrameMode(false);
 
 		auto camera = Camera::GetInstance();
-		camera->SetCameraPosition(glm::vec3(0.0f, 8.0f, 30.0f));
+
 		DebugMesh debugMesh(debugShader);
 		GridMesh gridMesh;
 		gridMesh.SetGridTexture(gridTexture);
 
 		CurveMesh curveMesh;
 		curveMesh.SetShader(splineShader);
+
+		point = new PointMesh();
+		point->SetSpline(curveMesh.GetSpline());
 
 		while (running && !window->WindowShouldClose())
 		{
@@ -130,8 +138,6 @@ namespace AnimationEngine
 			glm::mat4 projection = glm::perspective(glm::radians(camera->GetZoom()), (float)window->GetWidth() / (float)window->GetHeight(), CAMERA_NEAR_CLIPPING_PLANE, CAMERA_FAR_CLIPPING_PLANE);
 			glm::mat4 view = camera->GetViewMatrix();
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
-			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
 
 			ProcessInput();
 			animator->UpdateAnimation();
@@ -148,28 +154,61 @@ namespace AnimationEngine
 
 			if (enableModelMesh)
 			{
-				shader->Bind();
-				shader->SetUniformInt(0, animationStorage.GetDiffuseTextureFromCurrentlyBoundIndex()->GetTextureName());
-				shader->SetUniformMatrix4F(projection, "projection");
-				shader->SetUniformMatrix4F(view, "view");
-				shader->SetUniformMatrix4F(model, "model");
+				animationShader->Bind();
+				animationShader->SetUniformInt(0, animationStorage.GetDiffuseTextureFromCurrentlyBoundIndex()->GetTextureName());
+				animationShader->SetUniformMatrix4F(projection, "projection");
+				animationShader->SetUniformMatrix4F(view, "view");
+				animationShader->SetUniformMatrix4F(model, "model");
 				for (unsigned i = 0; i < animator->GetFinalBoneMatrices().size(); ++i)
 				{
 					std::string uniformName = "finalBonesMatrices[" + std::to_string(i) + "]";
-					shader->SetUniformMatrix4F(animator->GetFinalBoneMatrices()[i], uniformName);
+					animationShader->SetUniformMatrix4F(animator->GetFinalBoneMatrices()[i], uniformName);
 				}
-				animationStorage.GetModelForCurrentlyBoundIndex()->Draw(shader);
-				shader->UnBind();
+				animationStorage.GetModelForCurrentlyBoundIndex()->Draw(animationShader);
+				animationShader->UnBind();
 			}
-
+			
 			gridMesh.Update(gridShader, projection, view);
-
+			
 			curveMesh.Draw();
+
+			GraphicsAPI::GetContext()->EnablePointSize(true);
+			point->Draw();
+			GraphicsAPI::GetContext()->EnablePointSize(false);
+
+			auto newRotation = Utils::GLMInternalHelper::ConvertQuaternionToGLMMatrix(point->GetRotation());
+
+			auto& animationRoot = animationStorage.GetAnimationForCurrentlyBoundIndex()->GetRootNode();
+
+			glm::vec3 scale, translation, skew;
+			glm::vec4 perspective;
+			glm::quat orientation;
+			glm::decompose(animationRoot.transformation, scale, orientation, translation, skew, perspective);
+
+			auto newMatrix = glm::mat4(1.0f);
+			newMatrix = glm::scale(newMatrix, scale); // Apply scale
+			newMatrix = newMatrix * newRotation;
+			newMatrix = glm::translate(newMatrix, translation); // Apply translation
+
+			animationRoot.transformation = newMatrix;
+
+			animationRoot.transformation[3][0] = point->GetPosition().x;
+			animationRoot.transformation[3][1] = point->GetPosition().y;
+			animationRoot.transformation[3][2] = point->GetPosition().z;
+
+			//LOG_WARN("Incoming Rotation: ({0}, {1}, {2}, {3})", point->GetRotation().x, point->GetRotation().y, point->GetRotation().z, point->GetRotation().w);
+			auto axis = Math::QuatF::GetAxis(point->GetRotation());
+			LOG_WARN("Angle: {0}_________Axis: ({1}, {2}, {3})", Math::QuatF::GetAngle(point->GetRotation()) * (180.0f / 3.14f), axis.x, axis.y, axis.z);
+			//auto rotationAxis = Utils::GLMInternalHelper::ConvertInternalVectorToGLM(Math::QuatF::GetAxis(point->GetRotation()));
 
 			window->Update();
 		}
 
 		assetManager->ClearStores();
+
+		delete point;
+
+		application->PostUpdate();
 	}
 
 	bool CoreEngine::Shutdown()
@@ -246,6 +285,43 @@ namespace AnimationEngine
 		else
 		{
 			isCameraResetKeyPressed = false;
+		}
+
+		static constexpr float moveSpeed = 0.1f;
+		static Math::Vector3F newPosition;
+		if (glfwGetKey(glfwWindow, GLFW_KEY_W) == GLFW_PRESS)
+		{
+			newPosition = { point->GetPosition().x, point->GetPosition().y, point->GetPosition().z - moveSpeed };
+			point->SetPosition(newPosition);
+		}
+		if (glfwGetKey(glfwWindow, GLFW_KEY_A) == GLFW_PRESS)
+		{
+			newPosition = { point->GetPosition().x - moveSpeed, point->GetPosition().y, point->GetPosition().z };
+			point->SetPosition(newPosition);
+		}
+		if (glfwGetKey(glfwWindow, GLFW_KEY_D) == GLFW_PRESS)
+		{
+			newPosition = { point->GetPosition().x + moveSpeed, point->GetPosition().y, point->GetPosition().z };
+			point->SetPosition(newPosition);
+		}
+		if (glfwGetKey(glfwWindow, GLFW_KEY_S) == GLFW_PRESS)
+		{
+			newPosition = { point->GetPosition().x, point->GetPosition().y, point->GetPosition().z + moveSpeed };
+			point->SetPosition(newPosition);
+		}
+
+		static bool resetPathFollowing = false;
+		if (glfwGetKey(glfwWindow, GLFW_KEY_R) == GLFW_PRESS)
+		{
+			if (!resetPathFollowing)
+			{
+				point->Reset();
+				resetPathFollowing = true;
+			}
+		}
+		else
+		{
+			resetPathFollowing = false;
 		}
 	}
 }

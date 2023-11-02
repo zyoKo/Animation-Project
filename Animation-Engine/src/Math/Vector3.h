@@ -11,11 +11,13 @@ namespace AnimationEngine::Math
 		// Declare variables
 		union
 		{
-			struct {
+			struct
+			{
 				T x, y, z;
 			};
 
-			struct {
+			struct
+			{
 				T r, g, b;
 			};
 
@@ -36,7 +38,7 @@ namespace AnimationEngine::Math
 		Vector3 operator+(const Vector3& vector);
 		Vector3& operator+=(const Vector3& vector);
 
-		Vector3 operator-(const Vector3& vector);
+		Vector3 operator-(const Vector3& vector) const;
 		Vector3& operator-=(const Vector3& vector);
 
 		Vector3 operator*(T value);
@@ -72,6 +74,9 @@ namespace AnimationEngine::Math
 		bool HasNaNs() const;
 		bool HasInfinite() const;
 
+		static Vector3 GetForward();
+		static Vector3 GetRight();
+		static Vector3 GetUp();
 		static bool IsZero(const Vector3& vector);
 
 		T LengthSquared() const;

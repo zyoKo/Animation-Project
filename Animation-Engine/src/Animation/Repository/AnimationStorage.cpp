@@ -9,7 +9,7 @@
 namespace AnimationEngine
 {
 	AnimationStorage::AnimationStorage()
-		: currentIndex(0)
+		:	currentIndex(0)
 	{
 	}
 	
@@ -44,7 +44,7 @@ namespace AnimationEngine
 	
 	void AnimationStorage::ChangeModel()
 	{
-		if (currentIndex < modelList.size() - 1)
+		if (currentIndex < static_cast<int>(modelList.size()) - 1)
 			++currentIndex;
 		else
 			currentIndex = 0;
