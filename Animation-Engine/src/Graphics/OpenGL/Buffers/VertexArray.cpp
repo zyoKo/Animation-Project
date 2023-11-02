@@ -6,7 +6,7 @@
 
 #include "Core/Logger/GLDebug.h"
 
-namespace Animator
+namespace AnimationEngine
 {
 	VertexArray::VertexArray()
 	{

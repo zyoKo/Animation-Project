@@ -6,7 +6,7 @@
 #include "Data/Constants.h"
 #include "Graphics/GraphicsAPI.h"
 
-namespace Animator
+namespace AnimationEngine
 {
 	GridMesh::GridMesh()
 		:	vertices(GRID_VERTICES),

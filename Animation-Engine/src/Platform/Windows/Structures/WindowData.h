@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace Animator
+namespace AnimationEngine
 {
 	struct WindowData
 	{

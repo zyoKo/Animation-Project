@@ -1,9 +1,8 @@
 #include <AnimationPch.h>
 
+#include "CoreEngine.h"
+
 #include <GLFW/glfw3.h>
-
-#include "Application.h"
-
 #include <execution>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
@@ -14,38 +13,52 @@
 #include "Graphics/GraphicsAPI.h"
 #include "AssetManager/AssetManager.h"
 #include "Components/GridMesh.h"
-#include "Components/Model.h"
+#include "Animation/Model.h"
 #include "Components/Camera/Camera.h"
-#include "Components/Camera/CameraConstants.h"
+#include "Components/Camera/Constants/CameraConstants.h"
+#include "Core/ServiceLocators/AssetManagerLocator.h"
+#include "Core/Utilities/Time.h"
+#include "Interface/IApplication.h"
 
-namespace Animator
+namespace AnimationEngine
 {
-	Application* Application::instance = nullptr;
-
-	Application::Application(const std::string& name, uint32_t width, uint32_t height)
-		:	deltaTime(0.0f),
-			lastFrame(0.0f),
-			animator(std::make_shared<AnimatorR>()),
-			assetManager(std::make_shared<AssetManager>())
+	CoreEngine::CoreEngine(const std::string& name, uint32_t width, uint32_t height)
+		:	animator(std::make_shared<Animator>()),
+			assetManager(new AssetManager())
 	{
-		if (!instance)
-		{
-			Log::Initialize();
-		}
-
-		ANIM_ASSERT(!instance, "Application Already exists!");
-		instance = this;
+		Log::Initialize();
 
 		window = std::unique_ptr<IWindow>(IWindow::Create({ name, width, height }));
 
 		// Bind Event Callback here
+
+		AssetManagerLocator::Initialize();
+
+		AssetManagerLocator::Provide(assetManager);
 	}
 
-	void Application::Initialize()
+	CoreEngine::~CoreEngine()
 	{
+		delete assetManager;
+		assetManager = nullptr;
+	}
+
+	void CoreEngine::SetApplication(const std::shared_ptr<IApplication>& app)
+	{
+		this->application = app;
+	}
+
+	void CoreEngine::Initialize()
+	{
+		Camera::GetInstance()->Initialize();
+
+		application->Initialize();
+
+		const auto assetManager = AssetManagerLocator::GetAssetManager();
+
 		const std::string dreyarDiffuseTextureFile = "./assets/dreyar/textures/Dreyar_diffuse.png";
-		const auto dreyarextureDiffuse = assetManager->CreateTexture(dreyarDiffuseTextureFile);
-		dreyarextureDiffuse->SetTextureName("texture_diffuse1");
+		const auto dreyarTextureDiffuse = assetManager->CreateTexture(dreyarDiffuseTextureFile);
+		dreyarTextureDiffuse->SetTextureName("texture_diffuse1");
 
 		const std::string gridTextureFile = "./assets/grid.png";
 		const auto gridTexture = assetManager->CreateTexture(gridTextureFile);
@@ -67,13 +80,15 @@ namespace Animator
 		const std::string dreyar1ColladaFile = "./assets/dreyar/Capoeira.dae";
 		const std::string dreyar2ColladaFile = "./assets/dreyar/Dying.dae";
 		const std::string dreyar3ColladaFile = "./assets/dreyar/JumpPushUp.dae";
-		animationStorage.AddAssetToStorage(dreyar1ColladaFile, dreyarextureDiffuse);
-		animationStorage.AddAssetToStorage(dreyar2ColladaFile, dreyarextureDiffuse);
-		animationStorage.AddAssetToStorage(dreyar3ColladaFile, dreyarextureDiffuse);
+		animationStorage.AddAssetToStorage(dreyar1ColladaFile, dreyarTextureDiffuse);
+		animationStorage.AddAssetToStorage(dreyar2ColladaFile, dreyarTextureDiffuse);
+		animationStorage.AddAssetToStorage(dreyar3ColladaFile, dreyarTextureDiffuse);
 	}
 
-	void Application::Run()
+	void CoreEngine::Update()
 	{
+		const auto assetManager = AssetManagerLocator::GetAssetManager();
+
 		auto shader = assetManager->RetrieveShaderFromStorage("AnimationShader");
 		auto debugShader = assetManager->RetrieveShaderFromStorage("DebugAnimationShader");
 		auto gridShader = assetManager->RetrieveShaderFromStorage("GridShader");
@@ -84,10 +99,11 @@ namespace Animator
 		animator->ChangeAnimation(animationStorage.GetAnimationForCurrentlyBoundIndex());
 
 		GraphicsAPI::GetContext()->EnableDepthTest(true);
-		//GL_CALL(glPolygonMode, GL_FRONT_AND_BACK, GL_LINE);
+		GraphicsAPI::GetContext()->EnableWireFrameMode(true);
 
-		Camera camera(glm::vec3(0.0f, 8.0f, 30.0f), glm::vec3(0.0f, 1.0f, 0.0f), CAMERA_YAW, CAMERA_PITCH);
-		DebugMesh debugMesh(debugShader, &camera);
+		auto camera = Camera::GetInstance();
+		camera->SetCameraPosition(glm::vec3(0.0f, 8.0f, 30.0f));
+		DebugMesh debugMesh(debugShader);
 		GridMesh gridMesh;
 		gridMesh.SetGridTexture(gridTexture);
 
@@ -96,19 +112,19 @@ namespace Animator
 			GraphicsAPI::GetContext()->ClearColor();
 			GraphicsAPI::GetContext()->ClearBuffer();
 
-			const auto currentFrame = static_cast<float>(glfwGetTime());
-			deltaTime = currentFrame - lastFrame;
-			lastFrame = currentFrame;
+			Time::Update();
+
+			application->Update();
 
 			// camera/view transformation
-			glm::mat4 projection = glm::perspective(glm::radians(camera.zoom), (float)window->GetWidth() / (float)window->GetHeight(), 0.1f, 10000.0f);
-			glm::mat4 view = camera.GetViewMatrix();
+			glm::mat4 projection = glm::perspective(glm::radians(camera->GetZoom()), (float)window->GetWidth() / (float)window->GetHeight(), CAMERA_NEAR_CLIPPING_PLANE, CAMERA_FAR_CLIPPING_PLANE);
+			glm::mat4 view = camera->GetViewMatrix();
 			glm::mat4 model = glm::mat4(1.0f);
 			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
 			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
 
-			ProcessInput(camera);
-			animator->UpdateAnimation(deltaTime);
+			ProcessInput();
+			animator->UpdateAnimation();
 
 			debugMesh.OverwriteJointsPosition(animator->GetJointPositions());
 			animator->ClearJoints();
@@ -144,38 +160,41 @@ namespace Animator
 		assetManager->ClearStores();
 	}
 
-	void Application::Render()
-	{
-	}
-
-	bool Application::Shutdown()
+	bool CoreEngine::Shutdown()
 	{
 		running = false;
 		return true;
 	}
 
-	void Application::ProcessInput(Camera& camera)
+	void CoreEngine::ProcessInput()
 	{
+		const auto camera = Camera::GetInstance();
+
 		const auto glfwWindow = static_cast<GLFWwindow*>(window->GetNativeWindow());
 
 		if (glfwGetKey(glfwWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		    glfwSetWindowShouldClose(glfwWindow, true);
 
-		if (glfwGetKey(glfwWindow, GLFW_KEY_W) == GLFW_PRESS)
-		    camera.ProcessKeyboard(CameraMovement::FORWARD, deltaTime);
-		if (glfwGetKey(glfwWindow, GLFW_KEY_S) == GLFW_PRESS)
-		    camera.ProcessKeyboard(CameraMovement::BACKWARD, deltaTime);
-		if (glfwGetKey(glfwWindow, GLFW_KEY_A) == GLFW_PRESS)
-		    camera.ProcessKeyboard(CameraMovement::LEFT, deltaTime);
-		if (glfwGetKey(glfwWindow, GLFW_KEY_D) == GLFW_PRESS)
-		    camera.ProcessKeyboard(CameraMovement::RIGHT, deltaTime);
-		if (glfwGetKey(glfwWindow, GLFW_KEY_E) == GLFW_PRESS)
-			camera.ProcessKeyboard(CameraMovement::ROTATE_LEFT, deltaTime);
-		if (glfwGetKey(glfwWindow, GLFW_KEY_Q) == GLFW_PRESS)
-			camera.ProcessKeyboard(CameraMovement::ROTATE_RIGHT, deltaTime);
+		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_8) == GLFW_PRESS)
+		    camera->ProcessKeyboard(CameraMovement::FORWARD);
+		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_2) == GLFW_PRESS)
+		    camera->ProcessKeyboard(CameraMovement::BACKWARD);
+		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_4) == GLFW_PRESS)
+		    camera->ProcessKeyboard(CameraMovement::LEFT);
+		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_6) == GLFW_PRESS)
+		    camera->ProcessKeyboard(CameraMovement::RIGHT);
+
+		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_DECIMAL) == GLFW_PRESS)
+			camera->ProcessKeyboard(CameraMovement::ROTATE_LEFT);
+		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_0) == GLFW_PRESS)
+			camera->ProcessKeyboard(CameraMovement::ROTATE_RIGHT);
+		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_ADD) == GLFW_PRESS)
+			camera->ProcessKeyboard(CameraMovement::ZOOM_IN);
+		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_SUBTRACT) == GLFW_PRESS)
+			camera->ProcessKeyboard(CameraMovement::ZOOM_OUT);
 
 		static bool isChangeModelKeyPressed = false;
-		if (glfwGetKey(glfwWindow, GLFW_KEY_T) == GLFW_PRESS)
+		if (glfwGetKey(glfwWindow, GLFW_KEY_SPACE) == GLFW_PRESS)
 		{
 			if (!isChangeModelKeyPressed)
 			{
@@ -201,6 +220,20 @@ namespace Animator
 		else
 		{
 			isEnableModelKeyPressed = false;
+		}
+
+		static bool isCameraResetKeyPressed = false;
+		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_5) == GLFW_PRESS)
+		{
+			if (!isCameraResetKeyPressed)
+			{
+				camera->Reset();
+				isCameraResetKeyPressed = true;
+			}
+		}
+		else
+		{
+			isCameraResetKeyPressed = false;
 		}
 	}
 }

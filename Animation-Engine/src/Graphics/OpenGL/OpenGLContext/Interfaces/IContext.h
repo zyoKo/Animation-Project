@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Animator
+namespace AnimationEngine
 {
 	class IContext
 	{
@@ -18,5 +18,7 @@ namespace Animator
 		virtual void ClearColor() = 0;
 
 		virtual void EnableDepthTest(bool value) = 0;
+
+		virtual void EnableWireFrameMode(bool value) = 0;
 	};
 }

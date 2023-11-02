@@ -7,7 +7,7 @@
 
 #include "Math.h"
 
-namespace Animator::Utils
+namespace AnimationEngine::Utils
 {
 	static std::string RetrieveFilenameFromFilepath(const std::string& filepath)
 	{

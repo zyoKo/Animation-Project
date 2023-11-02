@@ -4,7 +4,7 @@
 
 #include "UniversalWindowData.h"
 
-namespace Animator
+namespace AnimationEngine
 {
 	class IWindow
 	{

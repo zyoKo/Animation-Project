@@ -4,7 +4,7 @@
 
 #include "spdlog/spdlog.h"
 
-namespace Animator
+namespace AnimationEngine
 {
 	class Log
 	{
@@ -18,11 +18,11 @@ namespace Animator
 	};
 }
 
-#define LOG_TRACE(message, ...)		Animator::Log::GetLogger()->trace(message, __VA_ARGS__)
-#define LOG_INFO(message, ...)		Animator::Log::GetLogger()->info(message, __VA_ARGS__)
-#define LOG_WARN(message, ...)		Animator::Log::GetLogger()->warn(message, __VA_ARGS__)
-#define LOG_ERROR(message, ...)		Animator::Log::GetLogger()->error(message, __VA_ARGS__)
-#define LOG_CRITICAL(message, ...)	Animator::Log::GetLogger()->critical(message, __VA_ARGS__)
+#define LOG_TRACE(message, ...)		AnimationEngine::Log::GetLogger()->trace(message, __VA_ARGS__)
+#define LOG_INFO(message, ...)		AnimationEngine::Log::GetLogger()->info(message, __VA_ARGS__)
+#define LOG_WARN(message, ...)		AnimationEngine::Log::GetLogger()->warn(message, __VA_ARGS__)
+#define LOG_ERROR(message, ...)		AnimationEngine::Log::GetLogger()->error(message, __VA_ARGS__)
+#define LOG_CRITICAL(message, ...)	AnimationEngine::Log::GetLogger()->critical(message, __VA_ARGS__)
 
 #ifdef ANIM_DEBUG
 #define ANIM_ENABLE_ASSERTS

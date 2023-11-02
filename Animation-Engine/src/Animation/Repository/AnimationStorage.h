@@ -1,6 +1,8 @@
 #pragma once
 
-namespace Animator
+#include <memory>
+
+namespace AnimationEngine
 {
 	class Animation;
 	

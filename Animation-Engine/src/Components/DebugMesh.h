@@ -8,14 +8,12 @@
 #include "Graphics/GraphicsAPI.h"
 #include "Types/DebugDrawMode.h"
 
-namespace Animator
+namespace AnimationEngine
 {
-	class Camera;
-
 	class DebugMesh
 	{
 	public:
-		DebugMesh(const std::shared_ptr<Shader>& debugShader, Camera* camera);
+		DebugMesh(const std::shared_ptr<Shader>& debugShader);
 
 		~DebugMesh() = default;
 
@@ -30,6 +28,8 @@ namespace Animator
 		void OverwriteJointsPosition(const std::vector<Math::Vector3F>& jointsPosition);
 
 		void SetupMesh();
+
+		void SetShader(const std::shared_ptr<Shader>& shader);
 	private:
 		std::vector<Math::Vector3F> jointsPosition;
 
@@ -46,9 +46,6 @@ namespace Animator
 		std::shared_ptr<Shader> shader;
 
 		VertexBufferLayout layout;
-
-		Camera* camera;
-
 
 		void OverwriteDataInVertexBuffer() const;
 

@@ -1,20 +1,42 @@
-#include "Core/Application/Application.h"
+#include "Sandbox.h"
 
-class Sandbox : public Animator::Application
+#include <iostream>
+
+#include "Core/Application/CoreEngine.h"
+
+namespace Sandbox
 {
-public:
-    Sandbox() = default;
-};
+	void SandboxApp::Initialize()
+	{
+		std::cout << "Hi from sandbox\n";
+	}
+
+	void SandboxApp::Update()
+	{
+	}
+
+	bool SandboxApp::Shutdown()
+	{
+		return true;
+	}
+}
+
+std::shared_ptr<AnimationEngine::IApplication> AnimationEngine::CreateApplication()
+{
+	return std::make_shared<Sandbox::SandboxApp>();
+}
 
 int main()
 {
-    Sandbox application;
+	AnimationEngine::CoreEngine app;
 
-    application.Initialize();
+	app.SetApplication(AnimationEngine::CreateApplication());
 
-	application.Run();
+	app.Initialize();
 
-    application.Shutdown();
+	app.Update();
 
-    return 0;
+	app.Shutdown();
+
+	return 0;
 }

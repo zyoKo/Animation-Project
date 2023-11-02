@@ -4,7 +4,7 @@
 
 #include <glm/glm.hpp>
 
-namespace Animator
+namespace AnimationEngine
 {
 	struct CameraProperties
 	{

@@ -4,7 +4,7 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-namespace Animator::Math
+namespace AnimationEngine::Math
 {
 	class VQS
 	{

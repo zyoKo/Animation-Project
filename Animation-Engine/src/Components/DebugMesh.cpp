@@ -5,12 +5,12 @@
 #include "Core/Logger/GLDebug.h"
 
 #include "Camera/Camera.h"
+#include "Camera/Constants/CameraConstants.h"
 
-namespace Animator
+namespace AnimationEngine
 {
-	DebugMesh::DebugMesh(const std::shared_ptr<Shader>& debugShader, Camera* camera)
-		:	shader(debugShader),
-			camera(camera)
+	DebugMesh::DebugMesh(const std::shared_ptr<Shader>& debugShader)
+		:	shader(debugShader)
 	{
 		vertexArrayObject = GraphicsAPI::CreateVertexArray();
 		vertexBuffer = GraphicsAPI::CreateVertexBuffer();
@@ -70,6 +70,11 @@ namespace Animator
 		OverwriteDataInVertexBuffer();
 	}
 
+	void DebugMesh::SetShader(const std::shared_ptr<Shader>& shader)
+	{
+		this->shader = shader;
+	}
+
 	void DebugMesh::OverwriteDataInVertexBuffer() const
 	{
 		int layoutLocation = -1;
@@ -85,8 +90,10 @@ namespace Animator
 
 	void DebugMesh::SetupShader()
 	{
-		glm::mat4 projection = glm::perspective(glm::radians(camera->zoom), 1280.0f / 720.0f, 0.1f, 10000.0f);
-		glm::mat4 view = camera->GetViewMatrix();
+		// TODO: Remove hard coding
+		const auto camera = Camera::GetInstance();
+		const glm::mat4 projection = glm::perspective(glm::radians(camera->GetZoom()), 1280.0f / 720.0f, CAMERA_NEAR_CLIPPING_PLANE, CAMERA_FAR_CLIPPING_PLANE);
+		const glm::mat4 view = camera->GetViewMatrix();
 
 		shader->Bind();
 		shader->SetUniformMatrix4F(projection, "projection");

@@ -2,7 +2,7 @@
 
 #include <glm/gtc/type_ptr.hpp>
 
-namespace Animator
+namespace AnimationEngine
 {
 	struct BoneInfo
 	{

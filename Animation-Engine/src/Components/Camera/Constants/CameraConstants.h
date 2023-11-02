@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Animator
+namespace AnimationEngine
 {
 	static constexpr float CAMERA_YAW = -90.0f;
 
@@ -15,4 +15,12 @@ namespace Animator
 	static constexpr glm::vec3 CAMERA_DEFAULT_POSITION = { 0.0f, 0.0f, 0.0f };
 
 	static constexpr glm::vec3 CAMERA_DEFAULT_WORLD_UP = { 0.0f, 1.0f, 0.0f };
+
+	static constexpr float CAMERA_ROTATE_SPEED = 30.0f;
+
+	static constexpr float CAMERA_ZOOM_SPEED = 10.0f;
+
+	static constexpr float CAMERA_NEAR_CLIPPING_PLANE = 0.1f;
+
+	static constexpr float CAMERA_FAR_CLIPPING_PLANE = 10000.0f;
 }

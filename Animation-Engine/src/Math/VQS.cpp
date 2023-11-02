@@ -4,7 +4,7 @@
 
 #include "Core/Utilities/Utilites.h"
 
-namespace Animator::Math
+namespace AnimationEngine::Math
 {
 	VQS::VQS()
 		:	translationVector(),
@@ -128,13 +128,16 @@ namespace Animator::Math
 	{
 		VQS inverse;
 
-		const auto scaledTranslationInverse = (1.0f / this->scalingVector) * (this->translationVector * -1.0f);
-		const auto scaledTranslationInverseQuat = QuatF(scaledTranslationInverse.x, scaledTranslationInverse.y, scaledTranslationInverse.z, 0.0f);
+		const auto scaledInverse = (1.0f / this->scalingVector.x);
+		const auto translationInverse = this->translationVector * -1.0f;
 
 		// [ q^-1 * (s^-1 * v^-1) * q, q^-1, s^-1 ]
-		const auto subTranslationVectorInverse = QuatF::Inverse(this->quatRotation) * (scaledTranslationInverseQuat) * this->quatRotation;
+		const auto rotationVector = glm::vec3(this->quatRotation.x, this->quatRotation.y, this->quatRotation.z);
+		const auto rotationVectorInverse = glm::vec3(-this->quatRotation.x, -this->quatRotation.y, -this->quatRotation.z);
 
-		inverse.translationVector = glm::vec3(subTranslationVectorInverse.x, subTranslationVectorInverse.y, subTranslationVectorInverse.z);
+		const auto subTranslationVectorInverse = rotationVectorInverse * (scaledInverse) * rotationVector;
+
+		inverse.translationVector = subTranslationVectorInverse;
 		inverse.quatRotation = QuatF::Inverse(this->quatRotation);
 		inverse.scalingVector = 1.0f / this->scalingVector;
 

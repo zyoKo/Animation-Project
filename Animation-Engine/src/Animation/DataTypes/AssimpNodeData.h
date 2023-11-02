@@ -1,9 +1,8 @@
 #pragma once
 
-#include <glm/fwd.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-namespace Animator
+namespace AnimationEngine
 {
 	struct AssimpNodeData
 	{
@@ -11,7 +10,7 @@ namespace Animator
 
 		glm::mat4 transformation;
 
-		int childrenCount;
+		unsigned childrenCount;
 
 		std::vector<AssimpNodeData> children;
 

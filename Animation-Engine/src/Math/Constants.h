@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Animator::Math
+namespace AnimationEngine::Math
 {
 	static constexpr float MATH_EPSILON = 0.000001f;
 

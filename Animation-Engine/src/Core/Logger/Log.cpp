@@ -3,7 +3,7 @@
 #include "Log.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 
-namespace Animator
+namespace AnimationEngine
 {
 	std::shared_ptr<spdlog::logger> Log::logger;
 

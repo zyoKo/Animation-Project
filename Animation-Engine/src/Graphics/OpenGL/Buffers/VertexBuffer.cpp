@@ -4,7 +4,7 @@
 
 #include "Core/Logger/GLDebug.h"
 
-namespace Animator
+namespace AnimationEngine
 {
 	VertexBuffer::VertexBuffer()
 		:	vertexBufferDataSize(0)

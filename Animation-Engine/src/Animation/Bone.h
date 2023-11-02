@@ -6,7 +6,7 @@
 
 #include "DataTypes/BoneData.h"
 
-namespace Animator
+namespace AnimationEngine
 {
 	class Bone
 	{
@@ -51,12 +51,6 @@ namespace Animator
 		int numScales;
 
 		float GetScaleFactor(float lastTimeStamp, float nextTimeStamp, float animationTime);
-
-		glm::mat4 InterpolationPosition(float animationTime);
-
-		glm::mat4 InterpolationRotation(float animationTime);
-
-		glm::mat4 InterpolationScaling(float animationTime);
 
 		Math::VQS InterpolateWithVQS(float animationTime);
 	};

@@ -3,7 +3,7 @@
 #include "Graphics/OpenGL/Buffers/Interfaces/IVertexBuffer.h"
 #include "Graphics/OpenGL/Textures/ITexture2D.h"
 
-namespace Animator
+namespace AnimationEngine
 {
 	class Shader;
 	class ITexture2D;

@@ -4,7 +4,7 @@
 
 #include "Core/Logger/Log.h"
 
-namespace Animator::Math
+namespace AnimationEngine::Math
 {
 	template <typename T>
 	constexpr Vector2<T>::Vector2() noexcept
