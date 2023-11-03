@@ -28,8 +28,8 @@ namespace AnimationEngine::Math
 
 		float GetCumulativeArcLength(float u) const;
 
-		Vector3F FindPointOnCurve(float nonNormalizedS) const;
-		float FindUUsingBisect(float nonNormalizedS, int segmentIndex) const;
+		Vector3F FindPointOnCurve(float nS) const;
+		float FindUUsingBisect(float nS, int segmentIndex) const;
 
 		void Clear(bool clearSpline = true);
 
@@ -51,7 +51,7 @@ namespace AnimationEngine::Math
 		float ComputeArcLength(int segmentIndex, float u) const;
 		float SegmentArcLengthUsingGaussianQuadrature(int segmentIndex, float u) const;
 
-		int FindSegmentIndex(float nonNormalizedS) const;
+		int FindSegmentIndex(float nS) const;
 		void GetCPAndTangentForSegmentIndex(int segmentIndex, Vector3F& cpOne, Vector3F& tanOne, Vector3F& cpTwo, Vector3F& tanTwo) const;
 	};
 }

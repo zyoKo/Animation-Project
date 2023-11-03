@@ -48,7 +48,7 @@ namespace AnimationEngine::Math
 		Vector3& operator/=(T value);
 
 		bool operator==(const Vector3& vector);
-		bool operator!=(const Vector3& vector);
+		bool operator!=(const Vector3& vector) const;
 
 		const T* GetPointerToData() const;
 

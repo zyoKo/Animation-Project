@@ -40,6 +40,8 @@ namespace AnimationEngine
 
 		float timeInSeconds;
 
+		std::vector<Math::Vector3F> equallySpacedPoints;
+
 		std::weak_ptr<Math::HermiteSpline> spline;
 
 		std::shared_ptr<IVertexArray> vertexArrayObject;

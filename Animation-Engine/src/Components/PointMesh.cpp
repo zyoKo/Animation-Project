@@ -17,7 +17,7 @@ namespace AnimationEngine
 {
 	PointMesh::PointMesh()
 		:	position(0.0f, 0.0f, 0.0f),
-			moveSpeed(13.5f),
+			moveSpeed(13.5f),	// 13.5f
 			totalArcLength(0.0f),
 			distanceTraveled(0.0f),
 			timeInSeconds(0.0f)
@@ -115,15 +115,21 @@ namespace AnimationEngine
 			{
 				const auto centerOfInterest = splinePtr->FindPointOnCurve(distanceTraveled + delta);
 
-				const auto direction = (centerOfInterest - nextPoint).GetNormalize();
+				if (centerOfInterest != nextPoint)
+				{
+					const auto direction = (centerOfInterest - nextPoint).GetNormalize();
 
-				// To calculate the rotation quaternion, we need the axis and angle
-				auto rotationAxis = Math::Vector3F::Cross(Math::Vector3F::GetForward(), direction);
-				rotationAxis = rotationAxis.GetNormalize();
-				const float rotationAngle = std::acos(Math::Vector3F::Dot(Math::Vector3F::GetForward(), direction));
-				
-				// Create a quaternion representing the rotation from defaultForward to direction
-				rotation = Math::QuatF::AngleAxis(rotationAngle, rotationAxis);
+					// To calculate the rotation quaternion, we need the axis and angle
+					auto rotationAxis = Math::Vector3F::Cross(Math::Vector3F::GetForward(), direction);
+					if (!Math::Vector3F::IsZero(rotationAxis))
+					{
+						rotationAxis = rotationAxis.GetNormalize();
+						const float rotationAngle = std::acos(Math::Vector3F::Dot(Math::Vector3F::GetForward(), direction));
+						
+						// Create a quaternion representing the rotation from defaultForward to direction
+						rotation = Math::QuatF::AngleAxis(rotationAngle, rotationAxis);
+					}
+				}
 			}
 
 			position = nextPoint;

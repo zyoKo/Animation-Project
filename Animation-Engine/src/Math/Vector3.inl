@@ -122,7 +122,7 @@ namespace AnimationEngine::Math
 	}
 
 	template <typename T>
-	bool Vector3<T>::operator!=(const Vector3& vector)
+	bool Vector3<T>::operator!=(const Vector3& vector) const
 	{
 		ANIM_ASSERT(!vector.HasNaNs(), "Operation '/' failed, the vector has NaNs!");
 		return x != vector.x || y != vector.y || z != vector.z;

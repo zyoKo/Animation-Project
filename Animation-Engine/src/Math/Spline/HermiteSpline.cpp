@@ -7,8 +7,9 @@
 namespace AnimationEngine::Math
 {
 	HermiteSpline::HermiteSpline()
-		:	controlPoints(DEFAULT_CONTROL_POINTS_CIRCLE)
-		//:	controlPoints(DEFAULT_CONTROL_POINTS)
+		//:	controlPoints(TEST_CP_LINE)
+		//:	controlPoints(DEFAULT_CONTROL_POINTS_CIRCLE)
+		:	controlPoints(DEFAULT_CONTROL_POINTS)
 	{
 		CalculateTangentsForControlPoints();
 
@@ -36,13 +37,13 @@ namespace AnimationEngine::Math
 		const Vector3F& cpTwo, const Vector3F& tanTwo,
 		float u)
 	{
-		const float tSquare = u * u;
-		const float tCube	= u * u * u;
+		const float uSquare = u * u;
+		const float uCube	= u * u * u;
 
-		const float h1 =  2.0f * tCube - 3.0f * tSquare + 1.0f;	//  2u^3 - 3u^2 + 1
-		const float h2 =  1.0f * tCube - 2.0f * tSquare + u;	//   u^3 - 2u^2 + u
-		const float h3 = -2.0f * tCube + 3.0f * tSquare + 0.0f;	// -2u^3 - 3u^2
-		const float h4 =  1.0f * tCube - 1.0f * tSquare + 0.0f;	//   u^3 - u^2
+		const float h1 =  2.0f * uCube - 3.0f * uSquare + 1.0f;	//  2u^3 - 3u^2 + 1
+		const float h2 =  1.0f * uCube - 2.0f * uSquare + u;	//   u^3 - 2u^2 + u
+		const float h3 = -2.0f * uCube + 3.0f * uSquare + 0.0f;	// -2u^3 - 3u^2
+		const float h4 =  1.0f * uCube - 1.0f * uSquare + 0.0f;	//   u^3 - u^2
 
 		return h1 * cpOne + h2 * tanOne + h3 * cpTwo + h4 * tanTwo;
 	}
@@ -74,32 +75,27 @@ namespace AnimationEngine::Math
 	{
 		if (controlPoints.empty())
 		{
-			LOG_WARN("Set control points first to calculate tangents");
-			return;
-		}
-
-		if (!tangents.empty())
-		{
-			tangents.clear();
+		    LOG_WARN("Set control points first to calculate tangents");
+		    return;
 		}
 
 		tangents.resize(controlPoints.size());
 
-		// Compute perpendicular tangents for the control points
-		for (size_t i = 0; i < controlPoints.size() - 1; ++i)
+		// Compute tangents for the control points
+		for (size_t i = 0; i < controlPoints.size(); ++i)
 		{
-			if (i == 0)
-			{
-				tangents[i] = controlPoints[1] - controlPoints[0];
-			}
-			else if (i == controlPoints.size() - 1)
-			{
-				tangents[i] = controlPoints[i] - controlPoints[i - 1];
-			}
-			else
-			{
-				tangents[i] = controlPoints[i+1] - controlPoints[i];
-			}
+		    if (i == 0)
+		    {
+		        tangents[i] = controlPoints[1] - controlPoints[0];
+		    }
+		    else if (i == controlPoints.size() - 1)
+		    {
+		        tangents[i] = controlPoints[i] - controlPoints[i - 1];
+		    }
+		    else
+		    {
+		        tangents[i] = 0.5f * (controlPoints[i+1] - controlPoints[i-1]);
+		    }
 		}
 	}
 
@@ -167,7 +163,7 @@ namespace AnimationEngine::Math
 		return length;
 	}
 
-	float HermiteSpline::FindUUsingBisect(float nonNormalizedS, int segmentIndex) const
+	float HermiteSpline::FindUUsingBisect(float nS, int segmentIndex) const
 	{
 	    // Bisection method for the identified segment
 	    float uA = 0.0f;
@@ -180,10 +176,10 @@ namespace AnimationEngine::Math
 	    const float arcLengthOfPreviousSegments = cumulativeArcLengths[segmentIndex];
 		float previousMid = -1.0f;
 	    while (
-			std::abs(arcLengthOfPreviousSegments + arcLengthMid - nonNormalizedS) > MATH_EPSILON &&
+			std::abs(arcLengthOfPreviousSegments + arcLengthMid - nS) > MATH_EPSILON &&
 			std::abs(uM - previousMid) > MATH_EPSILON)
 	    {
-	        if (arcLengthOfPreviousSegments + arcLengthMid < nonNormalizedS)
+	        if (arcLengthOfPreviousSegments + arcLengthMid < nS)
 	        {
 	            uA = uM;
 	        }
@@ -200,10 +196,10 @@ namespace AnimationEngine::Math
 	    return uM;
 	}
 
-	Vector3F HermiteSpline::FindPointOnCurve(float nonNormalizedS) const
+	Vector3F HermiteSpline::FindPointOnCurve(float nS) const
 	{
-	    const int segmentIndex = FindSegmentIndex(nonNormalizedS);
-		const float u = FindUUsingBisect(nonNormalizedS, segmentIndex);
+	    const int segmentIndex = FindSegmentIndex(nS);
+		const float u = FindUUsingBisect(nS, segmentIndex);
 
 		return GetPointOnSpline(segmentIndex, u);
 	}
@@ -222,19 +218,20 @@ namespace AnimationEngine::Math
 
 	float HermiteSpline::SegmentArcLengthUsingGaussianQuadrature(int segmentIndex, float u) const
 	{
-		// 3-point Gaussian Quadrature
-		static constexpr std::array weights  = { 0.5555556f, 0.8888889f, 0.5555556f };
-		static constexpr std::array abscissa = { -0.7745967f, 0.0f, 0.7745967f };
-
-		float integral = 0.0f;
-		for (int i = 0; i < 3; ++i)
-		{
-		    const float t = 0.5f * u * (abscissa[i] + 1.0f);
-		    integral += weights[i] * ComputeArcLength(segmentIndex, t);
-		}
-		integral *= 0.5f * u;
-
-		return integral;
+	    // 4-point Gaussian Quadrature
+	    static constexpr std::array<float, 4> weights  = { 0.3478548f, 0.6521452f, 0.6521452f, 0.3478548f };
+	    static constexpr std::array<float, 4> abscissa = { -0.8611363f, -0.3399810f, 0.3399810f, 0.8611363f };
+	
+	    float integral = 0.0f;
+	    for (int i = 0; i < 4; ++i)
+	    {
+	        const float t = 0.5f * u * (abscissa[i] + 1.0f);
+	        const auto tempArcLength = ComputeArcLength(segmentIndex, t);
+	        integral += weights[i] * tempArcLength;
+	    }
+	    integral *= 0.5f * u;
+	
+	    return integral;
 	}
 
 	float HermiteSpline::ComputeArcLength(int segmentIndex, float u) const
@@ -242,30 +239,30 @@ namespace AnimationEngine::Math
 	    // get the two points and tangents for the segment
 		Vector3F cpOne, tanOne, cpTwo, tanTwo;
 		GetCPAndTangentForSegmentIndex(segmentIndex, cpOne, tanOne, cpTwo, tanTwo);
-
-	    const Vector3F a =  2.0f * cpOne - 2.0f * cpTwo + 1.0f * tanOne + tanTwo;
-	    const Vector3F b = -3.0f * cpOne + 3.0f * cpTwo - 2.0f * tanOne - tanTwo;
-	    const Vector3F c =  tanOne;
-
+		
+		const Vector3F a =  2.0f * cpOne - 2.0f * cpTwo + 1.0f * tanOne + tanTwo;
+		const Vector3F b = -3.0f * cpOne + 3.0f * cpTwo - 2.0f * tanOne - tanTwo;
+		const Vector3F c =  tanOne;
+		
 	    const float A =  9.0f * Vector3F::Dot(a, a);
 	    const float B = 12.0f * Vector3F::Dot(a, b);
 	    const float C =  6.0f * Vector3F::Dot(a, c) + 4.0f * Vector3F::Dot(b, b);
 		const float D =  4.0f * Vector3F::Dot(b, c);
-	    const float E =			Vector3F::Dot(c, c);
-	
+	    const float E =	 1.0f *	Vector3F::Dot(c, c);
+		
 	    const float uSquare = u * u;
 	    const float uCube	= u * u * u;
 	    const float uPow4	= u * u * u * u;
-	
+		
 	    // Compute the integrand for arc length
 	    return std::sqrtf(A * uPow4 + B * uCube + C * uSquare + D * u + E);
 	}
 
-	int HermiteSpline::FindSegmentIndex(float nonNormalizedS) const
+	int HermiteSpline::FindSegmentIndex(float nS) const
 	{
-		for (size_t i = 0; i < cumulativeArcLengths.size(); ++i)
+		for (size_t i = 1; i < cumulativeArcLengths.size(); ++i)
 		{
-		    if (cumulativeArcLengths[i] > nonNormalizedS)
+		    if (cumulativeArcLengths[i] > nS)
 		    {
 		        return static_cast<int>(i - 1);
 		    }

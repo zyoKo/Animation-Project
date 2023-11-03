@@ -27,5 +27,14 @@ namespace AnimationEngine::Math
 		{  25.0f,	  1.0f,    0.0f }
 	};
 
+	static const std::vector<Vector3F> TEST_CP_LINE =
+	{
+		{ -100.0f,	1.0f,   0.0f },
+		{    0.0f,	1.0f,   0.0f },
+		{   80.0f,	1.0f,   0.0f },
+		{   90.0f,	1.0f,   0.0f },
+		{  120.0f,	1.0f,   0.0f }
+	};
+
 	static constexpr float STEP_SIZE = 0.01f;
 }
