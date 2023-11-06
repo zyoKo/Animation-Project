@@ -51,6 +51,12 @@ namespace AnimationEngine
 		}
 
 		template <typename... Args>
+		static std::unique_ptr<IVertexArray> CreateUniqueVertexArray(Args&&... args)
+		{
+			return std::make_unique<VertexArray>(std::forward<Args>(args)...);
+		}
+
+		template <typename... Args>
 		static std::shared_ptr<IVertexBuffer> CreateVertexBuffer(Args&&... args)
 		{
 			return std::make_shared<VertexBuffer>(std::forward<Args>(args)...);

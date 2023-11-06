@@ -11,7 +11,8 @@ namespace AnimationEngine
 {
 	Animator::Animator()
 		:	currentAnimation(nullptr),
-			currentTime(0.0f)
+			currentTime(0.0f),
+			animationSpeedFactor(1.0f)
 	{
 		finalBoneMatrices.reserve(100);
 
@@ -23,7 +24,8 @@ namespace AnimationEngine
 
 	Animator::Animator(Animation* animation)
 		:	currentAnimation(animation),
-			currentTime(0.0f)
+			currentTime(0.0f),
+			animationSpeedFactor(1.0f)
 	{
 		finalBoneMatrices.reserve(100);
 
@@ -45,7 +47,7 @@ namespace AnimationEngine
 
 		if (currentAnimation)
 		{
-			currentTime += currentAnimation->GetTicksPerSecond() * dt;
+			currentTime += currentAnimation->GetTicksPerSecond() * dt * animationSpeedFactor;
 			currentTime = std::fmod(currentTime, currentAnimation->GetDuration());
 			CalculateBoneTransformWithVQS(&currentAnimation->GetRootNode(), Math::VQS());
 		}
@@ -54,6 +56,11 @@ namespace AnimationEngine
 	void Animator::PlayAnimation(Animation* animation)
 	{
 		currentAnimation = animation;
+		currentTime = 0.0f;
+	}
+
+	void Animator::ResetAnimation()
+	{
 		currentTime = 0.0f;
 	}
 
@@ -68,8 +75,7 @@ namespace AnimationEngine
 			bone->Update(currentTime);
 			localVQS = bone->GetLocalVQS();
 
-			jointPositions.push_back(ExtractJointPosition(Utils::GLMInternalHelper::ConvertVQSToGLMMatrix(parentVQS)));
-			jointPositions.push_back(ExtractJointPosition(Utils::GLMInternalHelper::ConvertVQSToGLMMatrix(parentVQS * localVQS)));
+			ExtractParentJointAndChildJoints(parentVQS, localVQS);
 		}
 
 		const auto worldVQS = parentVQS * localVQS;
@@ -97,13 +103,30 @@ namespace AnimationEngine
 		return jointPositions;
 	}
 
+	float Animator::GetAnimationSpeedFactor() const
+	{
+		return animationSpeedFactor;
+	}
+
+	void Animator::SetAnimationSpeedFactor(float value)
+	{
+		animationSpeedFactor = value;
+	}
+
 	void Animator::ClearJoints()
 	{
 		jointPositions.clear();
 	}
 
-	Math::Vector3F Animator::ExtractJointPosition(const glm::mat4& transform)
+	void Animator::ExtractParentJointAndChildJoints(const Math::VQS& parent, const Math::VQS& child)
 	{
-		return { transform[3][0], transform[3][1], transform[3][2] };
+		const auto parentJoint = Utils::GLMInternalHelper::ConvertVQSToGLMMatrix(parent);
+		const auto childJoint = Utils::GLMInternalHelper::ConvertVQSToGLMMatrix(parent * child);
+
+		const auto parentJointPosition = Math::Vector3F{ parentJoint[3].x, parentJoint[3].y, parentJoint[3].z };
+		const auto childJointPosition = Math::Vector3F{ childJoint[3].x, childJoint[3].y, childJoint[3].z };
+
+		jointPositions.push_back(parentJointPosition);
+		jointPositions.push_back(childJointPosition);
 	}
 }

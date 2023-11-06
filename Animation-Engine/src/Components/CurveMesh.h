@@ -15,36 +15,42 @@ namespace AnimationEngine
 
 		CurveMesh(const std::vector<Math::Vector3F>& controlPoints);
 
-		void Bind() const;
+		void BindSplineVAO() const;
 
-		void UnBind() const;
+		void BindControlPointsVAO() const;
 
-		void Draw();
+		void UnBindSplineVAO() const;
 
-		void SetShader(const std::shared_ptr<Shader>& shader);
+		void UnBindControlPointsVAO() const;
+
+		void Draw() const;
+
+		void SetSplineShader(const std::shared_ptr<Shader>& shader);
+
+		void SetControlPointsShader(const std::shared_ptr<Shader>& shader);
 
 		const std::vector<Math::Vector3F>& GetSplinePoints() const;
-		const std::vector<Math::Vector3F>& GetEquallySpacedPoints() const;
+
 		std::weak_ptr<Math::HermiteSpline> GetSpline() const;
+
+		void CreateNewSplinePath(const std::vector<Math::Vector3F>& controlPoints);
 
 	private:
 		std::vector<Math::Vector3F> splinePoints;
 
-		std::vector<Math::Vector3F> equallySpacedPoints;
-
 		std::shared_ptr<Math::HermiteSpline> spline;
 
-		std::shared_ptr<IVertexArray> vertexArrayObject;
-		std::shared_ptr<IVertexBuffer> vertexBuffer;
+		std::shared_ptr<IVertexArray> vaoSpline;
+		std::shared_ptr<IVertexBuffer> vbSpline;
 
-		std::weak_ptr<Shader> shader;
+		std::shared_ptr<IVertexArray> vaoControlPoints;
+		std::shared_ptr<IVertexBuffer> vbControlPoints;
+
+		std::weak_ptr<Shader> splineShader;
+		std::weak_ptr<Shader> controlPointsShader;
 
 		void SetupMesh() const;
 
-		void SetupMeshWithEquallySpacedPoints() const;
-
 		void GeneratePath();
-
-		void ComputeEquallySpacedPoints();
 	};
 }

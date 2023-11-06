@@ -52,6 +52,13 @@ namespace AnimationEngine
 			stride += GetSizeofCustomType(type);
 		}
 
+		void Clear()
+		{
+			bufferElements.clear();
+
+			stride = 0;
+		}
+
 	private:
 		std::vector<VertexBufferElements> bufferElements;
 

@@ -1,23 +1,12 @@
 #pragma once
 
-#include <glm/gtc/matrix_transform.hpp>
-
-#include "Interface/IAnimator.h"
+#include "Animation/Interface/IAnimator.h"
 
 namespace AnimationEngine
 {
-	struct AssimpNodeData;
-
-	class Animation;
-
-	class Animator : public IAnimator
+	class NullAnimator : public IAnimator
 	{
-	public:
-		Animator();
-
-		Animator(Animation* animation);
-
-		void ChangeAnimation(Animation* newAnimation) override;
+		void ChangeAnimation(Animation* animation) override;
 
 		void UpdateAnimation() override;
 
@@ -36,18 +25,5 @@ namespace AnimationEngine
 		void SetAnimationSpeedFactor(float value) override;
 
 		void ClearJoints() override;
-
-	private:
-		std::vector<glm::mat4> finalBoneMatrices;
-
-		std::vector<Math::Vector3F> jointPositions;
-
-		Animation* currentAnimation;
-
-		float currentTime;
-
-		float animationSpeedFactor;
-
-		void ExtractParentJointAndChildJoints(const Math::VQS& parent, const Math::VQS& child);
 	};
 }

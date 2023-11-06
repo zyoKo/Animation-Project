@@ -18,12 +18,12 @@ namespace AnimationEngine
 	}
 
 	template <typename T>
-	std::shared_ptr<T> AssetStore<T>::RetrieveFromStorage(const std::string& assetName)
+	std::weak_ptr<T> AssetStore<T>::RetrieveFromStorage(const std::string& assetName)
 	{
 		if (!assetStorage.contains(assetName))
 		{
 			LOG_WARN("Failed to retrive asset[{0}] from the Asset Storage!", assetName);
-			return nullptr;
+			return {};
 		}
 
 		LOG_INFO("Successfully retrived asset[{0}] from Asset Storage!", assetName);

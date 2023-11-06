@@ -9,26 +9,30 @@
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-#include "Animation/Animator.h"
+#include "Interface/IApplication.h"
 #include "Core/Logger/Log.h"
+#include "Core/Utilities/Time.h"
 #include "Graphics/GraphicsAPI.h"
 #include "AssetManager/AssetManager.h"
-#include "Components/GridMesh.h"
-#include "Animation/Model.h"
 #include "Components/CurveMesh.h"
+#include "Components/GridMesh.h"
 #include "Components/Camera/Camera.h"
 #include "Components/Camera/Constants/CameraConstants.h"
-#include "Core/ServiceLocators/AssetManagerLocator.h"
-#include "Core/Utilities/Time.h"
-#include "Core/Utilities/Utilites.h"
-#include "Interface/IApplication.h"
+#include "Animation/Animator.h"
+#include "Animation/Model.h"
+
+#include "Core/ServiceLocators/Assets/AssetManagerLocator.h"
+#include "Core/ServiceLocators/Animation/AnimatorLocator.h"
+#include "Core/ServiceLocators/Assets/AnimationStorageLocator.h"
+#include "Math/Spline/Constants/SplineConstants.h"
 
 namespace AnimationEngine
 {
 	CoreEngine::CoreEngine(const std::string& name, uint32_t width, uint32_t height)
-		:	animator(std::make_shared<Animator>()),
-			assetManager(new AssetManager()),
-			point(nullptr)
+		:	assetManager(new AssetManager()),
+			animator(new Animator()),
+			curveMesh(nullptr),
+			modelManager(nullptr)
 	{
 		Log::Initialize();
 
@@ -37,14 +41,26 @@ namespace AnimationEngine
 		// Bind Event Callback here
 
 		AssetManagerLocator::Initialize();
+		AnimatorLocator::Initialize();
 
 		AssetManagerLocator::Provide(assetManager);
+		AnimatorLocator::Provide(animator);
+		AnimationStorageLocator::Provide(&animationStorage);
 	}
 
 	CoreEngine::~CoreEngine()
 	{
 		delete assetManager;
 		assetManager = nullptr;
+
+		delete animator;
+		animator = nullptr;
+
+		delete modelManager;
+		modelManager = nullptr;
+
+		delete curveMesh;
+		curveMesh = nullptr;
 	}
 
 	void CoreEngine::SetApplication(const std::shared_ptr<IApplication>& app)
@@ -52,21 +68,22 @@ namespace AnimationEngine
 		this->application = app;
 	}
 
-	void CoreEngine::Initialize()
+	void CoreEngine::Initialize() const
 	{
 		Camera::GetInstance()->Initialize();
 
 		application->Initialize();
 
-		const auto assetManager = AssetManagerLocator::GetAssetManager();
+		auto* assetManager = AssetManagerLocator::GetAssetManager();
+		auto* animationStorage = AnimationStorageLocator::GetAnimationStorage();
 
 		const std::string dreyarDiffuseTextureFile = "./assets/dreyar/textures/Dreyar_diffuse.png";
 		const auto dreyarTextureDiffuse = assetManager->CreateTexture(dreyarDiffuseTextureFile);
-		dreyarTextureDiffuse->SetTextureName("texture_diffuse1");
+		dreyarTextureDiffuse.lock()->SetTextureName("texture_diffuse1");
 
 		const std::string gridTextureFile = "./assets/grid.png";
 		const auto gridTexture = assetManager->CreateTexture(gridTextureFile);
-		gridTexture->SetTextureName("gridTexture");
+		gridTexture.lock()->SetTextureName("gridTexture");
 
 		const std::string vertexShaderFile = "./assets/shaders/anim_model.vert";
 		const std::string fragmentShaderFile = "./assets/shaders/anim_model.frag";
@@ -85,45 +102,54 @@ namespace AnimationEngine
 		const std::string dreyar2ColladaFile = "./assets/dreyar/Walking.dae";
 		const std::string dreyar3ColladaFile = "./assets/dreyar/Running.dae";
 		//animationStorage.AddAssetToStorage(dreyar1ColladaFile, dreyarTextureDiffuse);
-		animationStorage.AddAssetToStorage(dreyar2ColladaFile, dreyarTextureDiffuse);
-		animationStorage.AddAssetToStorage(dreyar3ColladaFile, dreyarTextureDiffuse);
+		animationStorage->AddAssetToStorage(dreyar2ColladaFile, dreyarTextureDiffuse.lock());
+		animationStorage->AddAssetToStorage(dreyar3ColladaFile, dreyarTextureDiffuse.lock());
 
 		// Spline
 		const std::string splineVertShader = "./assets/shaders/spline.vert";
 		const std::string splineFragShader = "./assets/shaders/spline.frag";
 		assetManager->CreateShader("SplineShader", splineVertShader, splineFragShader);
+
+		const std::string controlPointsVertShader = "./assets/shaders/spline_cp.vert";
+		const std::string controlPointsFragShader = "./assets/shaders/spline_cp.frag";
+		assetManager->CreateShader("ControlPointShader", controlPointsVertShader, controlPointsFragShader);
 	}
 
 	void CoreEngine::Update()
 	{
 		application->PreUpdate();
 
-		const auto assetManager = AssetManagerLocator::GetAssetManager();
+		auto* assetManager = AssetManagerLocator::GetAssetManager();
+		auto* animator = AnimatorLocator::GetAnimator();
+		auto* animationStorage = AnimationStorageLocator::GetAnimationStorage();
 
 		auto animationShader = assetManager->RetrieveShaderFromStorage("AnimationShader");
 		auto debugShader = assetManager->RetrieveShaderFromStorage("DebugAnimationShader");
 		auto gridShader = assetManager->RetrieveShaderFromStorage("GridShader");
 		auto splineShader = assetManager->RetrieveShaderFromStorage("SplineShader");
+		auto controlPointShader = assetManager->RetrieveShaderFromStorage("ControlPointShader");
 
 		auto textureDiffuse = assetManager->RetrieveTextureFromStorage("Dreyar_diffuse");
 		auto gridTexture = assetManager->RetrieveTextureFromStorage("grid");
 
-		animator->ChangeAnimation(animationStorage.GetAnimationForCurrentlyBoundIndex());
+		animator->ChangeAnimation(animationStorage->GetAnimationForCurrentlyBoundIndex());
 
 		GraphicsAPI::GetContext()->EnableDepthTest(true);
 		GraphicsAPI::GetContext()->EnableWireFrameMode(false);
 
 		auto camera = Camera::GetInstance();
 
-		DebugMesh debugMesh(debugShader);
+		DebugMesh debugMesh(debugShader.lock());
 		GridMesh gridMesh;
-		gridMesh.SetGridTexture(gridTexture);
+		gridMesh.SetGridTexture(gridTexture.lock());
 
-		CurveMesh curveMesh;
-		curveMesh.SetShader(splineShader);
+		//CurveMesh curveMesh;
+		curveMesh = new CurveMesh();
+		curveMesh->SetSplineShader(splineShader.lock());
+		curveMesh->SetControlPointsShader(controlPointShader.lock());
 
-		point = new PointMesh();
-		point->SetSpline(curveMesh.GetSpline());
+		modelManager = new ModelManager();
+		modelManager->SetSpline(curveMesh->GetSpline());
 
 		while (running && !window->WindowShouldClose())
 		{
@@ -154,65 +180,40 @@ namespace AnimationEngine
 
 			if (enableModelMesh)
 			{
-				animationShader->Bind();
-				animationShader->SetUniformInt(0, animationStorage.GetDiffuseTextureFromCurrentlyBoundIndex()->GetTextureName());
-				animationShader->SetUniformMatrix4F(projection, "projection");
-				animationShader->SetUniformMatrix4F(view, "view");
-				animationShader->SetUniformMatrix4F(model, "model");
+				animationShader.lock()->Bind();
+				animationShader.lock()->SetUniformInt(0, animationStorage->GetDiffuseTextureFromCurrentlyBoundIndex()->GetTextureName());
+				animationShader.lock()->SetUniformMatrix4F(projection, "projection");
+				animationShader.lock()->SetUniformMatrix4F(view, "view");
+				animationShader.lock()->SetUniformMatrix4F(model, "model");
 				for (unsigned i = 0; i < animator->GetFinalBoneMatrices().size(); ++i)
 				{
 					std::string uniformName = "finalBonesMatrices[" + std::to_string(i) + "]";
-					animationShader->SetUniformMatrix4F(animator->GetFinalBoneMatrices()[i], uniformName);
+					animationShader.lock()->SetUniformMatrix4F(animator->GetFinalBoneMatrices()[i], uniformName);
 				}
-				animationStorage.GetModelForCurrentlyBoundIndex()->Draw(animationShader);
-				animationShader->UnBind();
+				animationStorage->GetModelForCurrentlyBoundIndex()->Draw(animationShader.lock());
+				animationShader.lock()->UnBind();
 			}
 			
-			gridMesh.Update(gridShader, projection, view);
-			
-			curveMesh.Draw();
+			gridMesh.Update(gridShader.lock(), projection, view);
 
 			GraphicsAPI::GetContext()->EnablePointSize(true);
-			point->Draw();
+			curveMesh->Draw();
 			GraphicsAPI::GetContext()->EnablePointSize(false);
 
-			auto newRotation = Utils::GLMInternalHelper::ConvertQuaternionToGLMMatrix(point->GetRotation());
-
-			auto& animationRoot = animationStorage.GetAnimationForCurrentlyBoundIndex()->GetRootNode();
-
-			glm::vec3 scale, translation, skew;
-			glm::vec4 perspective;
-			glm::quat orientation;
-			glm::decompose(animationRoot.transformation, scale, orientation, translation, skew, perspective);
-
-			auto newMatrix = glm::mat4(1.0f);
-			newMatrix = glm::scale(newMatrix, scale); // Apply scale
-			newMatrix = newMatrix * newRotation;
-			newMatrix = glm::translate(newMatrix, translation); // Apply translation
-
-			animationRoot.transformation = newMatrix;
-
-			animationRoot.transformation[3][0] = point->GetPosition().x;
-			animationRoot.transformation[3][1] = point->GetPosition().y;
-			animationRoot.transformation[3][2] = point->GetPosition().z;
-
-			//LOG_WARN("Incoming Rotation: ({0}, {1}, {2}, {3})", point->GetRotation().x, point->GetRotation().y, point->GetRotation().z, point->GetRotation().w);
-			auto axis = Math::QuatF::GetAxis(point->GetRotation());
-			LOG_WARN("Angle: {0}_________Axis: ({1}, {2}, {3})", Math::QuatF::GetAngle(point->GetRotation()) * (180.0f / 3.14f), axis.x, axis.y, axis.z);
-			//auto rotationAxis = Utils::GLMInternalHelper::ConvertInternalVectorToGLM(Math::QuatF::GetAxis(point->GetRotation()));
+			modelManager->Update();
 
 			window->Update();
 		}
 
 		assetManager->ClearStores();
 
-		delete point;
-
 		application->PostUpdate();
 	}
 
 	bool CoreEngine::Shutdown()
 	{
+		application->Shutdown();
+
 		running = false;
 		return true;
 	}
@@ -287,41 +288,51 @@ namespace AnimationEngine
 			isCameraResetKeyPressed = false;
 		}
 
-		static constexpr float moveSpeed = 0.1f;
-		static Math::Vector3F newPosition;
-		if (glfwGetKey(glfwWindow, GLFW_KEY_W) == GLFW_PRESS)
-		{
-			newPosition = { point->GetPosition().x, point->GetPosition().y, point->GetPosition().z - moveSpeed };
-			point->SetPosition(newPosition);
-		}
-		if (glfwGetKey(glfwWindow, GLFW_KEY_A) == GLFW_PRESS)
-		{
-			newPosition = { point->GetPosition().x - moveSpeed, point->GetPosition().y, point->GetPosition().z };
-			point->SetPosition(newPosition);
-		}
-		if (glfwGetKey(glfwWindow, GLFW_KEY_D) == GLFW_PRESS)
-		{
-			newPosition = { point->GetPosition().x + moveSpeed, point->GetPosition().y, point->GetPosition().z };
-			point->SetPosition(newPosition);
-		}
-		if (glfwGetKey(glfwWindow, GLFW_KEY_S) == GLFW_PRESS)
-		{
-			newPosition = { point->GetPosition().x, point->GetPosition().y, point->GetPosition().z + moveSpeed };
-			point->SetPosition(newPosition);
-		}
-
 		static bool resetPathFollowing = false;
 		if (glfwGetKey(glfwWindow, GLFW_KEY_R) == GLFW_PRESS)
 		{
 			if (!resetPathFollowing)
 			{
-				point->Reset();
+				modelManager->Reset();
 				resetPathFollowing = true;
 			}
 		}
 		else
 		{
 			resetPathFollowing = false;
+		}
+
+		static bool changePath = false;
+		if (glfwGetKey(glfwWindow, GLFW_KEY_1) == GLFW_PRESS)
+		{
+			if (changePath)
+				return;
+
+			curveMesh->CreateNewSplinePath(Math::DEFAULT_CONTROL_POINTS);
+			modelManager->Reset();
+			changePath = true;
+		}
+		else if(glfwGetKey(glfwWindow, GLFW_KEY_2) == GLFW_PRESS)
+		{
+			if (changePath)
+				return;
+			
+			curveMesh->CreateNewSplinePath(Math::SMOOTH_CONTROL_POINTS);
+			modelManager->Reset();
+			changePath = true;
+		}
+		else if(glfwGetKey(glfwWindow, GLFW_KEY_3) == GLFW_PRESS)
+		{
+			if (changePath)
+				return;
+
+			curveMesh->CreateNewSplinePath(Math::CONTROL_POINTS_CIRCLE);
+			modelManager->Reset();
+			changePath = true;
+		}
+		else
+		{
+			changePath = false;
 		}
 	}
 }

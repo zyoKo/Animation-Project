@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Math/Math.h"
+
 namespace AnimationEngine::Math
 {
 	/*
@@ -23,7 +25,7 @@ namespace AnimationEngine::Math
 
 		const std::vector<Vector3F>& GetControlPoints() const;
 		const std::vector<Vector3F>& GetTangents() const;
-		const std::vector<Vector3F>& GetSpline() const;
+		const std::vector<Vector3F>& GetSplinePoints() const;
 		const std::vector<float>& GetCumulativeArcLengths() const;
 
 		float GetCumulativeArcLength(float u) const;
@@ -36,7 +38,7 @@ namespace AnimationEngine::Math
 	private:
 		std::vector<Vector3F> controlPoints;
 		std::vector<Vector3F> tangents;
-		std::vector<Vector3F> spline;
+		std::vector<Vector3F> splinePoints;
 		std::vector<float> cumulativeArcLengths;
 
 		Vector3F GetPointOnSpline(int segmentIndex, float u) const;

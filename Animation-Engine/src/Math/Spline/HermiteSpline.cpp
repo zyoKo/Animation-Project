@@ -7,8 +7,6 @@
 namespace AnimationEngine::Math
 {
 	HermiteSpline::HermiteSpline()
-		//:	controlPoints(TEST_CP_LINE)
-		//:	controlPoints(DEFAULT_CONTROL_POINTS_CIRCLE)
 		:	controlPoints(DEFAULT_CONTROL_POINTS)
 	{
 		CalculateTangentsForControlPoints();
@@ -105,11 +103,11 @@ namespace AnimationEngine::Math
 		{
 			for (float u = 0.0f; u <= 1.0f; u += STEP_SIZE)
 			{
-				spline.push_back(GetPointOnSpline(static_cast<int>(segmentIndex), u));
+				splinePoints.push_back(GetPointOnSpline(static_cast<int>(segmentIndex), u));
 			}
 		}
 
-		return spline;
+		return splinePoints;
 	}
 
 	void HermiteSpline::OverwriteControlPoints(const std::vector<Vector3F>& controlPoints)
@@ -119,6 +117,8 @@ namespace AnimationEngine::Math
 			LOG_WARN("Call 'Clear' if you wanna clear the currently bound control points");
 			return;
 		}
+
+		Clear();
 
 		this->controlPoints = controlPoints;
 
@@ -139,9 +139,9 @@ namespace AnimationEngine::Math
 		return tangents;
 	}
 
-	const std::vector<Vector3F>& HermiteSpline::GetSpline() const
+	const std::vector<Vector3F>& HermiteSpline::GetSplinePoints() const
 	{
-		return spline;
+		return splinePoints;
 	}
 
 	const std::vector<float>& HermiteSpline::GetCumulativeArcLengths() const
@@ -198,6 +198,11 @@ namespace AnimationEngine::Math
 
 	Vector3F HermiteSpline::FindPointOnCurve(float nS) const
 	{
+		if (std::fabs(nS - cumulativeArcLengths.back()) < MATH_EPSILON)
+		{
+			return splinePoints.back();
+		}
+
 	    const int segmentIndex = FindSegmentIndex(nS);
 		const float u = FindUUsingBisect(nS, segmentIndex);
 
@@ -208,7 +213,7 @@ namespace AnimationEngine::Math
 	{
 		if (clearSpline)
 		{
-			this->spline.clear();
+			this->splinePoints.clear();
 		}
 
 		this->controlPoints.clear();
