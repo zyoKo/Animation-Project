@@ -11,11 +11,13 @@ namespace AnimationEngine::Math
 		// Declare variables
 		union
 		{
-			struct {
+			struct
+			{
 				T x, y, z;
 			};
 
-			struct {
+			struct
+			{
 				T r, g, b;
 			};
 
@@ -26,7 +28,7 @@ namespace AnimationEngine::Math
 		constexpr Vector3(T x, T y, T z) noexcept;
 		constexpr Vector3(T value) noexcept;
 		constexpr Vector3(std::initializer_list<T> data) noexcept;
-		explicit constexpr Vector3(const Vector3& vector) noexcept;
+		constexpr Vector3(const Vector3& vector) noexcept;
 
 		~Vector3() = default;
 
@@ -36,7 +38,7 @@ namespace AnimationEngine::Math
 		Vector3 operator+(const Vector3& vector);
 		Vector3& operator+=(const Vector3& vector);
 
-		Vector3 operator-(const Vector3& vector);
+		Vector3 operator-(const Vector3& vector) const;
 		Vector3& operator-=(const Vector3& vector);
 
 		Vector3 operator*(T value);
@@ -46,7 +48,7 @@ namespace AnimationEngine::Math
 		Vector3& operator/=(T value);
 
 		bool operator==(const Vector3& vector);
-		bool operator!=(const Vector3& vector);
+		bool operator!=(const Vector3& vector) const;
 
 		const T* GetPointerToData() const;
 
@@ -72,6 +74,9 @@ namespace AnimationEngine::Math
 		bool HasNaNs() const;
 		bool HasInfinite() const;
 
+		static Vector3 GetForward();
+		static Vector3 GetRight();
+		static Vector3 GetUp();
 		static bool IsZero(const Vector3& vector);
 
 		T LengthSquared() const;

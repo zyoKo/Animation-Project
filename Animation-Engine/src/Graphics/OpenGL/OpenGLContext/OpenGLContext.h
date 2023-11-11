@@ -25,6 +25,8 @@ namespace AnimationEngine
 
 		void EnableWireFrameMode(bool value) override;
 
+		void EnablePointSize(bool value) override;
+
 	private:
 		GLFWwindow* window;
 	};

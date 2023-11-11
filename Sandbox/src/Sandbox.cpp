@@ -1,23 +1,27 @@
 #include "Sandbox.h"
 
-#include <iostream>
-
 #include "Core/Application/CoreEngine.h"
 
 namespace Sandbox
 {
 	void SandboxApp::Initialize()
 	{
-		std::cout << "Hi from sandbox\n";
+	}
+
+	void SandboxApp::PreUpdate()
+	{
 	}
 
 	void SandboxApp::Update()
 	{
 	}
 
-	bool SandboxApp::Shutdown()
+	void SandboxApp::PostUpdate()
 	{
-		return true;
+	}
+
+	void SandboxApp::Shutdown()
+	{
 	}
 }
 

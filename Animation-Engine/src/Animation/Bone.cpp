@@ -11,8 +11,7 @@ namespace AnimationEngine
 {
 	Bone::Bone(std::string name, int boneID, const aiNodeAnim* channel)
 		:	name(std::move(name)),
-			boneID(boneID),
-			localTransform(1.0f)
+			boneID(boneID)
 	{
 		numPositions = static_cast<int>(channel->mNumPositionKeys);
 		keyPositions.reserve(numPositions);
@@ -73,11 +72,6 @@ namespace AnimationEngine
 	int Bone::GetBoneID() const
 	{
 		return boneID;
-	}
-
-	const glm::mat4& Bone::GetLocalTransform() const
-	{
-		return localTransform;
 	}
 
 	const Math::VQS& Bone::GetLocalVQS() const

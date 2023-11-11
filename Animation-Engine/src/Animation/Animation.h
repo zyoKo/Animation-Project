@@ -25,6 +25,8 @@ namespace AnimationEngine
 
 		const AssimpNodeData& GetRootNode() const;
 
+		AssimpNodeData& GetRootNode();
+
 		const std::map<std::string, BoneInfo>& GetBoneIDMap() const;
 
 	private:

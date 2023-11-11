@@ -58,6 +58,11 @@ namespace AnimationEngine
 		return rootNode;
 	}
 
+	AssimpNodeData& Animation::GetRootNode()
+	{
+		return rootNode;
+	}
+
 	const std::map<std::string, BoneInfo>& Animation::GetBoneIDMap() const
 	{
 		return boneInfoMap;

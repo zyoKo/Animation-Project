@@ -7,25 +7,25 @@ namespace AnimationEngine
 	class NullAssetManager : public IAssetManager
 	{
 	public:
-		std::shared_ptr<ITexture2D> CreateTexture(const std::string& filepath) override
+		std::weak_ptr<ITexture2D> CreateTexture(const std::string& filepath) override
 		{
-			return nullptr;
+			return {};
 		}
 
-		std::shared_ptr<Shader> CreateShader(const std::string& shaderName, const std::string& vertexFilepath,
-			const std::string& fragmentFilepath) override
+		std::weak_ptr<Shader> CreateShader(const std::string& shaderName, const std::string& vertexFilepath,
+		                                   const std::string& fragmentFilepath) override
 		{
-			return nullptr;
+			return {};
 		}
 
-		std::shared_ptr<ITexture2D> RetrieveTextureFromStorage(const std::string& textureName) override
+		std::weak_ptr<ITexture2D> RetrieveTextureFromStorage(const std::string& textureName) override
 		{
-			return nullptr;
+			return {};
 		}
 
-		std::shared_ptr<Shader> RetrieveShaderFromStorage(const std::string& shaderName) override
+		std::weak_ptr<Shader> RetrieveShaderFromStorage(const std::string& shaderName) override
 		{
-			return nullptr;
+			return {};
 		}
 
 		void ClearStores() override

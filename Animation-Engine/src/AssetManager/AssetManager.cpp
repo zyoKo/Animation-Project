@@ -7,7 +7,7 @@
 
 namespace AnimationEngine
 {
-	std::shared_ptr<ITexture2D> AssetManager::CreateTexture(const std::string& filepath)
+	std::weak_ptr<ITexture2D> AssetManager::CreateTexture(const std::string& filepath)
 	{
 		const auto textureName = Utils::RetrieveFilenameFromFilepath(filepath);
 
@@ -24,7 +24,7 @@ namespace AnimationEngine
 		return texture2D;
 	}
 
-	std::shared_ptr<Shader> AssetManager::CreateShader(const std::string& shaderName, const std::string& vertexFilepath, const std::string& fragmentFilepath)
+	std::weak_ptr<Shader> AssetManager::CreateShader(const std::string& shaderName, const std::string& vertexFilepath, const std::string& fragmentFilepath)
 	{
 		const std::string vertexShaderSource = ReadShaderFile(vertexFilepath);
 		const std::string fragmentShaderSource = ReadShaderFile(fragmentFilepath);
@@ -36,12 +36,12 @@ namespace AnimationEngine
 		return shader;
 	}
 
-	std::shared_ptr<ITexture2D> AssetManager::RetrieveTextureFromStorage(const std::string& textureName)
+	std::weak_ptr<ITexture2D> AssetManager::RetrieveTextureFromStorage(const std::string& textureName)
 	{
 		return textureStore.RetrieveFromStorage(textureName);
 	}
 
-	std::shared_ptr<Shader> AssetManager::RetrieveShaderFromStorage(const std::string& shaderName)
+	std::weak_ptr<Shader> AssetManager::RetrieveShaderFromStorage(const std::string& shaderName)
 	{
 		return shaderStore.RetrieveFromStorage(shaderName);
 	}

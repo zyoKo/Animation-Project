@@ -15,7 +15,7 @@ namespace AnimationEngine
 		TriangleFan
 	};
 
-	static int DebugDrawModeToGLEnum(DebugDrawMode drawMode)
+	static int DrawModeToGLEnum(DebugDrawMode drawMode)
 	{
 		switch(drawMode)
 		{

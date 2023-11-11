@@ -10,7 +10,7 @@ namespace AnimationEngine
 	public:
 		void AddToStorage(const std::string& assetName, const std::shared_ptr<T> assetData, bool forceReplace = false);
 
-		std::shared_ptr<T> RetrieveFromStorage(const std::string& assetName);
+		std::weak_ptr<T> RetrieveFromStorage(const std::string& assetName);
 
 		void Clear();
 

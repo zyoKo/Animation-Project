@@ -1,7 +1,5 @@
 #pragma once
 
-#include <memory>
-
 #include "Core/Application/Interface/IApplication.h"
 
 namespace Sandbox
@@ -11,8 +9,12 @@ namespace Sandbox
 	public:
 		void Initialize() override;
 
+		void PreUpdate() override;
+
 		void Update() override;
 
-		bool Shutdown() override;
+		void PostUpdate() override;
+
+		void Shutdown() override;
 	};
 }

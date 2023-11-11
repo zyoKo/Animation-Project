@@ -20,5 +20,7 @@ namespace AnimationEngine
 		virtual void EnableDepthTest(bool value) = 0;
 
 		virtual void EnableWireFrameMode(bool value) = 0;
+
+		virtual void EnablePointSize(bool value) = 0;
 	};
 }
