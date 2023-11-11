@@ -82,4 +82,16 @@ namespace AnimationEngine
 			GL_CALL(glPolygonMode, GL_FRONT_AND_BACK, GL_FILL);
 		}
 	}
+
+	void OpenGLContext::EnablePointSize(bool value)
+	{
+		if (value)
+		{
+			GL_CALL(glEnable, GL_PROGRAM_POINT_SIZE);
+		}
+		else
+		{
+			GL_CALL(glDisable, GL_PROGRAM_POINT_SIZE);
+		}
+	}
 }

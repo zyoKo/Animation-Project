@@ -10,8 +10,7 @@
 namespace AnimationEngine
 {
 	Model::Model(const std::string& path)
-		:	debugMesh(nullptr),
-			gammaCorrection(false)
+		:	gammaCorrection(false)
 	{
 		LoadModel(path);
 	}
@@ -22,11 +21,6 @@ namespace AnimationEngine
 		{
 			mesh.Draw(shader);
 		}
-	}
-
-	void Model::DrawDebug(const std::shared_ptr<Shader>& shader) const
-	{
-		debugMesh->Draw(DebugDrawMode::Lines);
 	}
 
 	const std::vector<Mesh>& Model::GetMeshes() const
@@ -40,11 +34,6 @@ namespace AnimationEngine
 		{
 			mesh.AddTexture(textures);
 		}
-	}
-
-	void Model::SetJointsPosition(const std::vector<Math::Vector3F>& position) const
-	{
-		debugMesh->OverwriteJointsPosition(position);
 	}
 
 	void Model::LoadModel(const std::string& path)

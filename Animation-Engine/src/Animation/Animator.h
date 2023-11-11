@@ -2,34 +2,40 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "Interface/IAnimator.h"
+
 namespace AnimationEngine
 {
 	struct AssimpNodeData;
 
 	class Animation;
 
-	class Animator
+	class Animator : public IAnimator
 	{
 	public:
 		Animator();
 
 		Animator(Animation* animation);
 
-		~Animator() = default;
+		void ChangeAnimation(Animation* newAnimation) override;
 
-		void ChangeAnimation(Animation* newAnimation);
+		void UpdateAnimation() override;
 
-		void UpdateAnimation();
+		void PlayAnimation(Animation* animation) override;
 
-		void PlayAnimation(Animation* animation);
+		void ResetAnimation() override;
 
-		void CalculateBoneTransformWithVQS(const AssimpNodeData* node, Math::VQS parentVQS);
+		void CalculateBoneTransformWithVQS(const AssimpNodeData* node, Math::VQS parentVQS) override;
 
-		const std::vector<glm::mat4>& GetFinalBoneMatrices() const;
+		const std::vector<glm::mat4>& GetFinalBoneMatrices() const override;
 
-		const std::vector<Math::Vector3F>& GetJointPositions() const;
+		const std::vector<Math::Vector3F>& GetJointPositions() const override;
 
-		void ClearJoints();
+		float GetAnimationSpeedFactor() const override;
+
+		void SetAnimationSpeedFactor(float value) override;
+
+		void ClearJoints() override;
 
 	private:
 		std::vector<glm::mat4> finalBoneMatrices;
@@ -40,6 +46,8 @@ namespace AnimationEngine
 
 		float currentTime;
 
-		Math::Vector3F ExtractJointPosition(const glm::mat4& transform);
+		float animationSpeedFactor;
+
+		void ExtractParentJointAndChildJoints(const Math::VQS& parent, const Math::VQS& child);
 	};
 }

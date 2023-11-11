@@ -12,13 +12,13 @@ namespace AnimationEngine
 	class AssetManager : public IAssetManager
 	{
 	public:
-		std::shared_ptr<ITexture2D> CreateTexture(const std::string& filepath) override;
+		std::weak_ptr<ITexture2D> CreateTexture(const std::string& filepath) override;
 
-		std::shared_ptr<Shader> CreateShader(const std::string& shaderName, const std::string& vertexFilepath, const std::string& fragmentFilepath) override;
+		std::weak_ptr<Shader> CreateShader(const std::string& shaderName, const std::string& vertexFilepath, const std::string& fragmentFilepath) override;
 
-		std::shared_ptr<ITexture2D> RetrieveTextureFromStorage(const std::string& textureName) override;
+		std::weak_ptr<ITexture2D> RetrieveTextureFromStorage(const std::string& textureName) override;
 
-		std::shared_ptr<Shader> RetrieveShaderFromStorage(const std::string& shaderName) override;
+		std::weak_ptr<Shader> RetrieveShaderFromStorage(const std::string& shaderName) override;
 
 		void ClearStores() override;
 

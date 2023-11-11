@@ -44,7 +44,7 @@ namespace AnimationEngine
 	{
 		Bind();
 
-		GL_CALL(glDrawArrays, DebugDrawModeToGLEnum(mode), 0, static_cast<int>(jointsPosition.size()));
+		GL_CALL(glDrawArrays, DrawModeToGLEnum(mode), 0, static_cast<int>(jointsPosition.size()));
 
 		Unbind();
 	}

@@ -21,8 +21,6 @@ namespace AnimationEngine
 
 		void Draw(const std::shared_ptr<Shader>& shader) const;
 
-		void DrawDebug(const std::shared_ptr<Shader>& shader) const;
-
 		const std::vector<Mesh>& GetMeshes() const;
 
 		std::map<std::string, BoneInfo>& GetBoneInfoMap();
@@ -31,12 +29,8 @@ namespace AnimationEngine
 
 		void SetDiffuseTextureForMeshes(const std::shared_ptr<ITexture2D>& textures);
 
-		void SetJointsPosition(const std::vector<Math::Vector3F>& position) const;
-
 	private:
 		std::vector<Mesh> meshes;
-
-		std::unique_ptr<DebugMesh> debugMesh;
 
 		bool gammaCorrection;
 

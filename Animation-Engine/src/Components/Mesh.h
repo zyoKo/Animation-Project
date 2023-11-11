@@ -24,8 +24,8 @@ namespace AnimationEngine
 		Mesh();
 
 		Mesh(
-			Vertices_V3F vertices, 
-			Normal_V3F normals, 
+			Vertices_V3F vertices,
+			Normal_V3F normals,
 			TexCoordinates_V2F textureCoordinates,
 			Tangents_V3F tangents,
 			BiTangents_V3F biTangents,
