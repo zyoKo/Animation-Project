@@ -4,6 +4,9 @@
 
 namespace AnimationEngine::Math
 {
+	using ControlPoints = std::pair<Vector3F, Vector3F>;
+	using Tangents = std::pair<Vector3F, Vector3F>;
+
 	/*
 	 * Some general notations
 	 * ======================
@@ -11,6 +14,7 @@ namespace AnimationEngine::Math
 	 * 2. nS = Non-normalized S
 	 * 3. u  = Normalized U
 	 * 4. nU = Non-normalized U
+	 * 5. GQ = Gaussian Quadrature
 	*/
 	class HermiteSpline
 	{
@@ -28,7 +32,7 @@ namespace AnimationEngine::Math
 		const std::vector<Vector3F>& GetSplinePoints() const;
 		const std::vector<float>& GetCumulativeArcLengths() const;
 
-		float GetCumulativeArcLength(float u) const;
+		float ComputeCumulativeArcLength(float u) const;
 
 		Vector3F FindPointOnCurve(float nS) const;
 		float FindUUsingBisect(float nS, int segmentIndex) const;
@@ -51,9 +55,9 @@ namespace AnimationEngine::Math
 		void ComputeCumulativeArcLengths();
 
 		float ComputeArcLength(int segmentIndex, float u) const;
-		float SegmentArcLengthUsingGaussianQuadrature(int segmentIndex, float u) const;
+		float SegmentArcLengthGQ(int segmentIndex, float u) const;
 
 		int FindSegmentIndex(float nS) const;
-		void GetCPAndTangentForSegmentIndex(int segmentIndex, Vector3F& cpOne, Vector3F& tanOne, Vector3F& cpTwo, Vector3F& tanTwo) const;
+		std::pair<ControlPoints, Tangents> GetControlPointsAndTangent(int segmentIndex) const;
 	};
 }

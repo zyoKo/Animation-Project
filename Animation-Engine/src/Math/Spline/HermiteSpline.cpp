@@ -24,10 +24,10 @@ namespace AnimationEngine::Math
 
 	Vector3F HermiteSpline::GetPointOnSpline(int segmentIndex, float u) const
 	{
-		Vector3F cpOne, cpTwo, tanOne, tanTwo;
-		GetCPAndTangentForSegmentIndex(segmentIndex, cpOne, tanOne, cpTwo, tanTwo);
+		const auto cPoints = GetControlPointsAndTangent(segmentIndex).first;
+		const auto tan = GetControlPointsAndTangent(segmentIndex).second;
 
-		return CalculateSplinePointAux(cpOne, tanOne, cpTwo, tanTwo, u);
+		return CalculateSplinePointAux(cPoints.first, tan.first, cPoints.second, tan.second, u);
 	}
 
 	Vector3F HermiteSpline::CalculateSplinePointAux(
@@ -48,10 +48,10 @@ namespace AnimationEngine::Math
 
 	Vector3F HermiteSpline::CalculateTangentPoint(int segmentIndex, float u) const
 	{
-		Vector3F cpOne, cpTwo, tanOne, tanTwo;
-		GetCPAndTangentForSegmentIndex(segmentIndex, cpOne, tanOne, cpTwo, tanTwo);
+		const auto cPoints = GetControlPointsAndTangent(segmentIndex).first;
+		const auto tan = GetControlPointsAndTangent(segmentIndex).second;
 
-		return CalculateTangentPointAux(cpOne, tanOne, cpTwo, tanTwo, u);
+		return CalculateTangentPointAux(cPoints.first, tan.first, cPoints.second, tan.second, u);
 	}
 
 	Vector3F HermiteSpline::CalculateTangentPointAux(
@@ -149,13 +149,13 @@ namespace AnimationEngine::Math
 		return cumulativeArcLengths;
 	}
 
-	float HermiteSpline::GetCumulativeArcLength(float u) const
+	float HermiteSpline::ComputeCumulativeArcLength(float u) const
 	{
 		float length = 0.0f;
 
 		for (size_t index = 0; index < controlPoints.size() - 1; ++index)
 		{
-			const auto arcLength = SegmentArcLengthUsingGaussianQuadrature(static_cast<int>(index), u);
+			const auto arcLength = SegmentArcLengthGQ(static_cast<int>(index), u);
 
 		    length += arcLength;
 		}
@@ -171,7 +171,7 @@ namespace AnimationEngine::Math
 	    float uM = (uA + uB) * 0.5f;
 
 		// mid = uM
-	    float arcLengthMid = SegmentArcLengthUsingGaussianQuadrature(segmentIndex, uM);
+	    float arcLengthMid = SegmentArcLengthGQ(segmentIndex, uM);
 
 	    const float arcLengthOfPreviousSegments = cumulativeArcLengths[segmentIndex];
 		float previousMid = -1.0f;
@@ -190,7 +190,7 @@ namespace AnimationEngine::Math
 
 			previousMid = uM;
 	        uM = (uA + uB) * 0.5f;
-	        arcLengthMid = SegmentArcLengthUsingGaussianQuadrature(segmentIndex, uM);
+	        arcLengthMid = SegmentArcLengthGQ(segmentIndex, uM);
 	    }
 	
 	    return uM;
@@ -221,7 +221,8 @@ namespace AnimationEngine::Math
 		this->tangents.clear();
 	}
 
-	float HermiteSpline::SegmentArcLengthUsingGaussianQuadrature(int segmentIndex, float u) const
+	// Get Segment Arc Length using Gaussian Quadrature
+	float HermiteSpline::SegmentArcLengthGQ(int segmentIndex, float u) const
 	{
 	    // 4-point Gaussian Quadrature
 	    static constexpr std::array<float, 4> weights  = { 0.3478548f, 0.6521452f, 0.6521452f, 0.3478548f };
@@ -241,13 +242,12 @@ namespace AnimationEngine::Math
 
 	float HermiteSpline::ComputeArcLength(int segmentIndex, float u) const
 	{
-	    // get the two points and tangents for the segment
-		Vector3F cpOne, tanOne, cpTwo, tanTwo;
-		GetCPAndTangentForSegmentIndex(segmentIndex, cpOne, tanOne, cpTwo, tanTwo);
+	    const auto cPoints = GetControlPointsAndTangent(segmentIndex).first;
+		const auto tan = GetControlPointsAndTangent(segmentIndex).second;
 		
-		const Vector3F a =  2.0f * cpOne - 2.0f * cpTwo + 1.0f * tanOne + tanTwo;
-		const Vector3F b = -3.0f * cpOne + 3.0f * cpTwo - 2.0f * tanOne - tanTwo;
-		const Vector3F c =  tanOne;
+		const Vector3F a =  2.0f * cPoints.first - 2.0f * cPoints.second + 1.0f * tan.first + tan.second;
+		const Vector3F b = -3.0f * cPoints.first + 3.0f * cPoints.second - 2.0f * tan.first - tan.second;
+		const Vector3F c =  tan.first;
 		
 	    const float A =  9.0f * Vector3F::Dot(a, a);
 	    const float B = 12.0f * Vector3F::Dot(a, b);
@@ -256,8 +256,8 @@ namespace AnimationEngine::Math
 	    const float E =	 1.0f *	Vector3F::Dot(c, c);
 		
 	    const float uSquare = u * u;
-	    const float uCube	= u * u * u;
-	    const float uPow4	= u * u * u * u;
+	    const float uCube	= uSquare * u;
+	    const float uPow4	= uCube * u;
 		
 	    // Compute the integrand for arc length
 	    return std::sqrtf(A * uPow4 + B * uCube + C * uSquare + D * u + E);
@@ -288,19 +288,21 @@ namespace AnimationEngine::Math
 
 		for (int segmentIndex = 1; segmentIndex < static_cast<int>(controlPoints.size()); ++segmentIndex)
 		{
-			const float segmentLength = SegmentArcLengthUsingGaussianQuadrature(segmentIndex - 1, 1.0f);
+			const float segmentLength = SegmentArcLengthGQ(segmentIndex - 1, 1.0f);
 			cumulativeArcLengths[segmentIndex] = cumulativeArcLengths[segmentIndex - 1] + segmentLength;
 		}
 	}
 
-	void HermiteSpline::GetCPAndTangentForSegmentIndex(
-		int segmentIndex,
-		Vector3F& cpOne, Vector3F& tanOne,
-		Vector3F& cpTwo, Vector3F& tanTwo) const
+	std::pair<ControlPoints, Tangents> HermiteSpline::GetControlPointsAndTangent(int segmentIndex) const
 	{
-		cpOne = controlPoints[segmentIndex];
-		cpTwo = controlPoints[segmentIndex + 1];
-		tanOne = tangents[segmentIndex];
-		tanTwo = tangents[segmentIndex + 1];
+		ControlPoints cP;
+		cP.first = controlPoints[segmentIndex];
+		cP.second = controlPoints[segmentIndex + 1];
+
+		Tangents tan;
+		tan.first = tangents[segmentIndex];
+		tan.second = tangents[segmentIndex + 1];
+
+		return std::make_pair(cP, tan);
 	}
 }

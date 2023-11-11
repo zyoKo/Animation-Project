@@ -260,7 +260,7 @@ namespace AnimationEngine
 			return;
 		}
 
-		splineData.totalArcLength = splinePtr->GetCumulativeArcLength(1.0f);
+		splineData.totalArcLength = splinePtr->ComputeCumulativeArcLength(1.0f);
 
 		splineData.firstSegmentLength = splinePtr->GetCumulativeArcLengths()[1];
 
