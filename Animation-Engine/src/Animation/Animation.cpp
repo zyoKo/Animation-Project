@@ -23,14 +23,14 @@ namespace AnimationEngine
 		aiMatrix4x4 globalTransformation = scene->mRootNode->mTransformation;
 		globalTransformation = globalTransformation.Inverse();
 
-		ReadHierarchyData(rootNode, scene->mRootNode);
+		ReadHierarchyData(rootNode, scene->mRootNode, nullptr);
 
 		ReadMissingBones(animation, *model);
 	}
 
 	Bone* Animation::FindBone(const std::string& name)
 	{
-		auto iter = std::find_if(bones.begin(), bones.end(), 
+		auto iter = std::ranges::find_if(bones,
 			[&](const Bone& bone)
 			{
 				return bone.GetBoneName() == name;
@@ -70,9 +70,9 @@ namespace AnimationEngine
 
 	void Animation::ReadMissingBones(const aiAnimation* animation, Model& model)
 	{
-		auto size = static_cast<int>(animation->mNumChannels);
+		const auto size = static_cast<int>(animation->mNumChannels);
 
-		auto& boneInfoMap = model.GetBoneInfoMap();
+		auto& boneInfoMapForMissingBones = model.GetBoneInfoMap();
 		int& boneCount = model.GetBoneCount();
 
 		for (int i = 0; i < size; ++i)
@@ -80,30 +80,35 @@ namespace AnimationEngine
 			const auto channel = animation->mChannels[i];
 
 			std::string boneName = channel->mNodeName.data;
-			if (!boneInfoMap.contains(boneName))
+			if (!boneInfoMapForMissingBones.contains(boneName))
 			{
-				boneInfoMap[boneName].id = boneCount;
+				boneInfoMapForMissingBones[boneName].id = boneCount;
 				boneCount++;
 			}
-			bones.emplace_back(channel->mNodeName.data, boneInfoMap[channel->mNodeName.data].id, channel);
+			bones.emplace_back(channel->mNodeName.data, boneInfoMapForMissingBones[channel->mNodeName.data].id, channel);
 		}
 
-		this->boneInfoMap = boneInfoMap;
+		this->boneInfoMap = boneInfoMapForMissingBones;
 	}
 
-	void Animation::ReadHierarchyData(AssimpNodeData& destinationNode, const aiNode* sourceNode)
+	void Animation::ReadHierarchyData(AssimpNodeData& destinationNode, const aiNode* sourceNode, AssimpNodeData* parent /*  = nullptr */)
 	{
 		ANIM_ASSERT(sourceNode, "Source Node is Empty!");
 
 		destinationNode.name = sourceNode->mName.data;
 		destinationNode.transformation = Utils::AssimpToGLMHelper::ConvertMatrixToGLMFormat(sourceNode->mTransformation);
 		destinationNode.childrenCount = sourceNode->mNumChildren;
+		destinationNode.parent = parent;
+		destinationNode.localVQS = Utils::GLMInternalHelper::ConvertGLMMatrixToVQS(destinationNode.transformation);
+
+		// storing bind pose
+		bindPose.emplace_back(destinationNode.name, destinationNode.transformation);
 
 		for (unsigned i = 0; i < sourceNode->mNumChildren; ++i)
 		{
-			AssimpNodeData newAssimpNodeData;
-			ReadHierarchyData(newAssimpNodeData, sourceNode->mChildren[i]);
-			destinationNode.children.push_back(newAssimpNodeData);
+			std::unique_ptr<AssimpNodeData> newAssimpNodeData = std::make_unique<AssimpNodeData>();
+			ReadHierarchyData(*newAssimpNodeData, sourceNode->mChildren[i], &destinationNode);
+			destinationNode.children.push_back(std::move(newAssimpNodeData));
 		}
 	}
 }

@@ -35,7 +35,7 @@ namespace AnimationEngine::Math
 		// Operations
 		Vector3& operator=(const Vector3& vector);
 
-		Vector3 operator+(const Vector3& vector);
+		Vector3 operator+(const Vector3& vector) const;
 		Vector3& operator+=(const Vector3& vector);
 
 		Vector3 operator-(const Vector3& vector) const;

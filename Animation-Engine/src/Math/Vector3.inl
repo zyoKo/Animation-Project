@@ -48,7 +48,7 @@ namespace AnimationEngine::Math
 	}
 
 	template <typename T>
-	Vector3<T> Vector3<T>::operator+(const Vector3& vector)
+	Vector3<T> Vector3<T>::operator+(const Vector3& vector) const
 	{
 		ANIM_ASSERT(!vector.HasNaNs(), "Operation '/' failed, the vector has NaNs!");
 		return Vector3(x + vector.x, y + vector.y, z + vector.z);

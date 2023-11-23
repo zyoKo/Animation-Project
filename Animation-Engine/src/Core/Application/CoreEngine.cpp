@@ -19,6 +19,8 @@
 #include "Components/Camera/Camera.h"
 #include "Components/Camera/Constants/CameraConstants.h"
 #include "Animation/Animator.h"
+#include "Animation/BindPose.h"
+#include "Animation/IKManager.h"
 #include "Animation/Model.h"
 #include "Core/ServiceLocators/Assets/AssetManagerLocator.h"
 #include "Core/ServiceLocators/Animation/AnimatorLocator.h"
@@ -73,7 +75,6 @@ namespace AnimationEngine
 
 		application->Initialize();
 
-		auto* assetManager = AssetManagerLocator::GetAssetManager();
 		auto* animationStorage = AnimationStorageLocator::GetAnimationStorage();
 
 		const std::string dreyarDiffuseTextureFile = "./assets/dreyar/textures/Dreyar_diffuse.png";
@@ -118,10 +119,6 @@ namespace AnimationEngine
 	{
 		application->PreUpdate();
 
-		auto* assetManager = AssetManagerLocator::GetAssetManager();
-		auto* animator = AnimatorLocator::GetAnimator();
-		auto* animationStorage = AnimationStorageLocator::GetAnimationStorage();
-
 		auto animationShader = assetManager->RetrieveShaderFromStorage("AnimationShader");
 		auto debugShader = assetManager->RetrieveShaderFromStorage("DebugAnimationShader");
 		auto gridShader = assetManager->RetrieveShaderFromStorage("GridShader");
@@ -131,7 +128,7 @@ namespace AnimationEngine
 		auto textureDiffuse = assetManager->RetrieveTextureFromStorage("Dreyar_diffuse");
 		auto gridTexture = assetManager->RetrieveTextureFromStorage("grid");
 
-		animator->ChangeAnimation(animationStorage->GetAnimationForCurrentlyBoundIndex());
+		animator->ChangeAnimation(animationStorage.GetAnimationForCurrentlyBoundIndex());
 
 		GraphicsAPI::GetContext()->EnableDepthTest(true);
 		GraphicsAPI::GetContext()->EnableWireFrameMode(false);
@@ -142,13 +139,20 @@ namespace AnimationEngine
 		GridMesh gridMesh;
 		gridMesh.SetGridTexture(gridTexture.lock());
 
-		//CurveMesh curveMesh;
 		curveMesh = new CurveMesh();
 		curveMesh->SetSplineShader(splineShader.lock());
 		curveMesh->SetControlPointsShader(controlPointShader.lock());
 
 		modelManager = new ModelManager();
 		modelManager->SetSpline(curveMesh->GetSpline());
+
+		IKManager iKManager;
+		iKManager.Initialize();
+
+		if (auto* realAnimator = dynamic_cast<Animator*>(animator))
+		{
+			realAnimator->SetIKManager(&iKManager);
+		}
 
 		while (running && !window->WindowShouldClose())
 		{
@@ -159,14 +163,20 @@ namespace AnimationEngine
 
 			application->Update();
 
+			// TODO: Build a better camera system
 			// camera/view transformation
 			glm::mat4 projection = glm::perspective(glm::radians(camera->GetZoom()), (float)window->GetWidth() / (float)window->GetHeight(), CAMERA_NEAR_CLIPPING_PLANE, CAMERA_FAR_CLIPPING_PLANE);
 			glm::mat4 view = camera->GetViewMatrix();
 			glm::mat4 model = glm::mat4(1.0f);
 
 			ProcessInput();
-			animator->UpdateAnimation();
 
+			iKManager.Update();
+
+			animator->UpdateAnimation();
+			//animator->ResetAnimation();
+
+			// TODO: Fix these hacks
 			debugMesh.OverwriteJointsPosition(animator->GetJointPositions());
 			animator->ClearJoints();
 			static bool firstRun = true;
@@ -177,10 +187,11 @@ namespace AnimationEngine
 			}
 			debugMesh.Update();
 
+			// TODO: Move this inside model class
 			if (enableModelMesh)
 			{
 				animationShader.lock()->Bind();
-				animationShader.lock()->SetUniformInt(0, animationStorage->GetDiffuseTextureFromCurrentlyBoundIndex()->GetTextureName());
+				animationShader.lock()->SetUniformInt(0, animationStorage.GetDiffuseTextureFromCurrentlyBoundIndex()->GetTextureName());
 				animationShader.lock()->SetUniformMatrix4F(projection, "projection");
 				animationShader.lock()->SetUniformMatrix4F(view, "view");
 				animationShader.lock()->SetUniformMatrix4F(model, "model");
@@ -189,7 +200,7 @@ namespace AnimationEngine
 					std::string uniformName = "finalBonesMatrices[" + std::to_string(i) + "]";
 					animationShader.lock()->SetUniformMatrix4F(animator->GetFinalBoneMatrices()[i], uniformName);
 				}
-				animationStorage->GetModelForCurrentlyBoundIndex()->Draw(animationShader.lock());
+				animationStorage.GetModelForCurrentlyBoundIndex()->Draw(animationShader.lock());
 				animationShader.lock()->UnBind();
 			}
 			

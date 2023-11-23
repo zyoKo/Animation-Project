@@ -2,8 +2,6 @@
 
 #include <assimp/anim.h>
 
-#include <glm/matrix.hpp>
-
 #include "DataTypes/BoneData.h"
 
 namespace AnimationEngine

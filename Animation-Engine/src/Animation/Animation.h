@@ -29,19 +29,27 @@ namespace AnimationEngine
 
 		const std::map<std::string, BoneInfo>& GetBoneIDMap() const;
 
-	private:
-		void ReadMissingBones(const aiAnimation* animation, Model& model);
+		decltype(auto) GetBindPose() const
+		{
+			return (bindPose);
+		}
 
-		void ReadHierarchyData(AssimpNodeData& destinationNode, const aiNode* sourceNode);
+	private:
+		std::vector<Bone> bones;
+
+		AssimpNodeData rootNode;
+
+		std::vector<std::pair<std::string, glm::mat4>> bindPose;
+
+		std::map<std::string, BoneInfo> boneInfoMap;
 
 		float duration;
 
 		float ticksPerSecond;
 
-		std::vector<Bone> bones;
+		void ReadMissingBones(const aiAnimation* animation, Model& model);
 
-		AssimpNodeData rootNode;
-
-		std::map<std::string, BoneInfo> boneInfoMap;
+		void ReadHierarchyData(AssimpNodeData& destinationNode, const aiNode* sourceNode, 
+			AssimpNodeData* parent = nullptr);
 	};
 }

@@ -25,6 +25,11 @@ namespace AnimationEngine::Math
 
 			struct
 			{
+				T r, g, b, a;
+			};
+
+			struct
+			{
 				Vector3<T> vector;
 
 				T scalar;
@@ -106,6 +111,7 @@ namespace AnimationEngine::Math
 				std::fabs(leftQuat.z - rightQuat.z) <= MATH_EPSILON &&
 				std::fabs(leftQuat.w - rightQuat.w) <= MATH_EPSILON);
 		}
+
 		friend bool operator!=(const Quaternion& leftQuat, const Quaternion& rightQuat)
 		{
 			return !(leftQuat == rightQuat);

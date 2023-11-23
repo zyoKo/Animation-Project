@@ -6,10 +6,15 @@
 
 namespace AnimationEngine
 {
+	class IKManager;
+
 	struct AssimpNodeData;
 
 	class Animation;
+}
 
+namespace AnimationEngine
+{
 	class Animator : public IAnimator
 	{
 	public:
@@ -25,7 +30,7 @@ namespace AnimationEngine
 
 		void ResetAnimation() override;
 
-		void CalculateBoneTransformWithVQS(const AssimpNodeData* node, Math::VQS parentVQS) override;
+		void CalculateBoneTransformWithVQS(AssimpNodeData* node, Math::VQS parentVQS) override;
 
 		const std::vector<glm::mat4>& GetFinalBoneMatrices() const override;
 
@@ -37,10 +42,16 @@ namespace AnimationEngine
 
 		void ClearJoints() override;
 
+		void ExtractJointsAfterBoneWithName(const std::string& boneName);
+
+		void SetIKManager(IKManager* ikManager);
+
 	private:
 		std::vector<glm::mat4> finalBoneMatrices;
 
 		std::vector<Math::Vector3F> jointPositions;
+
+		std::vector<Math::Vector3F> bindPose;
 
 		Animation* currentAnimation;
 
@@ -48,6 +59,12 @@ namespace AnimationEngine
 
 		float animationSpeedFactor;
 
+		IKManager* ikManager;
+
 		void ExtractParentJointAndChildJoints(const Math::VQS& parent, const Math::VQS& child);
+
+		void ProcessChildNodes(const AssimpNodeData* node);
+
+		void CalculateBindPose(const AssimpNodeData* rootNode);
 	};
 }
