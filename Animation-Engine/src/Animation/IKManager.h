@@ -19,20 +19,6 @@ namespace AnimationEngine
 
 namespace AnimationEngine
 {
-	struct RigidBone
-	{
-		Math::Vec3F startPosition;
-		Math::Vec3F endPosition;
-		float length;
-
-		RigidBone(const Math::Vec3F& start, const Math::Vec3F& end)
-			:	startPosition(start),
-				endPosition(end)
-		{
-			length = (startPosition - endPosition).Length();
-		}
-	};
-
 	class IKManager
 	{
 	public:
@@ -44,40 +30,26 @@ namespace AnimationEngine
 
 		void SetTargetPosition(const Math::Vector3F& targetPosition);
 
-		bool IsFabrikRunning() const;
+		bool GetCanRunIK() const;
 
-		std::vector<glm::mat4> GetFinalBoneMatrices() const;
+		std::pair<AssimpNodeData*, AssimpNodeData*> GetBaseAndEndEffector() const;
 
-		const std::vector<Math::Vector3F>& GetJointsPosition() const { return debugJoints; }
-
-		void ClearJoints() { debugJoints.clear(); }
-
-		std::pair<AssimpNodeData*, AssimpNodeData*> GetBaseAndEndEffector() const
-		{
-			return { base, endEffector };
-		}
+		void CanRunIK(bool canRun);
 
 	private:
-		std::vector<RigidBone> boneChain;
+		bool canRunIK;
 
-		std::vector<std::pair<std::string, Math::VQS>> localJoints;	// joints in local space
-		std::vector<std::pair<std::string, Math::VQS>> joints;	// joints in world space
-		std::vector<std::pair<std::string, Math::VQS>> globalToLocalJoints;
-
-		bool isFabrikRunning;
-
-		float currentTime;
+		Math::Vector3F targetPosition;
 
 		std::vector<Math::Vector3F> jointPositions;
+		std::vector<Math::Vector3F> initialJointDirections;
+		std::vector<Math::QuatF> initialJointRotations;
+		std::vector<Math::QuatF> jointRotations;
+
 		std::vector<float> boneLengths;
 		float totalBoneLength;
-		std::vector<Math::Vector3F> fabrikSolvedJoints;
-		Math::Vector3F targetPosition;
 		float threshold;
 		unsigned maxIterations;
-
-		std::vector<glm::mat4> finalBoneMatrices;
-		std::vector<Math::Vector3F> debugJoints;
 
 		std::string baseBoneName;
 		std::string endEffectorName;
@@ -92,33 +64,25 @@ namespace AnimationEngine
 		std::weak_ptr<Shader> shader;
 
 		bool FindJointWithName(AssimpNodeData* node, const std::string& name, AssimpNodeData*& result);
-
 		void ReadHierarchyToFrom(const AssimpNodeData* to, AssimpNodeData* from);
 
 		// Pre-Solver Step
 		bool ComputeGlobalFromLocalVQS(AssimpNodeData* node, std::vector<Math::Vector3F>& iKChain, const Math::VQS& rootVQS, bool& chainStart);
-
 		// Post-Solver Step
-		bool ComputeLocalFromGlobalVQS(AssimpNodeData* node, const Math::VQS& parentVQS, bool& chainStart, int& counter);
+		bool ComputeLocalFromGlobalVQS(AssimpNodeData* node, const Math::VQS& parentVQS);
 
+		// FABRIK Logic
 		void BackwardSolver(const Math::Vector3F& target);
-
 		void ForwardSolver(const Math::Vector3F& baseLocation);
-
+		void ApplyRotationFix(const Math::Vector3F& target);
 		bool FABRIKSolver(const Math::Vec3F& targetLocation);
 
 		void SetupMesh() const;
-
 		void SetupShader() const;
-
 		void OverwriteDataInVertexBuffer() const;
 
+		void ComputeInitialDirectionAndRotation(const std::vector<Math::Vector3F>& jointPositions);
 		void ComputeBoneLengths(const std::vector<Math::Vector3F>& jointPositions);
-
-		void UpdateBonePositions() const;
-
-		void CalculateBoneTransformWithVQS(AssimpNodeData* node, Math::VQS parentVQS);
-
-		void ExtractParentJointAndChildJoints(const Math::VQS& parent, const Math::VQS& child);
+		void UpdateBonePositionAndRotation() const;
 	};
 }

@@ -155,7 +155,7 @@ namespace AnimationEngine::Math
 		static Quaternion NLerp(const Quaternion& fromQuat, const Quaternion& toQuat, T t);
 		static Quaternion SLerp(const Quaternion& leftQuat, const Quaternion& rightQuat, T t);
 
-		//static Quaternion LookRotation(const Vector3<T>& direction, const Vector3<T>& up);
+		static Quaternion FromTo(const Vector3<T>& from, const Vector3<T>& to);
 	};
 
 	using QuatF = Quaternion<float>;

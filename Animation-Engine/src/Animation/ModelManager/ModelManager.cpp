@@ -69,9 +69,6 @@ namespace AnimationEngine
 		UpdateAnimationTransformMatrix();
 
 		timeInSeconds += Time::GetDeltaTime();
-
-		//if (speedControlData.currentSpeed > 0.0f)
-		//	LOG_WARN("Position: ({0}, {1}, {2})", position.x, position.y, position.z);
 	}
 
 	void ModelManager::Reset()
@@ -245,11 +242,6 @@ namespace AnimationEngine
 		animationRoot.transformation[3][0] = position.x;
 		animationRoot.transformation[3][1] = position.y;
 		animationRoot.transformation[3][2] = position.z;
-
-		//LOG_WARN("Incoming Rotation: ({0}, {1}, {2}, {3})", point->GetRotation().x, point->GetRotation().y, point->GetRotation().z, point->GetRotation().w);
-		//auto axis = Math::QuatF::GetAxis(point->GetRotation());
-		//LOG_WARN("Angle: {0}_________Axis: ({1}, {2}, {3})", Math::QuatF::GetAngle(point->GetRotation()) * (180.0f / 3.14f), axis.x, axis.y, axis.z);
-		//auto rotationAxis = Utils::GLMInternalHelper::ConvertInternalVectorToGLM(Math::QuatF::GetAxis(point->GetRotation()));
 	}
 
 	void ModelManager::ResetData()

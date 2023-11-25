@@ -73,27 +73,35 @@ namespace AnimationEngine
 		auto* bone = currentAnimation->FindBone(nodeName);
 		if (bone)
 		{
-			// take control here when IK starts
-			auto [base, endEffector] = ikManager->GetBaseAndEndEffector();
-			static bool restrictBonesToIK = false;
-			if (node == base)
+			if (ikManager->GetCanRunIK())
 			{
-				restrictBonesToIK = true;
-			}
+				// take control here when IK starts
+				auto [base, endEffector] = ikManager->GetBaseAndEndEffector();
+				static bool restrictBonesToIK = false;
+				if (node == base)
+				{
+					restrictBonesToIK = true;
+				}
 
-			if (restrictBonesToIK)
-			{
-				localVQS = node->localVQS;
+				if (restrictBonesToIK)
+				{
+					localVQS = node->localVQS;
+				}
+				else
+				{
+					bone->Update(currentTime);
+					localVQS = bone->GetLocalVQS();
+				}
+
+				if (node == endEffector)
+				{
+					restrictBonesToIK = false;
+				}
 			}
 			else
 			{
 				bone->Update(currentTime);
 				localVQS = bone->GetLocalVQS();
-			}
-
-			if (node == endEffector)
-			{
-				restrictBonesToIK = false;
 			}
 
 			ExtractParentJointAndChildJoints(parentVQS, localVQS);
