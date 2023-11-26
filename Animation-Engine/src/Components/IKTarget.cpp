@@ -13,12 +13,15 @@
 #include "Core/Utilities/Time.h"
 #include "Core/Utilities/Utilites.h"
 #include "Graphics/GraphicsAPI.h"
+#include "Animation/IK/IKManager.h"
 
 namespace AnimationEngine
 {
-	IKTarget::IKTarget(CurveMesh* curveMesh, const Math::Vector3F& initialTargetLocation)
+	IKTarget::IKTarget(CurveMesh* curveMesh, IKManager* ikManager, const Math::Vector3F& initialTargetLocation)
 		:	curveMesh(curveMesh),
+			ikManager(ikManager),
 			targetLocation(initialTargetLocation),
+			currentTime(0.0f),
 			dirtyFlag(true)
 	{
 		Initialize();
@@ -33,9 +36,39 @@ namespace AnimationEngine
 		CreateShader();
 	}
 
-	void IKTarget::Update() const
+	void IKTarget::Update()
 	{
 		Draw(DebugDrawMode::Points);
+
+		if (!ikManager)
+		{
+			LOG_ERROR("IKTarget: IK Manager is nullptr!");
+			return;
+		}
+
+		if (ikManager->CanRunIK())
+		{
+			currentTime += Time::GetDeltaTime();
+
+			float t = currentTime / TOTAL_LERP_TIME_TO_REACH_TARGET;
+			t = std::clamp(t, 0.0f, 1.0f);
+
+			pseudoTarget = Math::Vector3F::Lerp(pseudoTarget, targetLocation, t);
+			return;
+		}
+		
+		const auto& chain = ikManager->GetChain().back();
+		pseudoTarget = chain->globalVQS.GetTranslationVectorInternal();
+		//pseudoTarget = {
+		//	chain->transformation[3].x,
+		//	chain->transformation[3].y,
+		//	chain->transformation[3].z
+		//};
+
+		if (currentTime > 0.0f)
+		{
+			currentTime = 0.0f;
+		}
 	}
 
 	void IKTarget::ProcessKeyboard(MovementType direction)
@@ -92,6 +125,11 @@ namespace AnimationEngine
 		OverwriteMeshData();
 
 		MakeDirty();
+	}
+
+	const Math::Vector3F& IKTarget::GetPseudoTargetLocation() const
+	{
+		return pseudoTarget;
 	}
 
 	void IKTarget::SetupMesh()
@@ -206,5 +244,10 @@ namespace AnimationEngine
 		CleanDirtyFlag();
 
 		return controlPoints;
+	}
+
+	void IKTarget::ResetTime()
+	{
+		currentTime = 0.0f;
 	}
 }

@@ -152,7 +152,7 @@ namespace AnimationEngine
 		IKManager iKManager;
 		iKManager.Initialize();
 
-		targetPoint = new IKTarget(curveMesh);
+		targetPoint = new IKTarget(curveMesh, &iKManager);
 
 		if (auto* realAnimator = dynamic_cast<Animator*>(animator))
 		{
@@ -178,7 +178,8 @@ namespace AnimationEngine
 
 			targetPoint->Update();	// IK Target Point Draw
 			// Set target for TargetFinder and the target to solve FABRIK on
-			iKManager.SetTargetPosition(targetPoint->GetTargetLocation());
+			iKManager.SetTargetFinderTargetPosition(targetPoint->GetTargetLocation());
+			iKManager.SetTargetPosition(targetPoint->GetPseudoTargetLocation());
 
 			iKManager.Update();
 

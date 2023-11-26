@@ -20,7 +20,7 @@ namespace AnimationEngine
 {
 	IKManager::IKManager()
 		:	targetFinder(nullptr),
-			canRunIK(true),
+			canRunIK(false),
 			wasFabrikSolved(false),
 			totalBoneLength(0),
 			currentAnimation(nullptr),
@@ -101,8 +101,11 @@ namespace AnimationEngine
 	void IKManager::SetTargetPosition(const Math::Vector3F& targetPosition)
 	{
 		this->targetPosition = targetPosition;
+	}
 
-		targetFinder->SetTargetLocation(targetPosition);
+	void IKManager::SetTargetFinderTargetPosition(const Math::Vector3F& position) const
+	{
+		targetFinder->SetTargetLocation(position);
 	}
 
 	bool IKManager::CanRunIK() const

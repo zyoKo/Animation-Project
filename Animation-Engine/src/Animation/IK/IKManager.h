@@ -30,6 +30,7 @@ namespace AnimationEngine
 		void Update();
 
 		void SetTargetPosition(const Math::Vector3F& targetPosition);
+		void SetTargetFinderTargetPosition(const Math::Vector3F& position) const;
 
 		std::pair<AssimpNodeData*, AssimpNodeData*> GetBaseAndEndEffector() const;
 		const std::vector<AssimpNodeData*>& GetChain() const;

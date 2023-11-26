@@ -19,7 +19,7 @@ namespace AnimationEngine
 	void TargetFinder::Update() const
 	{
 		const auto distanceFromBaseToTarget = (currentBaseLocation - currentTargetLocation).Length();
-		LOG_ERROR("Distance From Base To Target: {0}", distanceFromBaseToTarget);
+		//LOG_ERROR("Distance From Base To Target: {0}", distanceFromBaseToTarget);
 		if (distanceFromBaseToTarget < maxChainLength)
 		{
 			ikManager->SetCanRunIK(true);
