@@ -22,8 +22,7 @@ namespace AnimationEngine
 			timeToReachFirstPoint(0.0f),
 			timeToReachEndPoint(0.0f),
 			endCounter(0.0f)
-	{
-	}
+	{ }
 
 	void ModelManager::SetPosition(const Math::Vector3F& newPosition)
 	{

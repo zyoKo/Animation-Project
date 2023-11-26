@@ -19,9 +19,9 @@
 #include "Components/Camera/Camera.h"
 #include "Components/Camera/Constants/CameraConstants.h"
 #include "Animation/Animator.h"
-#include "Animation/BindPose.h"
-#include "Animation/IKManager.h"
+#include "Animation/IK/IKManager.h"
 #include "Animation/Model.h"
+#include "Components/IKTarget.h"
 #include "Core/ServiceLocators/Assets/AssetManagerLocator.h"
 #include "Core/ServiceLocators/Animation/AnimatorLocator.h"
 #include "Core/ServiceLocators/Assets/AnimationStorageLocator.h"
@@ -62,6 +62,9 @@ namespace AnimationEngine
 
 		delete curveMesh;
 		curveMesh = nullptr;
+
+		delete targetPoint;
+		targetPoint = nullptr;
 	}
 
 	void CoreEngine::SetApplication(const std::shared_ptr<IApplication>& app)
@@ -149,6 +152,8 @@ namespace AnimationEngine
 		IKManager iKManager;
 		iKManager.Initialize();
 
+		targetPoint = new IKTarget(curveMesh);
+
 		if (auto* realAnimator = dynamic_cast<Animator*>(animator))
 		{
 			realAnimator->SetIKManager(&iKManager);
@@ -170,6 +175,10 @@ namespace AnimationEngine
 			glm::mat4 model = glm::mat4(1.0f);
 
 			ProcessInput();
+
+			targetPoint->Update();	// IK Target Point Draw
+			// Set target for TargetFinder and the target to solve FABRIK on
+			iKManager.SetTargetPosition(targetPoint->GetTargetLocation());
 
 			iKManager.Update();
 
@@ -255,6 +264,20 @@ namespace AnimationEngine
 		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_SUBTRACT) == GLFW_PRESS)
 			camera->ProcessKeyboard(CameraMovement::ZOOM_OUT);
 
+		// IK_Target Movement Controls
+		if (glfwGetKey(glfwWindow, GLFW_KEY_UP) == GLFW_PRESS)
+		    targetPoint->ProcessKeyboard(MovementType::FORWARD);
+		if (glfwGetKey(glfwWindow, GLFW_KEY_DOWN) == GLFW_PRESS)
+		    targetPoint->ProcessKeyboard(MovementType::BACKWARD);
+		if (glfwGetKey(glfwWindow, GLFW_KEY_LEFT) == GLFW_PRESS)
+		    targetPoint->ProcessKeyboard(MovementType::LEFT);
+		if (glfwGetKey(glfwWindow, GLFW_KEY_RIGHT) == GLFW_PRESS)
+		    targetPoint->ProcessKeyboard(MovementType::RIGHT);
+		if (glfwGetKey(glfwWindow, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS)
+		    targetPoint->ProcessKeyboard(MovementType::UP);
+		if (glfwGetKey(glfwWindow, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS)
+		    targetPoint->ProcessKeyboard(MovementType::DOWN);
+
 		static bool isChangeModelKeyPressed = false;
 		if (glfwGetKey(glfwWindow, GLFW_KEY_SPACE) == GLFW_PRESS)
 		{
@@ -318,7 +341,8 @@ namespace AnimationEngine
 			if (changePath)
 				return;
 
-			curveMesh->CreateNewSplinePath(Math::DEFAULT_CONTROL_POINTS);
+			curveMesh->CreateNewSplinePath(targetPoint->GetControlPoints());
+			//curveMesh->CreateNewSplinePath(Math::DEFAULT_CONTROL_POINTS);
 			modelManager->Reset();
 			changePath = true;
 		}

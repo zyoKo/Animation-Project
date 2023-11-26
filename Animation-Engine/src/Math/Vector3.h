@@ -91,6 +91,7 @@ namespace AnimationEngine::Math
 		static Vector3 Cross(const Vector3& lhsVector, const Vector3& rhsVector);
 
 		static Vector3 Lerp(const Vector3& vecOne, const Vector3& vecTwo, T t);
+		static Vector3 Slerp(const Vector3& vecOne, const Vector3& vecTwo, T t);
 
 		// Misc Operations
 		T MinComponent(const Vector3& vector);
@@ -99,6 +100,7 @@ namespace AnimationEngine::Math
 		Vector3 Min(const Vector3& lhsVector, const Vector3& rhsVector);
 		Vector3 Max(const Vector3& lhsVector, const Vector3& rhsVector);
 		Vector3 Permute(const Vector3& vector, int x, int y, int z);
+		T FindAngle(const Vector3& vecOne, const Vector3& vecTwo);
 
 		// Assumes firstVector passed has already been normalized
 		void CoordinateSystem(const Vector3& firstVector, Vector3* secondVector, Vector3* thirdVector);

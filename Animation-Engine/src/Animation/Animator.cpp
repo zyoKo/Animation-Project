@@ -6,7 +6,7 @@
 #include "Core/Utilities/Time.h"
 #include "DataTypes/AssimpNodeData.h"
 #include "Core/Utilities/Utilites.h"
-#include "IKManager.h"
+#include "Animation/IK/IKManager.h"
 
 namespace AnimationEngine
 {
@@ -73,29 +73,27 @@ namespace AnimationEngine
 		auto* bone = currentAnimation->FindBone(nodeName);
 		if (bone)
 		{
-			if (ikManager->GetCanRunIK())
+			if (ikManager->CanRunIK() && ikManager->WasFabrikSolved())
 			{
-				// take control here when IK starts
-				auto [base, endEffector] = ikManager->GetBaseAndEndEffector();
 				static bool restrictBonesToIK = false;
-				if (node == base)
+				for (const auto& boneInChain : ikManager->GetChain())
 				{
-					restrictBonesToIK = true;
+					if (node == boneInChain)
+					{
+						restrictBonesToIK = true;
+					}
 				}
 
 				if (restrictBonesToIK)
 				{
 					localVQS = node->localVQS;
+
+					restrictBonesToIK = false;
 				}
 				else
 				{
 					bone->Update(currentTime);
 					localVQS = bone->GetLocalVQS();
-				}
-
-				if (node == endEffector)
-				{
-					restrictBonesToIK = false;
 				}
 			}
 			else
@@ -187,39 +185,9 @@ namespace AnimationEngine
 	{
 		static std::vector<Math::Vec3F> jointPositions;
 
-		//jointPositions.push_back(Utils::GLMInternalHelper::ConvertVQSToGLMMatrix())
-
 		for (unsigned i = 0; i < node->childrenCount; ++i)
 		{
 			ProcessChildNodes(node->children[i].get());
 		}
-	}
-
-	void Animator::CalculateBindPose(const AssimpNodeData* rootNode)
-	{
-		//std::string nodeName = rootNode->name;
-		//auto localTransform = rootNode->transformation;
-		//
-		//auto* bone = currentAnimation->FindBone(nodeName);
-		//if (bone)
-		//{
-		//	localTransform = bone->GetLocalVQS();
-		//}
-		//
-		//const auto worldVQS = parentVQS * localTransform;
-		//
-		//auto boneInfoMap = currentAnimation->GetBoneIDMap();
-		//if (boneInfoMap.contains(nodeName))
-		//{
-		//	const auto index = boneInfoMap[nodeName].id;
-		//	const auto& offset = Utils::GLMInternalHelper::ConvertGLMMatrixToVQS(boneInfoMap[nodeName].offset);
-		//
-		//	finalBoneMatrices[index] = Utils::GLMInternalHelper::ConvertVQSToGLMMatrix(worldVQS * offset);
-		//}
-		//
-		//for (unsigned i = 0; i < rootNode->childrenCount; ++i)
-		//{
-		//	CalculateBoneTransformWithVQS(&rootNode->children[i], worldVQS);
-		//}
 	}
 }

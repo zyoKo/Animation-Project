@@ -42,6 +42,11 @@ namespace AnimationEngine::Math
 		return translationVector;
 	}
 
+	Vector3F VQS::GetTranslationVectorInternal() const
+	{
+		return Utils::GLMInternalHelper::ConvertGLMVectorToInternal(translationVector);
+	}
+
 	void VQS::SetRotation(const QuatF& quat)
 	{
 		this->quatRotation = quat;

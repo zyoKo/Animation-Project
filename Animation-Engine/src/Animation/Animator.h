@@ -64,7 +64,5 @@ namespace AnimationEngine
 		void ExtractParentJointAndChildJoints(const Math::VQS& parent, const Math::VQS& child);
 
 		void ProcessChildNodes(const AssimpNodeData* node);
-
-		void CalculateBindPose(const AssimpNodeData* rootNode);
 	};
 }

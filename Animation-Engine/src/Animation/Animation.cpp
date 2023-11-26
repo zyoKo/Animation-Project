@@ -101,9 +101,6 @@ namespace AnimationEngine
 		destinationNode.parent = parent;
 		destinationNode.localVQS = Utils::GLMInternalHelper::ConvertGLMMatrixToVQS(destinationNode.transformation);
 
-		// storing bind pose
-		bindPose.emplace_back(destinationNode.name, destinationNode.transformation);
-
 		for (unsigned i = 0; i < sourceNode->mNumChildren; ++i)
 		{
 			std::unique_ptr<AssimpNodeData> newAssimpNodeData = std::make_unique<AssimpNodeData>();

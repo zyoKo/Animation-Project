@@ -18,6 +18,7 @@ namespace AnimationEngine::Math
 		void SetTranslationVector(const glm::vec3& vector);
 		const glm::vec3& GetTranslationVector() const;
 		glm::vec3 GetTranslationVector();
+		Vector3F GetTranslationVectorInternal() const;	// Internal Vector3
 
 		void SetRotation(const QuatF& quat);
 		const QuatF& GetRotation() const;

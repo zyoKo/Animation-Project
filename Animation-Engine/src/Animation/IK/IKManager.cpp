@@ -2,27 +2,27 @@
 
 #include "IKManager.h"
 
-#include <ranges>
-
+#include "Data/IKConstants.h"
+#include "Graphics/GraphicsAPI.h"
+#include "Graphics/OpenGL/Buffers/Structure/VertexBufferLayout.h"
 #include "Animation/Repository/AnimationStorage.h"
-#include "Core/ServiceLocators/Assets/AnimationStorageLocator.h"
 #include "Animation/Animation.h"
+#include "Animation/IK/TargetFinder.h"
 #include "Components/Camera/Camera.h"
+#include "Components/Types/DebugDrawMode.h"
 #include "Components/Camera/Constants/CameraConstants.h"
 #include "Core/Logger/GLDebug.h"
 #include "Core/ServiceLocators/Assets/AssetManagerLocator.h"
+#include "Core/ServiceLocators/Assets/AnimationStorageLocator.h"
 #include "Core/Utilities/Utilites.h"
-#include "Graphics/GraphicsAPI.h"
 
 namespace AnimationEngine
 {
 	IKManager::IKManager()
-		:	canRunIK(true),
+		:	targetFinder(nullptr),
+			canRunIK(true),
+			wasFabrikSolved(false),
 			totalBoneLength(0),
-			threshold(1.0f),
-			maxIterations(10),
-			baseBoneName("mixamorig_LeftShoulder"),
-			endEffectorName("mixamorig_LeftHand"),
 			currentAnimation(nullptr),
 			base(nullptr),
 			endEffector(nullptr)
@@ -41,87 +41,78 @@ namespace AnimationEngine
 		const std::string& fragmentFilePath = "./assets/shaders/IKManager.frag";
 		shader = AssetManagerLocator::GetAssetManager()->CreateShader("IKManagerShader", vertexFilePath, fragmentFilePath);
 
-		jointPositions.resize(4);
-
 		SetupMesh();
 	}
 
 	void IKManager::Initialize()
 	{
-		FindJointWithName(&currentAnimation->GetRootNode(), baseBoneName, base);
-		FindJointWithName(&currentAnimation->GetRootNode(), endEffectorName, endEffector);
+		FindJointWithName(&currentAnimation->GetRootNode(), std::string(BASE_BONE_NAME), base);
+		FindJointWithName(&currentAnimation->GetRootNode(), std::string(END_EFFECTOR_BONE_NAME), endEffector);
 
-		bool chainStart = false;
-		jointPositions.clear();
-		ComputeGlobalFromLocalVQS(&currentAnimation->GetRootNode(), jointPositions, Math::VQS(), chainStart);
+		ReadHierarchyToFrom(base, endEffector);
+
+		ComputeGlobalFromLocalVQS(&currentAnimation->GetRootNode(), Math::VQS());
+		OverwriteJointPositions();
 		ComputeBoneLengths(jointPositions);
 		ComputeInitialDirectionAndRotation(jointPositions);
+
+		targetFinder = std::make_shared<TargetFinder>(this, 20.0f);
 	}
 
 	void IKManager::Update()
 	{
-		//bool chainStart = false;
-		//joints.clear();
-		//jointPositions.clear();
-		//ComputeGlobalFromLocalVQS(&currentAnimation->GetRootNode(), fabrikSolvedJoints, Math::VQS(), chainStart);
-		//for (const auto& [jointName, jointVQS]: joints)
-		//{
-		//	//auto jointMatrix = Utils::GLMInternalHelper::ConvertVQSToGLMMatrix(joint.second);
-		//
-		//	jointPositions.emplace_back(
-		//		jointVQS.GetTranslationVector().x,
-		//		jointVQS.GetTranslationVector().y,
-		//		jointVQS.GetTranslationVector().z
-		//	);
-		//
-		//	//LOG_WARN("Global Joints {0} Position: ({1}, {2}, {3})", jointName,
-		//	//	jointVQS.GetTranslationVector().x,
-		//	//	jointVQS.GetTranslationVector().y,
-		//	//	jointVQS.GetTranslationVector().z);
-		//}
-		////LOG_WARN("====================================\n");
-		//
-		//localJoints.clear();
-		//ReadHierarchyToFrom(base, endEffector);
-		//for (const auto& [jointName, jointVQS] : localJoints)
-		//{
-		//	LOG_WARN("LocalJoint {0} Position: ({1}, {2}, {3})", jointName,
-		//		jointVQS.GetTranslationVector().x,
-		//		jointVQS.GetTranslationVector().y,
-		//		jointVQS.GetTranslationVector().z);
-		//}
-		//LOG_WARN("====================================\n");
-		//
-		//int counter = 0;
-		//globalToLocalJoints.clear();
-		//auto modelVQS = Utils::GLMInternalHelper::ConvertGLMMatrixToVQS(currentAnimation->GetRootNode().transformation);
-		//ComputeLocalFromGlobalVQS(&currentAnimation->GetRootNode(), Math::VQS(), chainStart, counter);
-		//for (const auto& [jointName, jointVQS] : globalToLocalJoints)
-		//{
-		//	LOG_WARN("Local(From Global) Joint {0} Position: ({1}, {2}, {3})", jointName,
-		//		jointVQS.GetTranslationVector().x,
-		//		jointVQS.GetTranslationVector().y,
-		//		jointVQS.GetTranslationVector().z);
-		//}
-		//LOG_WARN("====================================\n");
+		if (currentAnimation != AnimationStorageLocator::GetAnimationStorage()->GetAnimationForCurrentlyBoundIndex())
+		{
+			currentAnimation = AnimationStorageLocator::GetAnimationStorage()->GetAnimationForCurrentlyBoundIndex();
+			Initialize();
+		}
 
+		ComputeBoneLengths(jointPositions);
+		ComputeGlobalFromLocalVQS(&currentAnimation->GetRootNode(), Math::VQS());
+		OverwriteJointPositions();
+		targetFinder->SetBaseJointLocation(jointPositions[0]);
+
+		targetFinder->Update();
+
+		static bool computeInitialRotation = false;
 		if (canRunIK)
 		{
-			FABRIKSolver({ -10.0f, 10.0f, 10.0f });
+			if (computeInitialRotation)
+			{
+				ComputeGlobalFromLocalVQS(&currentAnimation->GetRootNode(), Math::VQS());
+				OverwriteJointPositions();
+				ComputeInitialDirectionAndRotation(jointPositions);
+
+				computeInitialRotation = false;
+			}
+
+			wasFabrikSolved = FABRIKSolver();
 
 			OverwriteDataInVertexBuffer();
 			SetupShader();
+		}
+		else
+		{
+			wasFabrikSolved = false;
+			computeInitialRotation = true;
 		}
 	}
 
 	void IKManager::SetTargetPosition(const Math::Vector3F& targetPosition)
 	{
 		this->targetPosition = targetPosition;
+
+		targetFinder->SetTargetLocation(targetPosition);
 	}
 
-	bool IKManager::GetCanRunIK() const
+	bool IKManager::CanRunIK() const
 	{
 		return canRunIK;
+	}
+
+	bool IKManager::WasFabrikSolved() const
+	{
+		return wasFabrikSolved;
 	}
 
 	std::pair<AssimpNodeData*, AssimpNodeData*> IKManager::GetBaseAndEndEffector() const
@@ -129,7 +120,12 @@ namespace AnimationEngine
 		return { base, endEffector };
 	}
 
-	void IKManager::CanRunIK(bool canRun)
+	const std::vector<AssimpNodeData*>& IKManager::GetChain() const
+	{
+		return chain;
+	}
+
+	void IKManager::SetCanRunIK(bool canRun)
 	{
 		this->canRunIK = canRun;
 	}
@@ -138,7 +134,7 @@ namespace AnimationEngine
 	{
 		if (node->name == name)
 		{
-			LOG_WARN("Voila! Found: {0}", node->name);
+			LOG_WARN("Bone with Name [{0}] Found!", node->name);
 			result = node;
 			return true;
 		}
@@ -160,34 +156,21 @@ namespace AnimationEngine
 
 		while (currentJoint != to)
 		{
-			const auto end = 
-			{
-				currentJoint->localVQS.GetTranslationVector().x,
-				currentJoint->localVQS.GetTranslationVector().y,
-				currentJoint->localVQS.GetTranslationVector().z
-			};
-
-			const auto start = 
-			{
-				currentJoint->parent->localVQS.GetTranslationVector().x,
-				currentJoint->parent->localVQS.GetTranslationVector().y,
-				currentJoint->parent->localVQS.GetTranslationVector().z
-			};
+			chain.emplace_back(currentJoint);
 
 			currentJoint = currentJoint->parent;
 		}
+
+		chain.emplace_back(currentJoint);
+
+		std::ranges::reverse(chain);
 	}
 
-	bool IKManager::ComputeGlobalFromLocalVQS(AssimpNodeData* node, std::vector<Math::Vector3F>& iKChain, const Math::VQS& rootVQS, bool& chainStart)
+	bool IKManager::ComputeGlobalFromLocalVQS(AssimpNodeData* node, const Math::VQS& rootVQS)
 	{
 		if (node == nullptr)
 		{
 			return false;
-		}
-
-		if (node == base)
-		{
-			chainStart = true;
 		}
 
 		if (node->parent != nullptr)
@@ -199,21 +182,9 @@ namespace AnimationEngine
 			node->globalVQS = rootVQS * node->localVQS;
 		}
 
-		if (chainStart)
-		{
-			const auto& globalPosition = node->globalVQS.GetTranslationVector();
-			iKChain.emplace_back(globalPosition.x, globalPosition.y, globalPosition.z);
-		}
-
-		if (node == endEffector)
-		{
-			chainStart = false;
-			return true;
-		}
-
 		for (unsigned i = 0; i < node->childrenCount; ++i)
 		{
-			if (true == ComputeGlobalFromLocalVQS(node->children[i].get(), iKChain, rootVQS, chainStart))
+			if (true == ComputeGlobalFromLocalVQS(node->children[i].get(), rootVQS))
 			{
 				return true;
 			}
@@ -291,7 +262,7 @@ namespace AnimationEngine
 		{
 			Math::Vector3F newDirection;
 
-			if (i == jointPositions.size() - 2)
+			if (i == jointPositions.size() - 1)
 			{
 				newDirection = (target - jointPositions[i]).GetNormalize();
 			}
@@ -306,7 +277,7 @@ namespace AnimationEngine
 		}
 	}
 
-	bool IKManager::FABRIKSolver(const Math::Vec3F& targetLocation)
+	bool IKManager::FABRIKSolver()
 	{
 		const auto size = jointPositions.size();
 		if (size == 0)
@@ -314,31 +285,26 @@ namespace AnimationEngine
 			return false;
 		}
 
-		const float thresholdSquare = threshold * threshold;
-
-		bool chainStart = false;
-		jointPositions.clear();
-		ComputeGlobalFromLocalVQS(&currentAnimation->GetRootNode(), jointPositions, Math::VQS(), chainStart);
+		ComputeGlobalFromLocalVQS(&currentAnimation->GetRootNode(), Math::VQS());
+		OverwriteJointPositions();
 		const auto basePosition = jointPositions[0];
 
-		auto target = targetLocation;
+		auto target = targetPosition;
 		// if target is too far away
-		const auto distanceFromShoulder = (targetLocation - jointPositions[0]).Length();
+		const auto distanceFromShoulder = (targetPosition - jointPositions[0]).Length();
 		if (distanceFromShoulder > totalBoneLength)
 		{
-			const auto direction = (targetLocation - jointPositions[0]).GetNormalize();
-			const auto offset = direction * totalBoneLength;
+			const auto direction = (targetPosition - jointPositions[0]).GetNormalize();
+			const auto offset = direction * totalBoneLength - 0.1f;
 			target = jointPositions[0] + offset;
 		}
 
-		SetTargetPosition(target);
-
-		for (unsigned iteration = 0; iteration < maxIterations; ++iteration)
+		for (unsigned iteration = 0; iteration < MAX_FABRIK_ITERATIONS; ++iteration)
 		{
 			Math::Vector3F effector = jointPositions.back();
 
 			const auto distanceBetweenEEAndTarget = (target - effector).Length();
-			if (distanceBetweenEEAndTarget < thresholdSquare)
+			if (distanceBetweenEEAndTarget < FABRIK_SOLVER_THRESHOLD_SQUARE)
 			{
 				ApplyRotationFix(target);
 
@@ -351,13 +317,21 @@ namespace AnimationEngine
 
 			BackwardSolver(target);
 			ForwardSolver(basePosition);
+
+			ApplyRotationFix(target);
 		}
 
 		ComputeLocalFromGlobalVQS(&currentAnimation->GetRootNode(), currentAnimation->GetRootNode().globalVQS);
 
 		const auto effector = Utils::GLMInternalHelper::ConvertGLMVectorToInternal(endEffector->globalVQS.GetTranslationVector());
-		if ((target - effector).Length() < thresholdSquare)
+		if ((target - effector).Length() < FABRIK_SOLVER_THRESHOLD_SQUARE)
 		{
+			ApplyRotationFix(target);
+
+			UpdateBonePositionAndRotation();
+
+			ComputeLocalFromGlobalVQS(&currentAnimation->GetRootNode(), currentAnimation->GetRootNode().globalVQS);
+
 			return true;
 		}
 
@@ -419,6 +393,9 @@ namespace AnimationEngine
 
 	void IKManager::ComputeInitialDirectionAndRotation(const std::vector<Math::Vector3F>& jointPositions)
 	{
+		initialJointDirections.clear();
+		initialJointRotations.clear();
+
 		for (unsigned i = 1; i < jointPositions.size(); ++i)
 		{
 			auto direction = (jointPositions[i] - jointPositions[i - 1]).GetNormalize();
@@ -437,6 +414,9 @@ namespace AnimationEngine
 
 	void IKManager::ComputeBoneLengths(const std::vector<Math::Vector3F>& jointPositions)
 	{
+		boneLengths.clear();
+		totalBoneLength = 0.0f;
+
 		for (unsigned i = 0; i < jointPositions.size() - 1; ++i)
 		{
 			const auto boneLength = (jointPositions[i] - jointPositions[i + 1]).Length();
@@ -461,5 +441,16 @@ namespace AnimationEngine
 		}
 
 		temp->globalVQS.SetTranslationVector(Utils::GLMInternalHelper::ConvertInternalVectorToGLM(jointPositions[i]));
+	}
+
+	void IKManager::OverwriteJointPositions()
+	{
+		jointPositions.clear();
+
+		for (const auto& bone : chain)
+		{
+			// Global Joint Positions
+			jointPositions.emplace_back(bone->globalVQS.GetTranslationVectorInternal());
+		}
 	}
 }

@@ -10,8 +10,11 @@
 
 namespace AnimationEngine
 {
-	class CurveMesh;
 	class IApplication;
+
+	class IKTarget;
+
+	class CurveMesh;
 
 	class IAnimator;
 
@@ -43,21 +46,18 @@ namespace AnimationEngine
 
 	private:
 		std::shared_ptr<IApplication> application;
-
 		std::unique_ptr<IWindow> window;
 
 		IAssetManager* assetManager;
-
 		IAnimator* animator;
 
 		CurveMesh* curveMesh;
+		IKTarget* targetPoint;
 
 		bool running = true;
-
 		bool enableModelMesh = false;
 
 		AnimationStorage animationStorage;
-
 		ModelManager* modelManager;
 
 		void ProcessInput();
