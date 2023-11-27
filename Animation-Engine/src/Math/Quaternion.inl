@@ -376,10 +376,12 @@ namespace AnimationEngine::Math
 			return { rotationAxis.x, rotationAxis.y, rotationAxis.z, static_cast<T>(0) };
 		}
 
-		rotationAxis = Vector3<T>::Cross(normalizedFrom, normalizedTo);
 		T angle = std::acos(cosTheta) / static_cast<T>(2);
-		Vector3<T> imaginary = rotationAxis.GetNormalize() * std::sin(angle);
+		T scalar = std::cos(angle);
 
-		return Quaternion(imaginary.x, imaginary.y, imaginary.z, std::cos(angle));
+		rotationAxis = Vector3<T>::Cross(normalizedFrom, normalizedTo);
+		Vector3<T> vector = rotationAxis.GetNormalize() * std::sin(angle);
+
+		return Quaternion(vector, scalar);
 	}
 }

@@ -224,6 +224,18 @@ namespace AnimationEngine::Math
 	}
 
 	template <typename T>
+	Vector3<T> Vector3<T>::Nlerp(const Vector3& vecTwo, const Vector3& vecOne, T t)
+	{
+		const Vector3 linear {
+			vecOne.x + (vecTwo.x - vecOne.x) * t,
+			vecOne.y + (vecTwo.y - vecOne.y) * t,
+			vecOne.z + (vecTwo.z - vecOne.z) * t
+		};
+
+		return Vector3::Normalize(linear);
+	}
+
+	template <typename T>
 	Vector3<T> Vector3<T>::Slerp(const Vector3& vecOne, const Vector3& vecTwo, T t)
 	{
 		if (t < static_cast<T>(0.001))
@@ -231,14 +243,23 @@ namespace AnimationEngine::Math
 			return Lerp(vecOne, vecTwo, t);
 		}
 
-		Vector3 from = vecOne.GetNormalize();
-		Vector3 to = vecOne.GetNormalize();
+		Vector3 from = Vector3::Normalize(vecOne);
+		Vector3 to = Vector3::Normalize(vecTwo);
 
 		T theta = FindAngle(vecOne, vecTwo);
 		T sinTheta = std::sin(theta);
 
-		T a = std::sin((static_cast<T>(1) - t) * theta) / sinTheta;
-		T b = std::sin(t * theta) / sinTheta;
+		T a, b;
+		if (sinTheta > 0.0f)
+		{
+			a = std::sin((static_cast<T>(1) - t) * theta) / sinTheta;
+			b = std::sin(t * theta) / sinTheta;
+		}
+		else
+		{
+			a = static_cast<T>(0);
+			b = static_cast<T>(0);
+		}
 
 		return from * a + to * b;
 	}

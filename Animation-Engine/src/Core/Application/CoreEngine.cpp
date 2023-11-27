@@ -33,11 +33,12 @@ namespace AnimationEngine
 		:	assetManager(new AssetManager()),
 			animator(new Animator()),
 			curveMesh(nullptr),
+			targetPoint(nullptr),
 			modelManager(nullptr)
 	{
 		Log::Initialize();
 
-		window = std::unique_ptr<IWindow>(IWindow::Create({ name, width, height }));
+		window = std::unique_ptr<IWindow>(IWindow::Create({name, width, height}));
 
 		// Bind Event Callback here
 
@@ -159,6 +160,10 @@ namespace AnimationEngine
 			realAnimator->SetIKManager(&iKManager);
 		}
 
+		// Initialize to go to point
+		curveMesh->CreateNewSplinePath(targetPoint->GetControlPoints());
+		modelManager->Reset();
+
 		while (running && !window->WindowShouldClose())
 		{
 			GraphicsAPI::GetContext()->ClearColor();
@@ -181,10 +186,10 @@ namespace AnimationEngine
 			iKManager.SetTargetFinderTargetPosition(targetPoint->GetTargetLocation());
 			iKManager.SetTargetPosition(targetPoint->GetPseudoTargetLocation());
 
-			iKManager.Update();
-
 			animator->UpdateAnimation();
 			//animator->ResetAnimation();
+
+			iKManager.Update();
 
 			// TODO: Fix these hacks
 			debugMesh.OverwriteJointsPosition(animator->GetJointPositions());
@@ -238,7 +243,7 @@ namespace AnimationEngine
 		return true;
 	}
 
-	void CoreEngine::ProcessInput()
+	void CoreEngine::ProcessInput() const
 	{
 		const auto camera = Camera::GetInstance();
 
@@ -255,58 +260,63 @@ namespace AnimationEngine
 		    camera->ProcessKeyboard(CameraMovement::LEFT);
 		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_6) == GLFW_PRESS)
 		    camera->ProcessKeyboard(CameraMovement::RIGHT);
+		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_9) == GLFW_PRESS)
+		    camera->ProcessKeyboard(CameraMovement::LOOK_UP);
+		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_3) == GLFW_PRESS)
+		    camera->ProcessKeyboard(CameraMovement::LOOK_DOWN);
 
-		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_DECIMAL) == GLFW_PRESS)
-			camera->ProcessKeyboard(CameraMovement::ROTATE_LEFT);
 		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_0) == GLFW_PRESS)
+			camera->ProcessKeyboard(CameraMovement::ROTATE_LEFT);
+		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_DECIMAL) == GLFW_PRESS)
 			camera->ProcessKeyboard(CameraMovement::ROTATE_RIGHT);
 		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_ADD) == GLFW_PRESS)
 			camera->ProcessKeyboard(CameraMovement::ZOOM_IN);
 		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_SUBTRACT) == GLFW_PRESS)
 			camera->ProcessKeyboard(CameraMovement::ZOOM_OUT);
 
-		// IK_Target Movement Controls
-		if (glfwGetKey(glfwWindow, GLFW_KEY_UP) == GLFW_PRESS)
-		    targetPoint->ProcessKeyboard(MovementType::FORWARD);
-		if (glfwGetKey(glfwWindow, GLFW_KEY_DOWN) == GLFW_PRESS)
-		    targetPoint->ProcessKeyboard(MovementType::BACKWARD);
-		if (glfwGetKey(glfwWindow, GLFW_KEY_LEFT) == GLFW_PRESS)
-		    targetPoint->ProcessKeyboard(MovementType::LEFT);
-		if (glfwGetKey(glfwWindow, GLFW_KEY_RIGHT) == GLFW_PRESS)
-		    targetPoint->ProcessKeyboard(MovementType::RIGHT);
-		if (glfwGetKey(glfwWindow, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS)
-		    targetPoint->ProcessKeyboard(MovementType::UP);
-		if (glfwGetKey(glfwWindow, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS)
-		    targetPoint->ProcessKeyboard(MovementType::DOWN);
+		// IK_Target Movement Controls (Testing)
+		//if (glfwGetKey(glfwWindow, GLFW_KEY_UP) == GLFW_PRESS)
+		//    targetPoint->ProcessKeyboard(MovementType::FORWARD);
+		//if (glfwGetKey(glfwWindow, GLFW_KEY_DOWN) == GLFW_PRESS)
+		//    targetPoint->ProcessKeyboard(MovementType::BACKWARD);
+		//if (glfwGetKey(glfwWindow, GLFW_KEY_LEFT) == GLFW_PRESS)
+		//    targetPoint->ProcessKeyboard(MovementType::LEFT);
+		//if (glfwGetKey(glfwWindow, GLFW_KEY_RIGHT) == GLFW_PRESS)
+		//    targetPoint->ProcessKeyboard(MovementType::RIGHT);
+		//if (glfwGetKey(glfwWindow, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS)
+		//    targetPoint->ProcessKeyboard(MovementType::UP);
+		//if (glfwGetKey(glfwWindow, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS)
+		//    targetPoint->ProcessKeyboard(MovementType::DOWN);
 
-		static bool isChangeModelKeyPressed = false;
-		if (glfwGetKey(glfwWindow, GLFW_KEY_SPACE) == GLFW_PRESS)
-		{
-			if (!isChangeModelKeyPressed)
-			{
-				animationStorage.ChangeModel();
-				animator->ChangeAnimation(animationStorage.GetAnimationForCurrentlyBoundIndex());
-				isChangeModelKeyPressed = true;
-			}
-		}
-		else
-		{
-			isChangeModelKeyPressed = false;
-		}
+		//static bool isChangeModelKeyPressed = false;
+		//if (glfwGetKey(glfwWindow, GLFW_KEY_SPACE) == GLFW_PRESS)
+		//{
+		//	if (!isChangeModelKeyPressed)
+		//	{
+		//		//animationStorage.ChangeModel();
+		//		//animator->ChangeAnimation(animationStorage.GetAnimationForCurrentlyBoundIndex());
+		//		isChangeModelKeyPressed = true;
+		//	}
+		//}
+		//else
+		//{
+		//	isChangeModelKeyPressed = false;
+		//}
 
-		static bool isEnableModelKeyPressed = false;
-		if (glfwGetKey(glfwWindow, GLFW_KEY_ENTER) == GLFW_PRESS)
-		{
-			if (!isEnableModelKeyPressed)
-			{
-				enableModelMesh = !enableModelMesh;
-				isEnableModelKeyPressed = true;
-			}
-		}
-		else
-		{
-			isEnableModelKeyPressed = false;
-		}
+		// Disabled for testing
+		//static bool isEnableModelKeyPressed = false;
+		//if (glfwGetKey(glfwWindow, GLFW_KEY_ENTER) == GLFW_PRESS)
+		//{
+		//	if (!isEnableModelKeyPressed)
+		//	{
+		//		enableModelMesh = !enableModelMesh;
+		//		isEnableModelKeyPressed = true;
+		//	}
+		//}
+		//else
+		//{
+		//	isEnableModelKeyPressed = false;
+		//}
 
 		static bool isCameraResetKeyPressed = false;
 		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_5) == GLFW_PRESS)
@@ -336,34 +346,55 @@ namespace AnimationEngine
 			resetPathFollowing = false;
 		}
 
+		static unsigned path = 0;
 		static bool changePath = false;
 		if (glfwGetKey(glfwWindow, GLFW_KEY_1) == GLFW_PRESS)
 		{
-			if (changePath)
+			if (changePath || path == 1)
 				return;
 
+			targetPoint->SetTargetLocation({ -50.0f, 15.0f, -50.0f });
 			curveMesh->CreateNewSplinePath(targetPoint->GetControlPoints());
-			//curveMesh->CreateNewSplinePath(Math::DEFAULT_CONTROL_POINTS);
 			modelManager->Reset();
+
 			changePath = true;
+			path = 1;
 		}
 		else if(glfwGetKey(glfwWindow, GLFW_KEY_2) == GLFW_PRESS)
 		{
-			if (changePath)
+			if (changePath || path == 2)
 				return;
-			
-			curveMesh->CreateNewSplinePath(Math::SMOOTH_CONTROL_POINTS);
+
+			targetPoint->SetTargetLocation({ 50.0f, 15.0f, -50.0f });
+			curveMesh->CreateNewSplinePath(targetPoint->GetControlPoints());
 			modelManager->Reset();
+
 			changePath = true;
+			path = 2;
 		}
 		else if(glfwGetKey(glfwWindow, GLFW_KEY_3) == GLFW_PRESS)
 		{
-			if (changePath)
+			if (changePath || path == 3)
 				return;
 
-			curveMesh->CreateNewSplinePath(Math::CONTROL_POINTS_CIRCLE);
+			targetPoint->SetTargetLocation({ 50.0f, 15.0f, 50.0f });
+			curveMesh->CreateNewSplinePath(targetPoint->GetControlPoints());
 			modelManager->Reset();
+
 			changePath = true;
+			path = 3;
+		}
+		else if(glfwGetKey(glfwWindow, GLFW_KEY_4) == GLFW_PRESS)
+		{
+			if (changePath || 4 == path)
+				return;
+
+			targetPoint->SetTargetLocation({ -50.0f, 15.0f, 50.0f });
+			curveMesh->CreateNewSplinePath(targetPoint->GetControlPoints());
+			modelManager->Reset();
+
+			changePath = true;
+			path = 4;
 		}
 		else
 		{

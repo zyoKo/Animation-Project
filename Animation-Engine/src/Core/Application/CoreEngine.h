@@ -60,6 +60,6 @@ namespace AnimationEngine
 		AnimationStorage animationStorage;
 		ModelManager* modelManager;
 
-		void ProcessInput();
+		void ProcessInput() const;
 	};
 }

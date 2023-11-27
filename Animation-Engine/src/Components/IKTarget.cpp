@@ -59,11 +59,6 @@ namespace AnimationEngine
 		
 		const auto& chain = ikManager->GetChain().back();
 		pseudoTarget = chain->globalVQS.GetTranslationVectorInternal();
-		//pseudoTarget = {
-		//	chain->transformation[3].x,
-		//	chain->transformation[3].y,
-		//	chain->transformation[3].z
-		//};
 
 		if (currentTime > 0.0f)
 		{

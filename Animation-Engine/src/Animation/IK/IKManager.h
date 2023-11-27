@@ -71,7 +71,7 @@ namespace AnimationEngine
 		// Pre-Solver Step
 		bool ComputeGlobalFromLocalVQS(AssimpNodeData* node, const Math::VQS& rootVQS);
 		// Post-Solver Step
-		bool ComputeLocalFromGlobalVQS(AssimpNodeData* node, const Math::VQS& parentVQS);
+		bool ComputeLocalFromGlobalVQS(AssimpNodeData* node, const Math::VQS& rootVQS);
 
 		// FABRIK Logic
 		void BackwardSolver(const Math::Vector3F& target);
@@ -84,6 +84,8 @@ namespace AnimationEngine
 
 		void ComputeInitialDirectionAndRotation(const std::vector<Math::Vector3F>& jointPositions);
 		void ComputeBoneLengths(const std::vector<Math::Vector3F>& jointPositions);
+		void UpdateBonePosition() const;
+		void UpdateBoneRotation() const;
 		void UpdateBonePositionAndRotation() const;
 
 		void OverwriteJointPositions();

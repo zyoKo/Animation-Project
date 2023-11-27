@@ -56,7 +56,7 @@ namespace AnimationEngine
 	static const std::vector<unsigned> GRID_INDICES = { 0, 1, 3, 1, 2, 3 };
 
 	// IK-Target Constants
-	static constexpr Math::Vector3F DEFAULT_IK_TARGET_LOCATION = { 0.0f, 15.0f, 0.0f };
+	static constexpr Math::Vector3F DEFAULT_IK_TARGET_LOCATION = { 10.0f, 15.0f, 0.0f };
 
 	static constexpr std::string_view IK_TARGET_SHADER_NAME = "IKTargetShader";
 

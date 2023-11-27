@@ -56,7 +56,7 @@ namespace AnimationEngine
 		ComputeBoneLengths(jointPositions);
 		ComputeInitialDirectionAndRotation(jointPositions);
 
-		targetFinder = std::make_shared<TargetFinder>(this, 20.0f);
+		targetFinder = std::make_shared<TargetFinder>(this, totalBoneLength + TARGET_FINDER_OFFSET);
 	}
 
 	void IKManager::Update()
@@ -196,7 +196,7 @@ namespace AnimationEngine
 		return false;
 	}
 
-	bool IKManager::ComputeLocalFromGlobalVQS(AssimpNodeData* node, const Math::VQS& parentVQS)
+	bool IKManager::ComputeLocalFromGlobalVQS(AssimpNodeData* node, const Math::VQS& rootVQS)
 	{
 		if (node == nullptr) 
 		{
@@ -209,12 +209,12 @@ namespace AnimationEngine
 		}
 		else
 		{
-			node->localVQS = parentVQS.Inverse() * node->globalVQS;
+			node->localVQS = rootVQS.Inverse() * node->globalVQS;
 		}
 
 		for (unsigned i = 0; i < node->childrenCount; ++i) 
 		{
-		    if (true == ComputeLocalFromGlobalVQS(node->children[i].get(), parentVQS))
+		    if (true == ComputeLocalFromGlobalVQS(node->children[i].get(), rootVQS))
 			{
 		        return true;
 		    }
@@ -265,7 +265,7 @@ namespace AnimationEngine
 		{
 			Math::Vector3F newDirection;
 
-			if (i == jointPositions.size() - 1)
+			if (i == jointPositions.size() - 2)
 			{
 				newDirection = (target - jointPositions[i]).GetNormalize();
 			}
@@ -309,36 +309,21 @@ namespace AnimationEngine
 			const auto distanceBetweenEEAndTarget = (target - effector).Length();
 			if (distanceBetweenEEAndTarget < FABRIK_SOLVER_THRESHOLD_SQUARE)
 			{
-				ApplyRotationFix(target);
-
-				UpdateBonePositionAndRotation();
-
 				ComputeLocalFromGlobalVQS(&currentAnimation->GetRootNode(), currentAnimation->GetRootNode().globalVQS);
 
 				return true;
 			}
 
-			BackwardSolver(target);
-			ForwardSolver(basePosition);
+			BackwardSolver(target);	// with pos fix
 
-			ApplyRotationFix(target);
-		}
+			ForwardSolver(basePosition);	// with pos and rot fix
 
-		ComputeLocalFromGlobalVQS(&currentAnimation->GetRootNode(), currentAnimation->GetRootNode().globalVQS);
-
-		const auto effector = Utils::GLMInternalHelper::ConvertGLMVectorToInternal(endEffector->globalVQS.GetTranslationVector());
-		if ((target - effector).Length() < FABRIK_SOLVER_THRESHOLD_SQUARE)
-		{
 			ApplyRotationFix(target);
 
 			UpdateBonePositionAndRotation();
-
-			ComputeLocalFromGlobalVQS(&currentAnimation->GetRootNode(), currentAnimation->GetRootNode().globalVQS);
-
-			return true;
 		}
 
-		return false;
+		return false;	// Failed to solve IK
 	}
 
 	void IKManager::SetupMesh() const
@@ -444,6 +429,36 @@ namespace AnimationEngine
 		}
 
 		temp->globalVQS.SetTranslationVector(Utils::GLMInternalHelper::ConvertInternalVectorToGLM(jointPositions[i]));
+	}
+
+	void IKManager::UpdateBonePosition() const
+	{
+		auto temp = endEffector;
+		auto i = jointPositions.size() - 1;
+		while (temp != base)
+		{
+			temp->globalVQS.SetTranslationVector(Utils::GLMInternalHelper::ConvertInternalVectorToGLM(jointPositions[i]));
+
+			--i;
+			temp = temp->parent;
+		}
+
+		temp->globalVQS.SetTranslationVector(Utils::GLMInternalHelper::ConvertInternalVectorToGLM(jointPositions[i]));
+	
+	}
+
+	void IKManager::UpdateBoneRotation() const
+	{
+		auto temp = endEffector;
+		auto i = jointPositions.size() - 1;
+		while (temp != base)
+		{
+			// set the rotation for all joints except base
+			temp->globalVQS.SetRotation(jointRotations[i - 1]);
+
+			--i;
+			temp = temp->parent;
+		}
 	}
 
 	void IKManager::OverwriteJointPositions()
