@@ -123,22 +123,48 @@ namespace AnimationEngine
 		const auto deltaTime = Time::GetDeltaTime();
 		const float velocity = movementSpeed * deltaTime;
 
-		if (direction == CameraMovement::FORWARD)
-		    cameraPosition += front * velocity;
-		if (direction == CameraMovement::BACKWARD)
-		    cameraPosition -= front * velocity;
-		if (direction == CameraMovement::LEFT)
-		    cameraPosition -= right * velocity;
-		if (direction == CameraMovement::RIGHT)
-		    cameraPosition += right * velocity;
-		if (direction == CameraMovement::ROTATE_LEFT)
+		switch(direction)
+		{
+		case CameraMovement::FORWARD:
+			cameraPosition += front * velocity;
+			break;
+
+		case CameraMovement::BACKWARD:
+			cameraPosition -= front * velocity;
+			break;
+
+		case CameraMovement::LEFT:
+			cameraPosition -= right * velocity;
+			break;
+
+		case CameraMovement::RIGHT:
+			cameraPosition += right * velocity;
+			break;
+
+		case CameraMovement::ROTATE_LEFT:
 			yaw -= rotateSpeed * deltaTime;
-		if (direction == CameraMovement::ROTATE_RIGHT)
+			break;
+
+		case CameraMovement::ROTATE_RIGHT:
 			yaw += rotateSpeed * deltaTime;
-		if (direction == CameraMovement::ZOOM_IN)
-		    zoom -= zoomSpeed * deltaTime;
-		if (direction == CameraMovement::ZOOM_OUT)
-		    zoom += zoomSpeed * deltaTime;
+			break;
+
+		case CameraMovement::ZOOM_IN:
+			zoom -= zoomSpeed * deltaTime;
+			break;
+
+		case CameraMovement::ZOOM_OUT:
+			zoom += zoomSpeed * deltaTime;
+			break;
+
+		case CameraMovement::LOOK_UP:
+			pitch += rotateSpeed * deltaTime;
+			break;
+
+		case CameraMovement::LOOK_DOWN:
+			pitch -= rotateSpeed * deltaTime;
+			break;
+		}
 
 		if (zoom < 1.0f)
 		    zoom = 1.0f;

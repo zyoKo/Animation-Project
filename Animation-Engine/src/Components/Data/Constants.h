@@ -54,4 +54,17 @@ namespace AnimationEngine
 	};
 
 	static const std::vector<unsigned> GRID_INDICES = { 0, 1, 3, 1, 2, 3 };
+
+	// IK-Target Constants
+	static constexpr Math::Vector3F DEFAULT_IK_TARGET_LOCATION = { 10.0f, 15.0f, 0.0f };
+
+	static constexpr std::string_view IK_TARGET_SHADER_NAME = "IKTargetShader";
+
+	static constexpr std::string_view IK_TARGET_VERTEX_SHADER_PATH = "./assets/shaders/point.vert";
+
+	static constexpr std::string_view IK_TARGET_FRAGMENT_SHADER_PATH = "./assets/shaders/point.frag";
+
+	static constexpr float IK_TARGET_MOVEMENT_SPEED = 20.0f;
+
+	static constexpr float TOTAL_LERP_TIME_TO_REACH_TARGET = 40.0f;
 }

@@ -27,12 +27,12 @@ namespace AnimationEngine::Math
 	{
 	}
 
-	inline void VQS::SetTranslationVector(const glm::vec3& vector)
+	void VQS::SetTranslationVector(const glm::vec3& vector)
 	{
 		this->translationVector = vector;
 	}
 
-	inline const glm::vec3& VQS::GetTranslationVector() const
+	const glm::vec3& VQS::GetTranslationVector() const
 	{
 		return translationVector;
 	}
@@ -42,12 +42,17 @@ namespace AnimationEngine::Math
 		return translationVector;
 	}
 
-	inline void VQS::SetRotation(const QuatF& quat)
+	Vector3F VQS::GetTranslationVectorInternal() const
+	{
+		return Utils::GLMInternalHelper::ConvertGLMVectorToInternal(translationVector);
+	}
+
+	void VQS::SetRotation(const QuatF& quat)
 	{
 		this->quatRotation = quat;
 	}
 
-	inline const QuatF& VQS::GetRotation() const
+	const QuatF& VQS::GetRotation() const
 	{
 		return quatRotation;
 	}
@@ -69,7 +74,7 @@ namespace AnimationEngine::Math
 		return this->scalingVector.x;
 	}
 
-	inline const glm::vec3& VQS::GetScaleVector() const
+	const glm::vec3& VQS::GetScaleVector() const
 	{
 		return scalingVector;
 	}
@@ -126,22 +131,20 @@ namespace AnimationEngine::Math
 
 	VQS VQS::Inverse() const
 	{
-		VQS inverse;
+		float inverseScalar = 1.0f / this->scalingVector.x;
+		glm::vec3 inverseTranslationVector = -translationVector;
 
-		const auto scaledInverse = (1.0f / this->scalingVector.x);
-		const auto translationInverse = this->translationVector * -1.0f;
+		glm::vec3 scaledInverseTranslation = inverseTranslationVector * inverseScalar;
+		
+		QuatF scaledInverseTranslationQuat(scaledInverseTranslation.x, scaledInverseTranslation.y, scaledInverseTranslation.z, 0.0f);
+		
+		QuatF inverseRotation = QuatF::Inverse(quatRotation);
+		
+		QuatF rotatedInverseTranslationQuat = inverseRotation * scaledInverseTranslationQuat * quatRotation;
 
-		// [ q^-1 * (s^-1 * v^-1) * q, q^-1, s^-1 ]
-		const auto rotationVector = glm::vec3(this->quatRotation.x, this->quatRotation.y, this->quatRotation.z);
-		const auto rotationVectorInverse = glm::vec3(-this->quatRotation.x, -this->quatRotation.y, -this->quatRotation.z);
-
-		const auto subTranslationVectorInverse = rotationVectorInverse * (scaledInverse) * rotationVector;
-
-		inverse.translationVector = subTranslationVectorInverse;
-		inverse.quatRotation = QuatF::Inverse(this->quatRotation);
-		inverse.scalingVector = 1.0f / this->scalingVector;
-
-		return inverse;
+		glm::vec3 finalInverseTranslation = glm::vec3(rotatedInverseTranslationQuat.x, rotatedInverseTranslationQuat.y, rotatedInverseTranslationQuat.z);
+		
+		return { finalInverseTranslation, inverseRotation, inverseScalar };
 	}
 
 	VQS VQS::Interpolate(const VQS& vqsOne, const VQS& vqsTwo, float t_Translation, float t_Rotation, float t_Scale)

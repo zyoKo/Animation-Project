@@ -48,7 +48,7 @@ namespace AnimationEngine::Math
 	}
 
 	template <typename T>
-	Vector3<T> Vector3<T>::operator+(const Vector3& vector)
+	Vector3<T> Vector3<T>::operator+(const Vector3& vector) const
 	{
 		ANIM_ASSERT(!vector.HasNaNs(), "Operation '/' failed, the vector has NaNs!");
 		return Vector3(x + vector.x, y + vector.y, z + vector.z);
@@ -224,6 +224,47 @@ namespace AnimationEngine::Math
 	}
 
 	template <typename T>
+	Vector3<T> Vector3<T>::Nlerp(const Vector3& vecTwo, const Vector3& vecOne, T t)
+	{
+		const Vector3 linear {
+			vecOne.x + (vecTwo.x - vecOne.x) * t,
+			vecOne.y + (vecTwo.y - vecOne.y) * t,
+			vecOne.z + (vecTwo.z - vecOne.z) * t
+		};
+
+		return Vector3::Normalize(linear);
+	}
+
+	template <typename T>
+	Vector3<T> Vector3<T>::Slerp(const Vector3& vecOne, const Vector3& vecTwo, T t)
+	{
+		if (t < static_cast<T>(0.001))
+		{
+			return Lerp(vecOne, vecTwo, t);
+		}
+
+		Vector3 from = Vector3::Normalize(vecOne);
+		Vector3 to = Vector3::Normalize(vecTwo);
+
+		T theta = FindAngle(vecOne, vecTwo);
+		T sinTheta = std::sin(theta);
+
+		T a, b;
+		if (sinTheta > 0.0f)
+		{
+			a = std::sin((static_cast<T>(1) - t) * theta) / sinTheta;
+			b = std::sin(t * theta) / sinTheta;
+		}
+		else
+		{
+			a = static_cast<T>(0);
+			b = static_cast<T>(0);
+		}
+
+		return from * a + to * b;
+	}
+
+	template <typename T>
 	T Vector3<T>::MinComponent(const Vector3& vector)
 	{
 		return std::min(vector.x, std::min(vector.y, vector.z));
@@ -254,15 +295,33 @@ namespace AnimationEngine::Math
 	}
 
 	template <typename T>
+	T Vector3<T>::FindAngle(const Vector3& vecOne, const Vector3& vecTwo)
+	{
+		T squareMagnitudeVecOne = vecOne.x * vecOne.x + vecOne.y * vecOne.y + vecOne.z * vecOne.z;
+		T squareMagnitudeVecTwo = vecTwo.x * vecTwo.x + vecTwo.y * vecTwo.y + vecTwo.z * vecTwo.z;
+
+		if (squareMagnitudeVecOne < MATH_EPSILON || squareMagnitudeVecTwo < MATH_EPSILON) 
+		{
+		    return static_cast<T>(0);
+		}
+
+		T dot = Vector3::Dot(vecOne, vecTwo);
+
+		T length = std::sqrtf(squareMagnitudeVecOne) * std::sqrtf(squareMagnitudeVecTwo);
+
+		return std::acosf(dot / length);
+	}
+
+	template <typename T>
 	void Vector3<T>::CoordinateSystem(const Vector3& firstVector, Vector3* secondVector, Vector3* thirdVector)
 	{
 		if (std::abs(firstVector.x) > std::abs(firstVector.y))
 		{
-			*secondVector = Vector3<T>(-firstVector.z, 0, firstVector.x) / std::sqrt(firstVector.x * firstVector.x + firstVector.z * firstVector.z);
+			*secondVector = Vector3(-firstVector.z, 0, firstVector.x) / std::sqrt(firstVector.x * firstVector.x + firstVector.z * firstVector.z);
 		}
 		else
 		{
-			*secondVector = Vector3<T>(0, firstVector.z, -firstVector.y) / std::sqrt(firstVector.y * firstVector.y + firstVector.z * firstVector.z);
+			*secondVector = Vector3(0, firstVector.z, -firstVector.y) / std::sqrt(firstVector.y * firstVector.y + firstVector.z * firstVector.z);
 		}
 
 		*thirdVector = Cross(firstVector, secondVector);

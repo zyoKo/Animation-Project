@@ -14,7 +14,7 @@ namespace AnimationEngine
 
 		void ResetAnimation() override;
 
-		void CalculateBoneTransformWithVQS(const AssimpNodeData* node, Math::VQS parentVQS) override;
+		void CalculateBoneTransformWithVQS(AssimpNodeData* node, Math::VQS parentVQS) override;
 
 		const std::vector<glm::mat4>& GetFinalBoneMatrices() const override;
 

@@ -6,13 +6,15 @@
 #include "Core/Utilities/Time.h"
 #include "DataTypes/AssimpNodeData.h"
 #include "Core/Utilities/Utilites.h"
+#include "Animation/IK/IKManager.h"
 
 namespace AnimationEngine
 {
 	Animator::Animator()
 		:	currentAnimation(nullptr),
 			currentTime(0.0f),
-			animationSpeedFactor(1.0f)
+			animationSpeedFactor(1.0f),
+			ikManager(nullptr)
 	{
 		finalBoneMatrices.reserve(100);
 
@@ -25,7 +27,8 @@ namespace AnimationEngine
 	Animator::Animator(Animation* animation)
 		:	currentAnimation(animation),
 			currentTime(0.0f),
-			animationSpeedFactor(1.0f)
+			animationSpeedFactor(1.0f),
+			ikManager(nullptr)
 	{
 		finalBoneMatrices.reserve(100);
 
@@ -43,11 +46,9 @@ namespace AnimationEngine
 
 	void Animator::UpdateAnimation()
 	{
-		const auto dt = Time::GetDeltaTime();
-
 		if (currentAnimation)
 		{
-			currentTime += currentAnimation->GetTicksPerSecond() * dt * animationSpeedFactor;
+			currentTime += currentAnimation->GetTicksPerSecond() * Time::GetDeltaTime() * animationSpeedFactor;
 			currentTime = std::fmod(currentTime, currentAnimation->GetDuration());
 			CalculateBoneTransformWithVQS(&currentAnimation->GetRootNode(), Math::VQS());
 		}
@@ -64,33 +65,64 @@ namespace AnimationEngine
 		currentTime = 0.0f;
 	}
 
-	void Animator::CalculateBoneTransformWithVQS(const AssimpNodeData* node, Math::VQS parentVQS)
+	void Animator::CalculateBoneTransformWithVQS(AssimpNodeData* node, Math::VQS parentVQS)
 	{
 		std::string nodeName = node->name;
 		auto localVQS = Utils::GLMInternalHelper::ConvertGLMMatrixToVQS(node->transformation);
 
-		auto bone = currentAnimation->FindBone(nodeName);
+		auto* bone = currentAnimation->FindBone(nodeName);
 		if (bone)
 		{
-			bone->Update(currentTime);
-			localVQS = bone->GetLocalVQS();
+			if (ikManager->CanRunIK() && ikManager->WasFabrikSolved())
+			{
+				static bool restrictBonesToIK = false;
+				for (const auto& boneInChain : ikManager->GetChain())
+				{
+					if (node == boneInChain)
+					{
+						restrictBonesToIK = true;
+					}
+				}
+
+				if (restrictBonesToIK)
+				{
+					localVQS = node->localVQS;
+
+					restrictBonesToIK = false;
+				}
+				else
+				{
+					bone->Update(currentTime);
+					localVQS = bone->GetLocalVQS();
+				}
+			}
+			else
+			{
+				bone->Update(currentTime);
+				localVQS = bone->GetLocalVQS();
+			}
 
 			ExtractParentJointAndChildJoints(parentVQS, localVQS);
 		}
 
 		const auto worldVQS = parentVQS * localVQS;
 
+		// Project 3 updating localVQS for node
+		node->localVQS = localVQS;
+
 		auto boneInfoMap = currentAnimation->GetBoneIDMap();
 		if (boneInfoMap.contains(nodeName))
 		{
-			const int index = boneInfoMap[nodeName].id;
-			const glm::mat4 offset = boneInfoMap[nodeName].offset;
+			const auto index = boneInfoMap[nodeName].id;
+			const auto& offset = Utils::GLMInternalHelper::ConvertGLMMatrixToVQS(boneInfoMap[nodeName].offset);
 
-			finalBoneMatrices[index] = Utils::GLMInternalHelper::ConvertVQSToGLMMatrix(worldVQS) * offset;
+			finalBoneMatrices[index] = Utils::GLMInternalHelper::ConvertVQSToGLMMatrix(worldVQS * offset);
 		}
 
 		for (unsigned i = 0; i < node->childrenCount; ++i)
-			CalculateBoneTransformWithVQS(&node->children[i], worldVQS);
+		{
+			CalculateBoneTransformWithVQS(node->children[i].get(), worldVQS);
+		}
 	}
 
 	const std::vector<glm::mat4>& Animator::GetFinalBoneMatrices() const
@@ -128,5 +160,34 @@ namespace AnimationEngine
 
 		jointPositions.push_back(parentJointPosition);
 		jointPositions.push_back(childJointPosition);
+	}
+
+	void Animator::ExtractJointsAfterBoneWithName(const std::string& boneName)
+	{
+		const auto* node = &currentAnimation->GetRootNode();
+
+		if (node != nullptr)
+		{
+			ProcessChildNodes(node);
+		}
+		else
+		{
+			LOG_WARN("Cannot find bone {0} in the hierarchy!", boneName);
+		}
+	}
+
+	void Animator::SetIKManager(IKManager* ikManager)
+	{
+		this->ikManager = ikManager;
+	}
+
+	void Animator::ProcessChildNodes(const AssimpNodeData* node)
+	{
+		static std::vector<Math::Vec3F> jointPositions;
+
+		for (unsigned i = 0; i < node->childrenCount; ++i)
+		{
+			ProcessChildNodes(node->children[i].get());
+		}
 	}
 }

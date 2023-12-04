@@ -30,18 +30,19 @@ namespace AnimationEngine
 		const std::map<std::string, BoneInfo>& GetBoneIDMap() const;
 
 	private:
-		void ReadMissingBones(const aiAnimation* animation, Model& model);
-
-		void ReadHierarchyData(AssimpNodeData& destinationNode, const aiNode* sourceNode);
-
-		float duration;
-
-		float ticksPerSecond;
-
 		std::vector<Bone> bones;
 
 		AssimpNodeData rootNode;
 
 		std::map<std::string, BoneInfo> boneInfoMap;
+
+		float duration;
+
+		float ticksPerSecond;
+
+		void ReadMissingBones(const aiAnimation* animation, Model& model);
+
+		void ReadHierarchyData(AssimpNodeData& destinationNode, const aiNode* sourceNode, 
+			AssimpNodeData* parent = nullptr);
 	};
 }

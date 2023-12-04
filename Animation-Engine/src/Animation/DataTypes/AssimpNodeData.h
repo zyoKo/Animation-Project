@@ -12,11 +12,18 @@ namespace AnimationEngine
 
 		unsigned childrenCount;
 
-		std::vector<AssimpNodeData> children;
+		AssimpNodeData* parent;
+
+		std::vector<std::unique_ptr<AssimpNodeData>> children;
+
+		Math::VQS localVQS;
+
+		Math::VQS globalVQS;
 
 		AssimpNodeData()
 			:	transformation(glm::mat4(1.0f)),
-				childrenCount(0)
+				childrenCount(0),
+				parent(nullptr)
 		{
 		}
 	};

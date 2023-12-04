@@ -22,7 +22,7 @@ namespace AnimationEngine
 
 		virtual void ResetAnimation() = 0;
 
-		virtual void CalculateBoneTransformWithVQS(const AssimpNodeData* node, Math::VQS parentVQS) = 0;
+		virtual void CalculateBoneTransformWithVQS(AssimpNodeData* node, Math::VQS parentVQS) = 0;
 
 		virtual const std::vector<glm::mat4>& GetFinalBoneMatrices() const = 0;
 

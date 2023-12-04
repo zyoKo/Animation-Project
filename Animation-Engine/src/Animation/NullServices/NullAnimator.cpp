@@ -20,7 +20,7 @@ namespace AnimationEngine
 	{
 	}
 
-	void NullAnimator::CalculateBoneTransformWithVQS(const AssimpNodeData* node, Math::VQS parentVQS)
+	void NullAnimator::CalculateBoneTransformWithVQS(AssimpNodeData* node, Math::VQS parentVQS)
 	{
 	}
 

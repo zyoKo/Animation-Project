@@ -344,4 +344,44 @@ namespace AnimationEngine::Math
 		T angle = std::acos(cosTheta);
 		return (sin((static_cast<T>(1) - clamped_t) * angle) * leftQuat + sin(clamped_t * angle) * endCopy) / std::sin(angle);
 	}
+
+	template <typename T>
+	Quaternion<T> Quaternion<T>::FromTo(const Vector3<T>& from, const Vector3<T>& to)
+	{
+		// Normalize
+		Vector3<T> normalizedFrom = Vector3<T>::Normalize(from);
+		Vector3<T> normalizedTo = Vector3<T>::Normalize(to);
+
+		// Angle
+		T cosTheta = Vector3<float>::Dot(normalizedFrom, normalizedTo);
+
+		if (cosTheta > 1 - MATH_EPSILON) 
+		{
+			return {};
+		}
+
+		Vector3<T> rotationAxis;
+
+		if (cosTheta < MATH_EPSILON - 1)
+		{
+			rotationAxis = Vector3<T>::Cross({ static_cast<T>(1), static_cast<T>(0), static_cast<T>(0) }, normalizedFrom);
+
+			if (rotationAxis.Length() < MATH_EPSILON) 
+			{
+				rotationAxis = Vector3<T>::Cross({ static_cast<T>(0), static_cast<T>(1), static_cast<T>(0) }, normalizedFrom);
+			}
+
+			rotationAxis.GetNormalize();
+
+			return { rotationAxis.x, rotationAxis.y, rotationAxis.z, static_cast<T>(0) };
+		}
+
+		T angle = std::acos(cosTheta) / static_cast<T>(2);
+		T scalar = std::cos(angle);
+
+		rotationAxis = Vector3<T>::Cross(normalizedFrom, normalizedTo);
+		Vector3<T> vector = rotationAxis.GetNormalize() * std::sin(angle);
+
+		return Quaternion(vector, scalar);
+	}
 }
