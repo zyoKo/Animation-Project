@@ -25,6 +25,11 @@ namespace AnimationEngine::Math
 
 			struct
 			{
+				T r, g, b, a;
+			};
+
+			struct
+			{
 				Vector3<T> vector;
 
 				T scalar;
@@ -106,6 +111,7 @@ namespace AnimationEngine::Math
 				std::fabs(leftQuat.z - rightQuat.z) <= MATH_EPSILON &&
 				std::fabs(leftQuat.w - rightQuat.w) <= MATH_EPSILON);
 		}
+
 		friend bool operator!=(const Quaternion& leftQuat, const Quaternion& rightQuat)
 		{
 			return !(leftQuat == rightQuat);
@@ -149,7 +155,7 @@ namespace AnimationEngine::Math
 		static Quaternion NLerp(const Quaternion& fromQuat, const Quaternion& toQuat, T t);
 		static Quaternion SLerp(const Quaternion& leftQuat, const Quaternion& rightQuat, T t);
 
-		//static Quaternion LookRotation(const Vector3<T>& direction, const Vector3<T>& up);
+		static Quaternion FromTo(const Vector3<T>& from, const Vector3<T>& to);
 	};
 
 	using QuatF = Quaternion<float>;

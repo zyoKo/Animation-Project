@@ -18,6 +18,7 @@ namespace AnimationEngine::Math
 		void SetTranslationVector(const glm::vec3& vector);
 		const glm::vec3& GetTranslationVector() const;
 		glm::vec3 GetTranslationVector();
+		Vector3F GetTranslationVectorInternal() const;	// Internal Vector3
 
 		void SetRotation(const QuatF& quat);
 		const QuatF& GetRotation() const;
@@ -33,6 +34,22 @@ namespace AnimationEngine::Math
 		VQS& operator*(float value);
 		VQS& operator*=(const VQS& vqs);
 		VQS operator*(const VQS& vqs) const;
+
+		friend bool operator==(const VQS& lhs, const VQS& rhs)
+		{
+			const bool translation = (lhs.translationVector == rhs.translationVector);
+
+			const bool rotation = (lhs.quatRotation == rhs.quatRotation);
+
+			const bool scale = (lhs.scalingVector == rhs.scalingVector);
+
+			return translation || rotation || scale;
+		}
+
+		friend bool operator!=(const VQS& lhs, const VQS& rhs)
+		{
+			return !(lhs == rhs);
+		}
 
 		void MakeInverse();
 		VQS Inverse() const;
@@ -76,7 +93,24 @@ namespace AnimationEngine::Math
 			const auto scaledPointQuat = Vec4F(scaledPoint.x, scaledPoint.y, scaledPoint.z, 0.0f);
 			QuatF rotationInverse = QuatF::Inverse(vqs.quatRotation);
 
-			const auto subResult = (vqs.quatRotation * (scaledPointQuat) * rotationInverse) + QuatF(vqs.translationVector.x, vqs.translationVector.y, vqs.translationVector.z, 0.0f);
+			auto subResult = (vqs.quatRotation * (scaledPointQuat) * rotationInverse) + QuatF(vqs.translationVector.x, vqs.translationVector.y, vqs.translationVector.z, 0.0f);
+
+			if (std::fabs(subResult.x) < MATH_EPSILON)
+			{
+				subResult.x = 0.0f;
+			}
+			if (std::fabs(subResult.y) < MATH_EPSILON)
+			{
+				subResult.y = 0.0f;
+			}
+			if (std::fabs(subResult.z) < MATH_EPSILON)
+			{
+				subResult.z = 0.0f;
+			}
+			if (std::fabs(subResult.w) < MATH_EPSILON)
+			{
+				subResult.w = 0.0f;
+			}
 
 			return { subResult.x, subResult.y, subResult.z };
 		}

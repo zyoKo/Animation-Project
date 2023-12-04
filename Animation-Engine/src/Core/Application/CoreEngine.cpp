@@ -19,7 +19,9 @@
 #include "Components/Camera/Camera.h"
 #include "Components/Camera/Constants/CameraConstants.h"
 #include "Animation/Animator.h"
+#include "Animation/IK/IKManager.h"
 #include "Animation/Model.h"
+#include "Components/IKTarget.h"
 #include "Core/ServiceLocators/Assets/AssetManagerLocator.h"
 #include "Core/ServiceLocators/Animation/AnimatorLocator.h"
 #include "Core/ServiceLocators/Assets/AnimationStorageLocator.h"
@@ -31,11 +33,12 @@ namespace AnimationEngine
 		:	assetManager(new AssetManager()),
 			animator(new Animator()),
 			curveMesh(nullptr),
+			targetPoint(nullptr),
 			modelManager(nullptr)
 	{
 		Log::Initialize();
 
-		window = std::unique_ptr<IWindow>(IWindow::Create({ name, width, height }));
+		window = std::unique_ptr<IWindow>(IWindow::Create({name, width, height}));
 
 		// Bind Event Callback here
 
@@ -60,6 +63,9 @@ namespace AnimationEngine
 
 		delete curveMesh;
 		curveMesh = nullptr;
+
+		delete targetPoint;
+		targetPoint = nullptr;
 	}
 
 	void CoreEngine::SetApplication(const std::shared_ptr<IApplication>& app)
@@ -73,7 +79,6 @@ namespace AnimationEngine
 
 		application->Initialize();
 
-		auto* assetManager = AssetManagerLocator::GetAssetManager();
 		auto* animationStorage = AnimationStorageLocator::GetAnimationStorage();
 
 		const std::string dreyarDiffuseTextureFile = "./assets/dreyar/textures/Dreyar_diffuse.png";
@@ -118,10 +123,6 @@ namespace AnimationEngine
 	{
 		application->PreUpdate();
 
-		auto* assetManager = AssetManagerLocator::GetAssetManager();
-		auto* animator = AnimatorLocator::GetAnimator();
-		auto* animationStorage = AnimationStorageLocator::GetAnimationStorage();
-
 		auto animationShader = assetManager->RetrieveShaderFromStorage("AnimationShader");
 		auto debugShader = assetManager->RetrieveShaderFromStorage("DebugAnimationShader");
 		auto gridShader = assetManager->RetrieveShaderFromStorage("GridShader");
@@ -131,7 +132,7 @@ namespace AnimationEngine
 		auto textureDiffuse = assetManager->RetrieveTextureFromStorage("Dreyar_diffuse");
 		auto gridTexture = assetManager->RetrieveTextureFromStorage("grid");
 
-		animator->ChangeAnimation(animationStorage->GetAnimationForCurrentlyBoundIndex());
+		animator->ChangeAnimation(animationStorage.GetAnimationForCurrentlyBoundIndex());
 
 		GraphicsAPI::GetContext()->EnableDepthTest(true);
 		GraphicsAPI::GetContext()->EnableWireFrameMode(false);
@@ -142,13 +143,26 @@ namespace AnimationEngine
 		GridMesh gridMesh;
 		gridMesh.SetGridTexture(gridTexture.lock());
 
-		//CurveMesh curveMesh;
 		curveMesh = new CurveMesh();
 		curveMesh->SetSplineShader(splineShader.lock());
 		curveMesh->SetControlPointsShader(controlPointShader.lock());
 
 		modelManager = new ModelManager();
 		modelManager->SetSpline(curveMesh->GetSpline());
+
+		IKManager iKManager;
+		iKManager.Initialize();
+
+		targetPoint = new IKTarget(curveMesh, &iKManager);
+
+		if (auto* realAnimator = dynamic_cast<Animator*>(animator))
+		{
+			realAnimator->SetIKManager(&iKManager);
+		}
+
+		// Initialize to go to point
+		curveMesh->CreateNewSplinePath(targetPoint->GetControlPoints());
+		modelManager->Reset();
 
 		while (running && !window->WindowShouldClose())
 		{
@@ -159,14 +173,25 @@ namespace AnimationEngine
 
 			application->Update();
 
+			// TODO: Build a better camera system
 			// camera/view transformation
 			glm::mat4 projection = glm::perspective(glm::radians(camera->GetZoom()), (float)window->GetWidth() / (float)window->GetHeight(), CAMERA_NEAR_CLIPPING_PLANE, CAMERA_FAR_CLIPPING_PLANE);
 			glm::mat4 view = camera->GetViewMatrix();
 			glm::mat4 model = glm::mat4(1.0f);
 
 			ProcessInput();
-			animator->UpdateAnimation();
 
+			targetPoint->Update();	// IK Target Point Draw
+			// Set target for TargetFinder and the target to solve FABRIK on
+			iKManager.SetTargetFinderTargetPosition(targetPoint->GetTargetLocation());
+			iKManager.SetTargetPosition(targetPoint->GetPseudoTargetLocation());
+
+			animator->UpdateAnimation();
+			//animator->ResetAnimation();
+
+			iKManager.Update();
+
+			// TODO: Fix these hacks
 			debugMesh.OverwriteJointsPosition(animator->GetJointPositions());
 			animator->ClearJoints();
 			static bool firstRun = true;
@@ -177,10 +202,11 @@ namespace AnimationEngine
 			}
 			debugMesh.Update();
 
+			// TODO: Move this inside model class
 			if (enableModelMesh)
 			{
 				animationShader.lock()->Bind();
-				animationShader.lock()->SetUniformInt(0, animationStorage->GetDiffuseTextureFromCurrentlyBoundIndex()->GetTextureName());
+				animationShader.lock()->SetUniformInt(0, animationStorage.GetDiffuseTextureFromCurrentlyBoundIndex()->GetTextureName());
 				animationShader.lock()->SetUniformMatrix4F(projection, "projection");
 				animationShader.lock()->SetUniformMatrix4F(view, "view");
 				animationShader.lock()->SetUniformMatrix4F(model, "model");
@@ -189,7 +215,7 @@ namespace AnimationEngine
 					std::string uniformName = "finalBonesMatrices[" + std::to_string(i) + "]";
 					animationShader.lock()->SetUniformMatrix4F(animator->GetFinalBoneMatrices()[i], uniformName);
 				}
-				animationStorage->GetModelForCurrentlyBoundIndex()->Draw(animationShader.lock());
+				animationStorage.GetModelForCurrentlyBoundIndex()->Draw(animationShader.lock());
 				animationShader.lock()->UnBind();
 			}
 			
@@ -217,7 +243,7 @@ namespace AnimationEngine
 		return true;
 	}
 
-	void CoreEngine::ProcessInput()
+	void CoreEngine::ProcessInput() const
 	{
 		const auto camera = Camera::GetInstance();
 
@@ -234,44 +260,63 @@ namespace AnimationEngine
 		    camera->ProcessKeyboard(CameraMovement::LEFT);
 		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_6) == GLFW_PRESS)
 		    camera->ProcessKeyboard(CameraMovement::RIGHT);
+		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_9) == GLFW_PRESS)
+		    camera->ProcessKeyboard(CameraMovement::LOOK_UP);
+		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_3) == GLFW_PRESS)
+		    camera->ProcessKeyboard(CameraMovement::LOOK_DOWN);
 
-		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_DECIMAL) == GLFW_PRESS)
-			camera->ProcessKeyboard(CameraMovement::ROTATE_LEFT);
 		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_0) == GLFW_PRESS)
+			camera->ProcessKeyboard(CameraMovement::ROTATE_LEFT);
+		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_DECIMAL) == GLFW_PRESS)
 			camera->ProcessKeyboard(CameraMovement::ROTATE_RIGHT);
 		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_ADD) == GLFW_PRESS)
 			camera->ProcessKeyboard(CameraMovement::ZOOM_IN);
 		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_SUBTRACT) == GLFW_PRESS)
 			camera->ProcessKeyboard(CameraMovement::ZOOM_OUT);
 
-		static bool isChangeModelKeyPressed = false;
-		if (glfwGetKey(glfwWindow, GLFW_KEY_SPACE) == GLFW_PRESS)
-		{
-			if (!isChangeModelKeyPressed)
-			{
-				animationStorage.ChangeModel();
-				animator->ChangeAnimation(animationStorage.GetAnimationForCurrentlyBoundIndex());
-				isChangeModelKeyPressed = true;
-			}
-		}
-		else
-		{
-			isChangeModelKeyPressed = false;
-		}
+		// IK_Target Movement Controls (Testing)
+		//if (glfwGetKey(glfwWindow, GLFW_KEY_UP) == GLFW_PRESS)
+		//    targetPoint->ProcessKeyboard(MovementType::FORWARD);
+		//if (glfwGetKey(glfwWindow, GLFW_KEY_DOWN) == GLFW_PRESS)
+		//    targetPoint->ProcessKeyboard(MovementType::BACKWARD);
+		//if (glfwGetKey(glfwWindow, GLFW_KEY_LEFT) == GLFW_PRESS)
+		//    targetPoint->ProcessKeyboard(MovementType::LEFT);
+		//if (glfwGetKey(glfwWindow, GLFW_KEY_RIGHT) == GLFW_PRESS)
+		//    targetPoint->ProcessKeyboard(MovementType::RIGHT);
+		//if (glfwGetKey(glfwWindow, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS)
+		//    targetPoint->ProcessKeyboard(MovementType::UP);
+		//if (glfwGetKey(glfwWindow, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS)
+		//    targetPoint->ProcessKeyboard(MovementType::DOWN);
 
-		static bool isEnableModelKeyPressed = false;
-		if (glfwGetKey(glfwWindow, GLFW_KEY_ENTER) == GLFW_PRESS)
-		{
-			if (!isEnableModelKeyPressed)
-			{
-				enableModelMesh = !enableModelMesh;
-				isEnableModelKeyPressed = true;
-			}
-		}
-		else
-		{
-			isEnableModelKeyPressed = false;
-		}
+		//static bool isChangeModelKeyPressed = false;
+		//if (glfwGetKey(glfwWindow, GLFW_KEY_SPACE) == GLFW_PRESS)
+		//{
+		//	if (!isChangeModelKeyPressed)
+		//	{
+		//		//animationStorage.ChangeModel();
+		//		//animator->ChangeAnimation(animationStorage.GetAnimationForCurrentlyBoundIndex());
+		//		isChangeModelKeyPressed = true;
+		//	}
+		//}
+		//else
+		//{
+		//	isChangeModelKeyPressed = false;
+		//}
+
+		// Disabled for testing
+		//static bool isEnableModelKeyPressed = false;
+		//if (glfwGetKey(glfwWindow, GLFW_KEY_ENTER) == GLFW_PRESS)
+		//{
+		//	if (!isEnableModelKeyPressed)
+		//	{
+		//		enableModelMesh = !enableModelMesh;
+		//		isEnableModelKeyPressed = true;
+		//	}
+		//}
+		//else
+		//{
+		//	isEnableModelKeyPressed = false;
+		//}
 
 		static bool isCameraResetKeyPressed = false;
 		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_5) == GLFW_PRESS)
@@ -301,33 +346,55 @@ namespace AnimationEngine
 			resetPathFollowing = false;
 		}
 
+		static unsigned path = 0;
 		static bool changePath = false;
 		if (glfwGetKey(glfwWindow, GLFW_KEY_1) == GLFW_PRESS)
 		{
-			if (changePath)
+			if (changePath || path == 1)
 				return;
 
-			curveMesh->CreateNewSplinePath(Math::DEFAULT_CONTROL_POINTS);
+			targetPoint->SetTargetLocation({ -50.0f, 15.0f, -50.0f });
+			curveMesh->CreateNewSplinePath(targetPoint->GetControlPoints());
 			modelManager->Reset();
+
 			changePath = true;
+			path = 1;
 		}
 		else if(glfwGetKey(glfwWindow, GLFW_KEY_2) == GLFW_PRESS)
 		{
-			if (changePath)
+			if (changePath || path == 2)
 				return;
-			
-			curveMesh->CreateNewSplinePath(Math::SMOOTH_CONTROL_POINTS);
+
+			targetPoint->SetTargetLocation({ 50.0f, 15.0f, -50.0f });
+			curveMesh->CreateNewSplinePath(targetPoint->GetControlPoints());
 			modelManager->Reset();
+
 			changePath = true;
+			path = 2;
 		}
 		else if(glfwGetKey(glfwWindow, GLFW_KEY_3) == GLFW_PRESS)
 		{
-			if (changePath)
+			if (changePath || path == 3)
 				return;
 
-			curveMesh->CreateNewSplinePath(Math::CONTROL_POINTS_CIRCLE);
+			targetPoint->SetTargetLocation({ 50.0f, 15.0f, 50.0f });
+			curveMesh->CreateNewSplinePath(targetPoint->GetControlPoints());
 			modelManager->Reset();
+
 			changePath = true;
+			path = 3;
+		}
+		else if(glfwGetKey(glfwWindow, GLFW_KEY_4) == GLFW_PRESS)
+		{
+			if (changePath || 4 == path)
+				return;
+
+			targetPoint->SetTargetLocation({ -50.0f, 15.0f, 50.0f });
+			curveMesh->CreateNewSplinePath(targetPoint->GetControlPoints());
+			modelManager->Reset();
+
+			changePath = true;
+			path = 4;
 		}
 		else
 		{

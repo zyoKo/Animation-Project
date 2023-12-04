@@ -18,6 +18,10 @@ namespace AnimationEngine
 
 		ZOOM_IN,
 
-		ZOOM_OUT
+		ZOOM_OUT,
+
+		LOOK_UP,
+
+		LOOK_DOWN
 	};
 }

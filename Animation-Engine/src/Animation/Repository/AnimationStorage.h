@@ -1,7 +1,5 @@
 #pragma once
 
-#include <memory>
-
 namespace AnimationEngine
 {
 	class Animation;
@@ -35,8 +33,6 @@ namespace AnimationEngine
 		void ChangeModel();
 	
 	private:
-		std::shared_ptr<ModelContainer> models;
-
 		std::vector<std::shared_ptr<Model>> modelList;
 	
 		std::vector<std::shared_ptr<Animation>> animationList;
