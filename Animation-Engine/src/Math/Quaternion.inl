@@ -192,7 +192,7 @@ namespace AnimationEngine::Math
 	{
 		T lengthSquared = LengthSquared(quat);
 
-		if (lengthSquared <= static_cast<T>(MATH_EPSILON))
+		if (lengthSquared <= static_cast<T>(EPSILON))
 			return static_cast<T>(0);
 
 		return std::sqrt(lengthSquared);
@@ -268,7 +268,7 @@ namespace AnimationEngine::Math
 	void Quaternion<T>::MakeInverse()
 	{
 		T lengthSquared = LengthSquared(*this);
-		if (lengthSquared < static_cast<T>(MATH_EPSILON))
+		if (lengthSquared < static_cast<T>(EPSILON))
 		{
 			this->x = 0;
 			this->y = 0;
@@ -288,7 +288,7 @@ namespace AnimationEngine::Math
 	Quaternion<T> Quaternion<T>::Inverse(const Quaternion& quat)
 	{
 		T lengthSquared = LengthSquared(quat);
-		if (lengthSquared < static_cast<T>(MATH_EPSILON))
+		if (lengthSquared < static_cast<T>(EPSILON))
 		{
 			return Quaternion();
 		}
@@ -336,7 +336,7 @@ namespace AnimationEngine::Math
 		    cosTheta = -cosTheta;
 		}
 
-		if (cosTheta > static_cast<T>(1) - MATH_EPSILON)
+		if (cosTheta > static_cast<T>(1) - EPSILON)
 		{
 		    return Quaternion::NLerp(leftQuat, endCopy, t);
 		}

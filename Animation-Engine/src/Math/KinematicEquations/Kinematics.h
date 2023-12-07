@@ -14,9 +14,9 @@ namespace AnimationEngine::Math
 
 		// v^2 = u^2 + 2as
 		// v = sqrt(u^2 + 2as)
-		static float GetFinalVelocityForUAS(float currentVelocity, float currentAcceleration, float distanceTraveled)
+		static float GetFinalSpeedForUAS(float currentSpeed, float currentAcceleration, float distanceTraveled)
 		{
-			return std::sqrt(currentVelocity * currentVelocity + 2 * currentAcceleration * distanceTraveled);
+			return std::sqrt(currentSpeed * currentSpeed + 2 * currentAcceleration * distanceTraveled);
 		}
 
 		// s = ut + 1/2 at^2
@@ -26,7 +26,7 @@ namespace AnimationEngine::Math
 		}
 
 		// v = u + at
-		static float GetFinalVelocityForUAT(float currentSpeed, float currentAcceleration, float currentTime)
+		static float GetFinalSpeedForUAT(float currentSpeed, float currentAcceleration, float currentTime)
 		{
 			return currentSpeed + currentAcceleration * currentTime;
 		}
@@ -45,9 +45,15 @@ namespace AnimationEngine::Math
 		}
 
 		// t = (v - u) / a;
-		static float TimeTakenToReachFinalVelocityAtConstantAcceleration(float finalVelocity, float acceleration, float initialSpeed)
+		static float TimeTakenToReachFinalSpeedAtConstantAcceleration(float finalVelocity, float acceleration, float initialSpeed)
 		{
 			return (finalVelocity - initialSpeed) / acceleration;
+		}
+
+		// Velocities
+		static Vec3F VelocityAsFunctionOfAccelerationAndTime(Vec3F currentVelocity, Vec3F acceleration, float time /* deltaTime */)
+		{
+			return currentVelocity + acceleration * time;
 		}
 	};
 }

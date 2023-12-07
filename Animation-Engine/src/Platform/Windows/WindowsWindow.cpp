@@ -112,7 +112,7 @@ namespace AnimationEngine
 		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 #endif
 
-		window = glfwCreateWindow(static_cast<int>(winData.width), static_cast<int>(winData.height), winData.title.c_str(), nullptr, nullptr);
+		window = glfwCreateWindow(static_cast<int>(winData.width), static_cast<int>(winData.height), std::string(winData.title).c_str(), nullptr, nullptr);
 
 		GraphicsAPI::CreateContext(this);
 

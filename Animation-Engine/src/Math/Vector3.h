@@ -78,9 +78,12 @@ namespace AnimationEngine::Math
 		static Vector3 GetRight();
 		static Vector3 GetUp();
 		static bool IsZero(const Vector3& vector);
+		static constexpr Vector3 Zero();
 
 		T LengthSquared() const;
 		T Length() const;
+		static T Length(const Vector3& vector);
+		static T LengthSquared(const Vector3& vector);
 
 		Vector3& GetNormalize();
 		static Vector3 Normalize(const Vector3& vector);

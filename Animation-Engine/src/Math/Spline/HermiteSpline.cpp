@@ -176,8 +176,8 @@ namespace AnimationEngine::Math
 	    const float arcLengthOfPreviousSegments = cumulativeArcLengths[segmentIndex];
 		float previousMid = -1.0f;
 	    while (
-			std::abs(arcLengthOfPreviousSegments + arcLengthMid - nS) > MATH_EPSILON &&
-			std::abs(uM - previousMid) > MATH_EPSILON)
+			std::abs(arcLengthOfPreviousSegments + arcLengthMid - nS) > EPSILON &&
+			std::abs(uM - previousMid) > EPSILON)
 	    {
 	        if (arcLengthOfPreviousSegments + arcLengthMid < nS)
 	        {
@@ -198,7 +198,7 @@ namespace AnimationEngine::Math
 
 	Vector3F HermiteSpline::FindPointOnCurve(float nS) const
 	{
-		if (std::fabs(nS - cumulativeArcLengths.back()) < MATH_EPSILON)
+		if (std::fabs(nS - cumulativeArcLengths.back()) < EPSILON)
 		{
 			return splinePoints.back();
 		}

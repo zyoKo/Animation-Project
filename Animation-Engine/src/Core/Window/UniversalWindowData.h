@@ -1,20 +1,18 @@
 #pragma once
 
-#include <string>
-
 #include "UniversalWindowConstants.h"
 
 namespace AnimationEngine
 {
 	struct UniversalWindowData
 	{
-		std::string title;
+		std::string_view title;
 
 		uint32_t width;
 
 		uint32_t height;
 
-		UniversalWindowData(const std::string& title = WINDOW_TITLE, uint32_t width = WINDOW_WIDTH, uint32_t height = WINDOW_HEIGHT)
+		UniversalWindowData(std::string_view title = WINDOW_TITLE, uint32_t width = WINDOW_WIDTH, uint32_t height = WINDOW_HEIGHT)
 			:	title(title),
 				width(width),
 				height(height)

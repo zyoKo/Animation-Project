@@ -110,7 +110,7 @@ namespace AnimationEngine::Math
 	bool Matrix4x4<T>::operator==(const Matrix4x4& leftMatrix, const Matrix4x4& rightMatrix)
 	{
 		for (int i = 0; i < 16; ++i) {
-			if (std::fabsf(leftMatrix.array[i] - rightMatrix.array[i]) > MATH_EPSILON) {
+			if (std::fabsf(leftMatrix.array[i] - rightMatrix.array[i]) > EPSILON) {
 				return false;
 			}
 		}

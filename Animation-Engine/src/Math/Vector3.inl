@@ -37,6 +37,12 @@ namespace AnimationEngine::Math
 	{
 	}
 
+	template <typename T>
+	constexpr Vector3<T> Vector3<T>::Zero()
+	{
+		return { static_cast<T>(0), static_cast<T>(0), static_cast<T>(0) };
+	}
+
 	// Operations
 	template <typename T>
 	Vector3<T>& Vector3<T>::operator=(const Vector3& vector)
@@ -181,6 +187,18 @@ namespace AnimationEngine::Math
 	T Vector3<T>::Length() const
 	{
 		return std::sqrt(LengthSquared());
+	}
+
+	template <typename T>
+	T Vector3<T>::Length(const Vector3& vector)
+	{
+		return std::sqrt(Vector3::LengthSquared(vector));
+	}
+
+	template <typename T>
+	T Vector3<T>::LengthSquared(const Vector3& vector)
+	{
+		return vector.x * vector.x + vector.y * vector.y + vector.z * vector.z;
 	}
 
 	template <typename T>

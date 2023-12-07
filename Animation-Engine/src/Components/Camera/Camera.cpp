@@ -139,6 +139,14 @@ namespace AnimationEngine
 		    zoom -= zoomSpeed * deltaTime;
 		if (direction == CameraMovement::ZOOM_OUT)
 		    zoom += zoomSpeed * deltaTime;
+		if (direction == CameraMovement::UP)
+			cameraPosition.y += velocity;
+		if (direction == CameraMovement::DOWN)
+			cameraPosition.y -= velocity;
+		if (direction == CameraMovement::LOOK_UP)
+			pitch += velocity;
+		if (direction == CameraMovement::LOOK_DOWN)
+			pitch -= velocity;
 
 		if (zoom < 1.0f)
 		    zoom = 1.0f;

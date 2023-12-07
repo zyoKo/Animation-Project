@@ -134,7 +134,7 @@ namespace AnimationEngine
 			animationSpeedFactor = timeInSeconds / timeToReachFirstPoint;
 
 			speedControlData.currentSpeed = 
-				Math::Kinematics::GetFinalVelocityForUAT(
+				Math::Kinematics::GetFinalSpeedForUAT(
 					speedControlData.currentSpeed, 
 					speedControlData.beginningArcAcceleration, 
 					Time::GetDeltaTime());
@@ -150,7 +150,7 @@ namespace AnimationEngine
 			animationSpeedFactor = endCounter / timeToReachEndPoint;
 
 			speedControlData.currentSpeed = 
-				Math::Kinematics::GetFinalVelocityForUAT(
+				Math::Kinematics::GetFinalSpeedForUAT(
 					speedControlData.currentSpeed, 
 					speedControlData.endArcAcceleration, 
 					Time::GetDeltaTime());
@@ -284,13 +284,13 @@ namespace AnimationEngine
 				splineData.lastSegmentLength);
 
 		timeToReachFirstPoint =
-			Math::Kinematics::TimeTakenToReachFinalVelocityAtConstantAcceleration(
+			Math::Kinematics::TimeTakenToReachFinalSpeedAtConstantAcceleration(
 				speedControlData.maxMoveSpeed, 
 				speedControlData.beginningArcAcceleration, 
 				0.0f);
 
 		timeToReachEndPoint =
-			Math::Kinematics::TimeTakenToReachFinalVelocityAtConstantAcceleration(
+			Math::Kinematics::TimeTakenToReachFinalSpeedAtConstantAcceleration(
 					0.0f, 
 					speedControlData.endArcAcceleration,
 					speedControlData.maxMoveSpeed);

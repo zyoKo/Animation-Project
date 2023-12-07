@@ -43,7 +43,9 @@ namespace AnimationEngine
 		this->Bind();
 		vertexBuffer->Bind();
 		if (indexBuffer)
+		{
 			indexBuffer->Bind();
+		}
 
 		unsigned int offset = 0;
 		const auto& elements = vertexBuffer->GetVertexBufferLayout().GetVertexBufferElements();

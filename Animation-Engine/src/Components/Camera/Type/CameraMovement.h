@@ -12,9 +12,17 @@ namespace AnimationEngine
 
 		RIGHT,
 
+		UP,
+
+		DOWN,
+
 		ROTATE_LEFT,
 
 		ROTATE_RIGHT,
+
+		LOOK_UP,
+
+		LOOK_DOWN,
 
 		ZOOM_IN,
 

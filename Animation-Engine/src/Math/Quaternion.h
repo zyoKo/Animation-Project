@@ -101,10 +101,10 @@ namespace AnimationEngine::Math
 		friend bool operator==(const Quaternion& leftQuat, const Quaternion& rightQuat)
 		{
 			return (
-				std::fabs(leftQuat.x - rightQuat.x) <= MATH_EPSILON &&
-				std::fabs(leftQuat.y - rightQuat.y) <= MATH_EPSILON &&
-				std::fabs(leftQuat.z - rightQuat.z) <= MATH_EPSILON &&
-				std::fabs(leftQuat.w - rightQuat.w) <= MATH_EPSILON);
+				std::fabs(leftQuat.x - rightQuat.x) <= EPSILON &&
+				std::fabs(leftQuat.y - rightQuat.y) <= EPSILON &&
+				std::fabs(leftQuat.z - rightQuat.z) <= EPSILON &&
+				std::fabs(leftQuat.w - rightQuat.w) <= EPSILON);
 		}
 		friend bool operator!=(const Quaternion& leftQuat, const Quaternion& rightQuat)
 		{

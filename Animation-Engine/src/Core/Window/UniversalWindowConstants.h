@@ -6,5 +6,5 @@ namespace AnimationEngine
 
 	static constexpr uint32_t WINDOW_HEIGHT = 720;
 
-	static const std::string WINDOW_TITLE = "Animation Window";
+	static constexpr std::string_view WINDOW_TITLE = "Animation Window";
 }

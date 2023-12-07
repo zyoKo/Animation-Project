@@ -1,20 +1,13 @@
 #pragma once
 
-#include <memory>
-#include <string>
-
 #include "Animation/Animation.h"
 #include "Animation/Repository/AnimationStorage.h"
-#include "Animation/ModelManager/ModelManager.h"
 #include "Core/Window/IWindow.h"
 
 namespace AnimationEngine
 {
-	class CurveMesh;
 	class IApplication;
-
 	class IAnimator;
-
 	class IAssetManager;
 }
 
@@ -23,7 +16,7 @@ namespace AnimationEngine
 	class CoreEngine
 	{
 	public:
-		CoreEngine(const std::string& name = "Animation Window", uint32_t width = 1280, uint32_t height = 720);
+		CoreEngine(std::string_view = WINDOW_TITLE, uint32_t width = WINDOW_WIDTH, uint32_t height = WINDOW_HEIGHT);
 
 		~CoreEngine();
 
@@ -50,15 +43,11 @@ namespace AnimationEngine
 
 		IAnimator* animator;
 
-		CurveMesh* curveMesh;
-
-		bool running = true;
+		bool isRunning = true;
 
 		bool enableModelMesh = false;
 
 		AnimationStorage animationStorage;
-
-		ModelManager* modelManager;
 
 		void ProcessInput();
 	};

@@ -1,15 +1,16 @@
 #pragma once
 
-#include "Graphics/OpenGL/Buffers/Interfaces/IVertexBuffer.h"
-#include "Graphics/OpenGL/Textures/ITexture2D.h"
-
 namespace AnimationEngine
 {
 	class Shader;
 	class ITexture2D;
 	class IVertexArray;
 	class IIndexBuffer;
+	class IVertexBuffer;
+}
 
+namespace AnimationEngine
+{
 	class GridMesh
 	{
 	public:
@@ -25,15 +26,13 @@ namespace AnimationEngine
 
 		void UnBind() const;
 
-		void Update(const std::shared_ptr<Shader>& shader, const glm::mat4& projection, const glm::mat4& view);
+		void Update();
 
 		void SetVertices(const std::vector<Math::Vector3F>& vertices);
 
 		void SetTextureCoordinates(const std::vector<Math::Vector2F>& textureCoordinates);
 
 		void SetIndices(const std::vector<unsigned>& indices);
-
-		void SetGridTexture(const std::shared_ptr<ITexture2D>& texture);
 
 	private:
 		std::vector<Math::Vector3F> vertices;
@@ -44,13 +43,20 @@ namespace AnimationEngine
 		std::shared_ptr<IVertexArray> vertexArrayObject;
 		std::shared_ptr<IVertexBuffer> vertexBuffer;
 		std::shared_ptr<IIndexBuffer> indexBuffer;
+		std::weak_ptr<Shader> shader;
 
-		std::shared_ptr<ITexture2D> gridTexture;
+		std::weak_ptr<ITexture2D> gridTexture;
 
 		bool dirtyFlag;
 
 		void SetupMesh() const;
 
 		void ReSetupMesh() const;
+
+		void SetupShader();
+
+		void Render();
+
+		void SetupGridTexture();
 	};
 }
