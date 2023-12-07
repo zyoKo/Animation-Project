@@ -16,6 +16,8 @@
 #include "Core/ServiceLocators/Animation/AnimatorLocator.h"
 #include "Core/ServiceLocators/Assets/AnimationStorageLocator.h"
 #include "Physics/Cloth.h"
+#include "Physics/Sphere.h"
+#include "Physics/Wind.h"
 #include "Physics/Particle/Particle.h"
 
 namespace AnimationEngine
@@ -68,7 +70,13 @@ namespace AnimationEngine
 
 		GridMesh gridMesh;
 
-		Physics::Cloth cloth(10, 10, 100.0f, 0.0f);
+		constexpr unsigned width = 50;
+		constexpr unsigned height = 50;
+		constexpr float particleMass = 0.08f;
+
+		Physics::Cloth cloth(width, height, particleMass);
+
+		Physics::Wind wind;
 
 		while (isRunning && !window->WindowShouldClose())
 		{
@@ -79,12 +87,19 @@ namespace AnimationEngine
 
 			application->Update();
 
-			for (const auto& particle : cloth.GetParticles())
+			if (startClothSimulation)
 			{
-				particle->AddForce({ 0.0f, -1000.0f, 0.0f });
-			}
+				for (const auto& particle : cloth.GetParticles())
+				{
+					particle->AddForce({ 0.0f, -1000.0f, 0.0f });
+				}
 
-			cloth.Update();
+				wind.Update(cloth.GetParticles());
+
+				HandleCollisionWithSphere(sphere, cloth.GetParticles());
+
+				cloth.Update();
+			}
 
 			gridMesh.Update();
 
@@ -143,21 +158,20 @@ namespace AnimationEngine
 		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_SUBTRACT) == GLFW_PRESS || glfwGetKey(glfwWindow, GLFW_KEY_P) == GLFW_PRESS)
 			camera->ProcessKeyboard(CameraMovement::ZOOM_OUT);
 
+		const float sphereMovementSpeed = 2.0f * Time::GetDeltaTime();
 
-		static bool isChangeModelKeyPressed = false;
+		if (glfwGetKey(glfwWindow, GLFW_KEY_W) == GLFW_PRESS)
+			sphere.center.z -= sphereMovementSpeed;
+		if (glfwGetKey(glfwWindow, GLFW_KEY_S) == GLFW_PRESS)
+			sphere.center.z += sphereMovementSpeed;
+		if (glfwGetKey(glfwWindow, GLFW_KEY_D) == GLFW_PRESS)
+			sphere.center.x += sphereMovementSpeed;
+		if (glfwGetKey(glfwWindow, GLFW_KEY_A) == GLFW_PRESS)
+			sphere.center.x -= sphereMovementSpeed;
 		if (glfwGetKey(glfwWindow, GLFW_KEY_SPACE) == GLFW_PRESS)
-		{
-			if (!isChangeModelKeyPressed)
-			{
-				animationStorage.ChangeModel();
-				animator->ChangeAnimation(animationStorage.GetAnimationForCurrentlyBoundIndex());
-				isChangeModelKeyPressed = true;
-			}
-		}
-		else
-		{
-			isChangeModelKeyPressed = false;
-		}
+			sphere.center.y += sphereMovementSpeed;
+		if (glfwGetKey(glfwWindow, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+			sphere.center.y -= sphereMovementSpeed;
 
 		static bool isCameraResetKeyPressed = false;
 		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_5) == GLFW_PRESS)
@@ -171,6 +185,16 @@ namespace AnimationEngine
 		else
 		{
 			isCameraResetKeyPressed = false;
+		}
+
+		static bool startClothSim = false;
+		if (glfwGetKey(glfwWindow, GLFW_KEY_ENTER) == GLFW_PRESS)
+		{
+			if (!startClothSim)
+			{
+				startClothSimulation = true;
+				startClothSim = true;
+			}
 		}
 	}
 }

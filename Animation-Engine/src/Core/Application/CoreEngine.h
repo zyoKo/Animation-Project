@@ -3,6 +3,7 @@
 #include "Animation/Animation.h"
 #include "Animation/Repository/AnimationStorage.h"
 #include "Core/Window/IWindow.h"
+#include "Physics/Sphere.h"
 
 namespace AnimationEngine
 {
@@ -46,6 +47,10 @@ namespace AnimationEngine
 		bool isRunning = true;
 
 		bool enableModelMesh = false;
+
+		bool startClothSimulation = false;
+
+		Physics::Sphere sphere{ { 10.0f, 15.0f, 10.0f}, 10.0f };
 
 		AnimationStorage animationStorage;
 

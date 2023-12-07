@@ -92,6 +92,8 @@ namespace AnimationEngine::Physics
 
 	void Cloth::InitializeParticles(float particleMass)
 	{
+		constexpr float particleSpacing = 0.5f;
+
 		if (!particleList.empty())
 		{
 			particleList.clear();
@@ -101,22 +103,24 @@ namespace AnimationEngine::Physics
 		{
 			for (unsigned x = 0; x < width; ++x)
 			{
-				constexpr float yOffset = 20.0f; // Offset on the Y-axis
+				constexpr float yOffset = 30.0f; // Offset on the Y-axis
 
-				Math::Vec3F position(static_cast<float>(x), yOffset, static_cast<float>(y));
+				Math::Vec3F position(static_cast<float>(x) * particleSpacing, yOffset, static_cast<float>(y) * particleSpacing);
 				auto newParticle = std::make_shared<Particle>(position, particleMass);
 
 				if (x == 0 && y == 0 ||
-					//x == width - 1 && y == 0 ||
-					x == 0 && y == height - 1 ||
+					x == width - 1 && y == 0 ||
+					//x == 0 && y == height - 1 ||
 					x == width - 1 && y == height - 1)
 				{
-					newParticle->SetIsStatic(true);
+					//newParticle->SetIsStatic(true);
 				}
 
 				particleList.emplace_back(std::move(newParticle));
 			}
 		}
+
+		LOG_WARN("Particles in the system: {0}", particleList.size());
 
 		// optimization when resetting simulation
 		if (!particleLocations.empty())
@@ -388,10 +392,18 @@ namespace AnimationEngine::Physics
 		unsigned bendSpringCount = 0;
 		unsigned shearSpringCount = 0;
 
+		constexpr unsigned MAX_ITERATIONS = 3;
+
+		for (auto iteration = 0u; iteration < MAX_ITERATIONS; ++iteration)
+		{
+			for (const auto& spring : springs)
+			{
+				spring->Update();
+			}
+		}
+
 		for (const auto& spring : springs)
 		{
-			spring->Update();
-
 			auto& [particle1, particle2] = spring->GetEndsOfSpringTest();
 			
 			switch (const auto type = spring->GetSpringType())
