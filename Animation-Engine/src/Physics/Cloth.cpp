@@ -25,6 +25,14 @@ namespace AnimationEngine::Physics
 		elasticVB = GraphicsAPI::CreateVertexBuffer();
 		elasticVAO->SetVertexBuffer(elasticVB);
 
+		bendVAO = GraphicsAPI::CreateVertexArray();
+		bendVB = GraphicsAPI::CreateVertexBuffer();
+		bendVAO->SetVertexBuffer(bendVB);
+
+		shearVAO = GraphicsAPI::CreateVertexArray();
+		shearVB = GraphicsAPI::CreateVertexBuffer();
+		shearVAO->SetVertexBuffer(shearVB);
+
 		InitializeParticles(particleMass);
 
 		InitializeSprings(sprintRestLength);
@@ -194,20 +202,26 @@ namespace AnimationEngine::Physics
 		VertexBufferLayout layout;
 
 		layout.AddBufferElement(VertexDataType::Vector3F, static_cast<unsigned>(particleLocations.size()), false);
-
 		particleVB->SetVertexBufferLayout(layout);
-
 		particleVB->SetSize(GetSizeofCustomType(VertexDataType::Vector3F) * static_cast<unsigned>(particleLocations.size()));
 
 		layout.Clear();
 
 		layout.AddBufferElement(VertexDataType::Vector3F, static_cast<unsigned>(elasticSprings.size()), false);
-
 		elasticVB->SetVertexBufferLayout(layout);
-
 		elasticVB->SetSize(GetSizeofCustomType(VertexDataType::Vector3F) * static_cast<unsigned>(elasticSprings.size()));
 
-		UpdateVertexBuffers();
+		layout.Clear();
+
+		layout.AddBufferElement(VertexDataType::Vector3F, static_cast<unsigned>(bendSprings.size()), false);
+		bendVB->SetVertexBufferLayout(layout);
+		bendVB->SetSize(GetSizeofCustomType(VertexDataType::Vector3F) * static_cast<unsigned>(bendSprings.size()));
+
+		layout.Clear();
+
+		layout.AddBufferElement(VertexDataType::Vector3F, static_cast<unsigned>(shearSprings.size()), false);
+		shearVB->SetVertexBufferLayout(layout);
+		shearVB->SetSize(GetSizeofCustomType(VertexDataType::Vector3F) * static_cast<unsigned>(shearSprings.size()));
 	}
 
 	void Cloth::SetupShader()
@@ -233,6 +247,20 @@ namespace AnimationEngine::Physics
 			GetSizeofCustomType(VertexDataType::Vector3F) * static_cast<unsigned>(elasticSprings.size()));
 		
 		elasticVAO->SetBufferData();
+
+		bendVB->OverwriteVertexBufferData(
+			0, 
+			bendSprings.data(), 
+			GetSizeofCustomType(VertexDataType::Vector3F) * static_cast<unsigned>(bendSprings.size()));
+		
+		bendVAO->SetBufferData();
+
+		shearVB->OverwriteVertexBufferData(
+			0, 
+			shearSprings.data(), 
+			GetSizeofCustomType(VertexDataType::Vector3F) * static_cast<unsigned>(shearSprings.size()));
+		
+		shearVAO->SetBufferData();
 	}
 
 	void Cloth::RenderParticles(DebugDrawMode mode) const
@@ -292,12 +320,56 @@ namespace AnimationEngine::Physics
 
 	void Cloth::RenderBendSprings(DebugDrawMode mode) const
 	{
-
+		const auto* camera = Camera::GetInstance();
+		const auto viewMatrix = camera->GetViewMatrix();
+		const auto projectionMatrix = glm::perspective(glm::radians(camera->GetZoom()), 1280.0f / 720.0f, CAMERA_NEAR_CLIPPING_PLANE, CAMERA_FAR_CLIPPING_PLANE);
+		
+		const auto shaderPtr = shader.lock();
+		if (!shaderPtr)
+		{
+			return;
+		}
+		
+		bendVAO->Bind();
+		
+		shaderPtr->Bind();
+		shaderPtr->SetUniformMatrix4F(viewMatrix, "view");
+		shaderPtr->SetUniformMatrix4F(projectionMatrix, "projection");
+		
+		GraphicsAPI::GetContext()->EnablePointSize(true);
+		GL_CALL(glDrawArrays, DrawModeToGLEnum(mode), 0, static_cast<unsigned>(bendSprings.size()));
+		GraphicsAPI::GetContext()->EnablePointSize(false);
+		
+		shaderPtr->UnBind();
+		
+		bendVAO->UnBind();
 	}
 
 	void Cloth::RenderShearSprings(DebugDrawMode mode) const
 	{
-
+		const auto* camera = Camera::GetInstance();
+		const auto viewMatrix = camera->GetViewMatrix();
+		const auto projectionMatrix = glm::perspective(glm::radians(camera->GetZoom()), 1280.0f / 720.0f, CAMERA_NEAR_CLIPPING_PLANE, CAMERA_FAR_CLIPPING_PLANE);
+		
+		const auto shaderPtr = shader.lock();
+		if (!shaderPtr)
+		{
+			return;
+		}
+		
+		shearVAO->Bind();
+		
+		shaderPtr->Bind();
+		shaderPtr->SetUniformMatrix4F(viewMatrix, "view");
+		shaderPtr->SetUniformMatrix4F(projectionMatrix, "projection");
+		
+		GraphicsAPI::GetContext()->EnablePointSize(true);
+		GL_CALL(glDrawArrays, DrawModeToGLEnum(mode), 0, static_cast<unsigned>(shearSprings.size()));
+		GraphicsAPI::GetContext()->EnablePointSize(false);
+		
+		shaderPtr->UnBind();
+		
+		shearVAO->UnBind();
 	}
 
 	void Cloth::UpdateParticles()

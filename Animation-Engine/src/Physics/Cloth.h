@@ -49,7 +49,10 @@ namespace AnimationEngine::Physics
 		std::shared_ptr<IVertexArray> elasticVAO;
 		std::shared_ptr<IVertexBuffer> elasticVB;
 
+		std::shared_ptr<IVertexArray> bendVAO;
 		std::shared_ptr<IVertexBuffer> bendVB;
+
+		std::shared_ptr<IVertexArray> shearVAO;
 		std::shared_ptr<IVertexBuffer> shearVB;
 
 		void InitializeParticles(float particleMass);
