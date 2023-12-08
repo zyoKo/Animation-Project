@@ -76,14 +76,14 @@ namespace AnimationEngine
 		constexpr unsigned width = 20;
 		constexpr unsigned height = 20;
 		sphere.GetRadius() = 4.0f;
-		static constexpr Math::Vec3F GRAVITY_FORCE = { 0.0f, -4000.0f, 0.0f };
 #else
 		constexpr unsigned width = 50;
 		constexpr unsigned height = 50;
 		sphere.GetRadius() = 8.0f;
-		static constexpr Math::Vec3F GRAVITY_FORCE = { 0.0f, -5000.0f, 0.0f };
 #endif
-		
+
+		static constexpr Math::Vec3F EXTERNAL_FORCE = { 0.0f, -5000.0f, 0.0f };
+
 		constexpr float particleMass = 1.0f;
 
 		Physics::Cloth cloth(width, height, particleMass);
@@ -111,7 +111,7 @@ namespace AnimationEngine
 				{
 					for (const auto& particle : cloth.GetParticles())
 					{
-						particle->AddForce(GRAVITY_FORCE);
+						particle->AddForce(EXTERNAL_FORCE);
 					}
 
 					wind.Update(cloth.GetParticles());
@@ -169,14 +169,13 @@ namespace AnimationEngine
 			camera->ProcessKeyboard(CameraMovement::DOWN);
 		if (glfwGetKey(glfwWindow, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS)
 			camera->ProcessKeyboard(CameraMovement::UP);
-		if (glfwGetKey(glfwWindow, GLFW_KEY_I) == GLFW_PRESS)
+		if (glfwGetKey(glfwWindow, GLFW_KEY_I) == GLFW_PRESS || glfwGetKey(glfwWindow, GLFW_KEY_KP_9) == GLFW_PRESS)
 			camera->ProcessKeyboard(CameraMovement::LOOK_UP);
-		if (glfwGetKey(glfwWindow, GLFW_KEY_K) == GLFW_PRESS)
+		if (glfwGetKey(glfwWindow, GLFW_KEY_K) == GLFW_PRESS || glfwGetKey(glfwWindow, GLFW_KEY_KP_3) == GLFW_PRESS)
 			camera->ProcessKeyboard(CameraMovement::LOOK_DOWN);
-
-		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_DECIMAL) == GLFW_PRESS  || glfwGetKey(glfwWindow, GLFW_KEY_J) == GLFW_PRESS)
+		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_0) == GLFW_PRESS || glfwGetKey(glfwWindow, GLFW_KEY_J) == GLFW_PRESS)
 			camera->ProcessKeyboard(CameraMovement::ROTATE_LEFT);
-		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_0) == GLFW_PRESS || glfwGetKey(glfwWindow, GLFW_KEY_L) == GLFW_PRESS)
+		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_DECIMAL) == GLFW_PRESS || glfwGetKey(glfwWindow, GLFW_KEY_L) == GLFW_PRESS)
 			camera->ProcessKeyboard(CameraMovement::ROTATE_RIGHT);
 		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_ADD) == GLFW_PRESS || glfwGetKey(glfwWindow, GLFW_KEY_O) == GLFW_PRESS)
 			camera->ProcessKeyboard(CameraMovement::ZOOM_IN);

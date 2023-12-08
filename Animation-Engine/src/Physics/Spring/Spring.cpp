@@ -152,11 +152,11 @@ namespace AnimationEngine::Physics
 		auto correctionVector = deltaPosition / stretchedLength * (stretchedLength - restingLength);
 
 		// Apply half of the correction to each particle, unless one is pinned
-		const auto halfCorrection = correctionVector * 0.5f;
+		const auto halfCorrectionVector = correctionVector * 0.5f;
 		if (!p1->IsStatic() && !p2->IsStatic())
 		{
-			p1->SetPosition(p1->GetPosition() + halfCorrection);
-			p2->SetPosition(p2->GetPosition() - halfCorrection);
+			p1->SetPosition(p1->GetPosition() + halfCorrectionVector);
+			p2->SetPosition(p2->GetPosition() - halfCorrectionVector);
 		}
 		else if (!p1->IsStatic())
 		{

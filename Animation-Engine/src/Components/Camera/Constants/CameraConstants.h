@@ -12,7 +12,7 @@ namespace AnimationEngine
 
 	static constexpr float CAMERA_ZOOM = 45.0f;
 
-	static constexpr glm::vec3 CAMERA_DEFAULT_POSITION = { 0.0f, 8.0f, 50.0f };
+	static constexpr glm::vec3 CAMERA_DEFAULT_POSITION = { 12.0f, 25.0f, 50.0f };
 
 	static constexpr glm::vec3 CAMERA_DEFAULT_WORLD_UP = { 0.0f, 1.0f, 0.0f };
 
