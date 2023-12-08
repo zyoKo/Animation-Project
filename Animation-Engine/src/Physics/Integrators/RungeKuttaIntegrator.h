@@ -31,7 +31,7 @@ namespace AnimationEngine::Physics
 				return;
 			}
 
-			const auto dt = Time::GetDeltaTime();
+			const auto dt = Time::GetFixedDeltaTime();
 
 			static constexpr std::array value { 0.0f, 0.5f , 0.5f, 1.0f };
 

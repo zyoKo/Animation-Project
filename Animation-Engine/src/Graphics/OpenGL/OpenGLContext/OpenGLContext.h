@@ -27,6 +27,8 @@ namespace AnimationEngine
 
 		void EnablePointSize(bool value) override;
 
+		void EnableVSync(bool value) override;
+
 	private:
 		GLFWwindow* window;
 	};

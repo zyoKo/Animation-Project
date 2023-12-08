@@ -94,4 +94,9 @@ namespace AnimationEngine
 			GL_CALL(glDisable, GL_PROGRAM_POINT_SIZE);
 		}
 	}
+
+	void OpenGLContext::EnableVSync(bool value)
+	{
+		glfwSwapInterval(value);
+	}
 }

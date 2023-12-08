@@ -44,11 +44,9 @@ namespace AnimationEngine::Physics
 
 	void Cloth::Update()
 	{
-		UpdateParticles();
-		
-		UpdateSprings();
-
 		UpdateVertexBuffers();
+
+		RenderSpring();
 
 		RenderParticles(DebugDrawMode::Points);
 
@@ -57,6 +55,13 @@ namespace AnimationEngine::Physics
 		RenderBendSprings(DebugDrawMode::Lines);
 
 		RenderShearSprings(DebugDrawMode::Lines);
+	}
+
+	void Cloth::FixedUpdate()
+	{
+		UpdateParticles();
+		
+		UpdateSprings();
 	}
 
 	void Cloth::ResetSimulation()
@@ -386,12 +391,8 @@ namespace AnimationEngine::Physics
 		}
 	}
 
-	void Cloth::UpdateSprings()
+	void Cloth::UpdateSprings() const
 	{
-		unsigned elasticSpringCount = 0;
-		unsigned bendSpringCount = 0;
-		unsigned shearSpringCount = 0;
-
 		constexpr unsigned MAX_ITERATIONS = 3;
 
 		for (auto iteration = 0u; iteration < MAX_ITERATIONS; ++iteration)
@@ -401,6 +402,13 @@ namespace AnimationEngine::Physics
 				spring->Update();
 			}
 		}
+	}
+
+	void Cloth::RenderSpring()
+	{
+		unsigned elasticSpringCount = 0;
+		unsigned bendSpringCount = 0;
+		unsigned shearSpringCount = 0;
 
 		for (const auto& spring : springs)
 		{

@@ -22,5 +22,7 @@ namespace AnimationEngine
 		virtual void EnableWireFrameMode(bool value) = 0;
 
 		virtual void EnablePointSize(bool value) = 0;
+
+		virtual void EnableVSync(bool value) = 0;
 	};
 }

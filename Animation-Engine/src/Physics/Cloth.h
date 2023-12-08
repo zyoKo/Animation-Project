@@ -24,6 +24,8 @@ namespace AnimationEngine::Physics
 
 		void Update();
 
+		void FixedUpdate();
+
 		void ResetSimulation();
 
 		void Clear();
@@ -67,6 +69,7 @@ namespace AnimationEngine::Physics
 		void RenderShearSprings(DebugDrawMode mode) const;
 
 		void UpdateParticles();
-		void UpdateSprings();
+		void UpdateSprings() const;
+		void RenderSpring();
 	};
 }

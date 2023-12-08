@@ -85,7 +85,7 @@ namespace AnimationEngine
 			stream.seekg(0, std::ios::beg);
 			stream.read(shaderSource.data(), fileSize);
 		}
-		catch (std::exception& e)
+		catch ([[maybe_unused]] std::exception& e)
 		{
 			ANIM_ASSERT(false, "Failed to open shader source file: {0}\nException Raised: {1}", filepath, e.what());
 		}

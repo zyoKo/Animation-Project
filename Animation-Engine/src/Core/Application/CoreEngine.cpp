@@ -54,11 +54,13 @@ namespace AnimationEngine
 		this->application = app;
 	}
 
-	void CoreEngine::Initialize() const
+	void CoreEngine::Initialize()
 	{
 		Camera::GetInstance()->Initialize();
 
 		application->Initialize();
+
+		sphere.Initialize();
 	}
 
 	void CoreEngine::Update()
@@ -72,11 +74,13 @@ namespace AnimationEngine
 
 		constexpr unsigned width = 50;
 		constexpr unsigned height = 50;
-		constexpr float particleMass = 0.08f;
+		constexpr float particleMass = 1.0f;
 
 		Physics::Cloth cloth(width, height, particleMass);
 
 		Physics::Wind wind;
+
+		//GraphicsAPI::GetContext()->EnableVSync(true);
 
 		while (isRunning && !window->WindowShouldClose())
 		{
@@ -87,19 +91,28 @@ namespace AnimationEngine
 
 			application->Update();
 
-			if (startClothSimulation)
+			sphere.Render();
+
+			while (Time::ShouldRunFixedUpdate())
 			{
-				for (const auto& particle : cloth.GetParticles())
+				if (startClothSimulation)
 				{
-					particle->AddForce({ 0.0f, -1000.0f, 0.0f });
+					for (const auto& particle : cloth.GetParticles())
+					{
+						particle->AddForce({ 0.0f, -1000.0f, 0.0f });
+					}
+
+					wind.Update(cloth.GetParticles());
+
+					HandleCollisionWithSphere(sphere, cloth.GetParticles());
+
+					cloth.FixedUpdate();
 				}
 
-				wind.Update(cloth.GetParticles());
-
-				HandleCollisionWithSphere(sphere, cloth.GetParticles());
-
-				cloth.Update();
+				Time::ResetAccumulator();
 			}
+
+			cloth.Update();
 
 			gridMesh.Update();
 
@@ -161,17 +174,17 @@ namespace AnimationEngine
 		const float sphereMovementSpeed = 2.0f * Time::GetDeltaTime();
 
 		if (glfwGetKey(glfwWindow, GLFW_KEY_W) == GLFW_PRESS)
-			sphere.center.z -= sphereMovementSpeed;
+			sphere.GetCenter().z -= sphereMovementSpeed;
 		if (glfwGetKey(glfwWindow, GLFW_KEY_S) == GLFW_PRESS)
-			sphere.center.z += sphereMovementSpeed;
+			sphere.GetCenter().z += sphereMovementSpeed;
 		if (glfwGetKey(glfwWindow, GLFW_KEY_D) == GLFW_PRESS)
-			sphere.center.x += sphereMovementSpeed;
+			sphere.GetCenter().x += sphereMovementSpeed;
 		if (glfwGetKey(glfwWindow, GLFW_KEY_A) == GLFW_PRESS)
-			sphere.center.x -= sphereMovementSpeed;
+			sphere.GetCenter().x -= sphereMovementSpeed;
 		if (glfwGetKey(glfwWindow, GLFW_KEY_SPACE) == GLFW_PRESS)
-			sphere.center.y += sphereMovementSpeed;
+			sphere.GetCenter().y += sphereMovementSpeed;
 		if (glfwGetKey(glfwWindow, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-			sphere.center.y -= sphereMovementSpeed;
+			sphere.GetCenter().y -= sphereMovementSpeed;
 
 		static bool isCameraResetKeyPressed = false;
 		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_5) == GLFW_PRESS)

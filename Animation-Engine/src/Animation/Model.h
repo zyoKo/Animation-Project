@@ -13,7 +13,10 @@
 namespace AnimationEngine
 {
 	class Shader;
+}
 
+namespace AnimationEngine
+{
 	class Model
 	{
 	public:

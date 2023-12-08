@@ -21,7 +21,7 @@ namespace AnimationEngine::Physics
 
 		void Update(const std::vector<std::shared_ptr<Particle>>& particles)
 		{
-			const auto dt = Time::GetDeltaTime();
+			const auto dt = Time::GetFixedDeltaTime();
 
 			strength = baseStrength * (1.0f + std::sin(dt * oscillationRate));
 
