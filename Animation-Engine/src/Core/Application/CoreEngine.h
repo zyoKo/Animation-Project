@@ -49,13 +49,11 @@ namespace AnimationEngine
 
 		IAnimator* animator;
 
-		bool isRunning = true;
+		bool isRunning;
 
-		bool enableModelMesh = false;
+		bool startClothSimulation;
 
-		bool startClothSimulation = false;
-
-		Physics::Sphere sphere{ { 10.0f, 15.0f, 10.0f}, 10.0f };
+		Physics::Sphere sphere;
 
 		AnimationStorage animationStorage;
 

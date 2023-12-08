@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Components/Types/DebugDrawMode.h"
+#include "Data/Constants.h"
 
 namespace AnimationEngine::Physics
 {
@@ -20,7 +21,7 @@ namespace AnimationEngine::Physics
 	class Cloth
 	{
 	public:
-		Cloth(unsigned width, unsigned height, float particleMass, float sprintRestLength = 0.0f);
+		Cloth(unsigned width, unsigned height, float particleMass = DEFAULT_PARTICLE_MASS, float sprintRestLength = DEFAULT_SPRING_REST_LENGTH);
 
 		void Update();
 

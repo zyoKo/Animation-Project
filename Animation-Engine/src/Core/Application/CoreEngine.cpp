@@ -24,7 +24,9 @@ namespace AnimationEngine
 {
 	CoreEngine::CoreEngine(std::string_view name, uint32_t width, uint32_t height)
 		:	assetManager(new AssetManager()),
-			animator(new Animator())
+			animator(new Animator()),
+			isRunning(true),
+			startClothSimulation(false)
 	{
 		Log::Initialize();
 
@@ -73,20 +75,16 @@ namespace AnimationEngine
 		GridMesh gridMesh;
 
 #if ANIM_DEBUG
-		constexpr unsigned width = 20;
-		constexpr unsigned height = 20;
-		sphere.GetRadius() = 4.0f;
+		constexpr unsigned width = Physics::CLOTH_WIDTH_DEBUG_MODE;
+		constexpr unsigned height = Physics::CLOTH_HEIGHT_DEBUG_MODE;
+		sphere.GetRadius() = Physics::SPHERE_RADIUS_DEBUG_MODE;
 #else
-		constexpr unsigned width = 50;
-		constexpr unsigned height = 50;
-		sphere.GetRadius() = 8.0f;
+		constexpr unsigned width = Physics::CLOTH_WIDTH_RELEASE_MODE;
+		constexpr unsigned height = Physics::CLOTH_HEIGHT_RELEASE_MODE;
+		sphere.GetRadius() = Physics::SPHERE_RADIUS_RELEASE_MODE;
 #endif
 
-		static constexpr Math::Vec3F EXTERNAL_FORCE = { 0.0f, -5000.0f, 0.0f };
-
-		constexpr float particleMass = 1.0f;
-
-		Physics::Cloth cloth(width, height, particleMass);
+		Physics::Cloth cloth(width, height);
 
 		Physics::Wind wind;
 
@@ -111,7 +109,7 @@ namespace AnimationEngine
 				{
 					for (const auto& particle : cloth.GetParticles())
 					{
-						particle->AddForce(EXTERNAL_FORCE);
+						particle->AddForce(Physics::EXTERNAL_FORCE);
 					}
 
 					wind.Update(cloth.GetParticles());
@@ -215,7 +213,7 @@ namespace AnimationEngine
 		}
 
 		// Sphere Movement
-		const float sphereMovementSpeed = 3.5f * Time::GetDeltaTime();
+		const float sphereMovementSpeed = Physics::DEFAULT_SPHERE_MOVEMENT_SPEED * Time::GetDeltaTime();
 
 		if (glfwGetKey(glfwWindow, GLFW_KEY_W) == GLFW_PRESS)
 			sphere.GetCenter().z -= sphereMovementSpeed;

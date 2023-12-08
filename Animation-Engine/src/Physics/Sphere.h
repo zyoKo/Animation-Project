@@ -13,7 +13,7 @@ namespace AnimationEngine::Physics
 	class Sphere
 	{
 	public:
-		Sphere(const Math::Vec3F& center, float radius);
+		Sphere(const Math::Vec3F& center = DEFAULT_SPHERE_CENTER_LOCATION, float radius = DEFAULT_SPHERE_RADIUS);
 
 		void Initialize(std::string_view filePath = SPHERE_MODEL_FILE_PATH);
 
