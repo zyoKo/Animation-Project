@@ -6,6 +6,7 @@
 #include "Components/Camera/Constants/CameraConstants.h"
 #include "Core/Logger/GLDebug.h"
 #include "Core/ServiceLocators/Assets/AssetManagerLocator.h"
+#include "Data/Constants.h"
 #include "Graphics/GraphicsAPI.h"
 #include "Graphics/OpenGL/Shader/Shader.h"
 #include "Particle/Particle.h"
@@ -296,9 +297,7 @@ namespace AnimationEngine::Physics
 	void Cloth::SetupShader()
 	{
 		auto* assetManager = AssetManagerLocator::GetAssetManager();
-		const std::string vertexShaderPath = "./assets/shaders/cloth.vert";
-		const std::string fragmentShaderPath = "./assets/shaders/cloth.frag";
-		shader = assetManager->CreateShader("ClothShader", vertexShaderPath, fragmentShaderPath);
+		shader = assetManager->CreateShader(CLOTH_SHADER_NAME, CLOTH_VERTEX_SHADER_PATH, CLOTH_FRAGMENT_SHADER_PATH);
 	}
 
 	void Cloth::UpdateVertexBuffers() const

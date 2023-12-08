@@ -19,9 +19,7 @@ namespace AnimationEngine::Physics
 	void Sphere::Initialize(std::string_view filePath)
 	{
 		auto* assetManager = AssetManagerLocator::GetAssetManager();
-		const std::string& vertexShaderPath = "./assets/shaders/sphere.vert";
-		const std::string& fragmentShaderPath = "./assets/shaders/sphere.frag";
-		shader = assetManager->CreateShader("SphereShader", vertexShaderPath, fragmentShaderPath);
+		shader = assetManager->CreateShader(SPHERE_SHADER_NAME, SPHERE_VERTEX_SHADER_PATH, SPHERE_FRAGMENT_SHADER_PATH);
 
 		sphereModel = std::make_shared<Model>(std::string(filePath));
 	}

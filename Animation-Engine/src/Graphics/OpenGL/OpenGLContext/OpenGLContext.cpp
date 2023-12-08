@@ -8,7 +8,8 @@
 namespace AnimationEngine
 {
 	OpenGLContext::OpenGLContext(GLFWwindow* window)
-		:	window(window)
+		:	window(window),
+			isWireFrameModeEnabled(false)
 	{
 		glfwMakeContextCurrent(window);
 
@@ -81,6 +82,19 @@ namespace AnimationEngine
 		{
 			GL_CALL(glPolygonMode, GL_FRONT_AND_BACK, GL_FILL);
 		}
+	}
+
+	void OpenGLContext::ToggleWireFrameMode()
+	{
+		if (isWireFrameModeEnabled)
+		{
+			isWireFrameModeEnabled = !isWireFrameModeEnabled;
+			GL_CALL(glPolygonMode, GL_FRONT_AND_BACK, GL_FILL);
+			return;
+		}
+
+		isWireFrameModeEnabled = !isWireFrameModeEnabled;
+		GL_CALL(glPolygonMode, GL_FRONT_AND_BACK, GL_LINE);
 	}
 
 	void OpenGLContext::EnablePointSize(bool value)

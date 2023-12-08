@@ -1,4 +1,5 @@
 #pragma once
+#include "Data/Constants.h"
 #include "Particle/Particle.h"
 
 namespace AnimationEngine
@@ -9,8 +10,6 @@ namespace AnimationEngine
 
 namespace AnimationEngine::Physics
 {
-	static constexpr std::string_view SPHERE_MODEL_FILE_PATH = "./assets/sphere/sphere.dae";
-
 	class Sphere
 	{
 	public:

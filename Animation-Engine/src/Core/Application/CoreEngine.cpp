@@ -157,6 +157,23 @@ namespace AnimationEngine
 		if (glfwGetKey(glfwWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		    glfwSetWindowShouldClose(glfwWindow, true);
 
+#ifdef ANIM_DEBUG
+		static bool enableWireFrame = false;
+		if (glfwGetKey(glfwWindow, GLFW_KEY_T) == GLFW_PRESS)
+		{
+			if (!enableWireFrame)
+			{
+				GraphicsAPI::GetContext()->ToggleWireFrameMode();
+				enableWireFrame = true;
+			}
+		}
+		else
+		{
+			enableWireFrame = false;
+		}
+#endif
+
+		// Camera Movement
 		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_8) == GLFW_PRESS || glfwGetKey(glfwWindow, GLFW_KEY_UP) == GLFW_PRESS)
 		    camera->ProcessKeyboard(CameraMovement::FORWARD);
 		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_2) == GLFW_PRESS || glfwGetKey(glfwWindow, GLFW_KEY_DOWN) == GLFW_PRESS)
@@ -182,6 +199,22 @@ namespace AnimationEngine
 		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_SUBTRACT) == GLFW_PRESS || glfwGetKey(glfwWindow, GLFW_KEY_P) == GLFW_PRESS)
 			camera->ProcessKeyboard(CameraMovement::ZOOM_OUT);
 
+		// Reset Camera
+		static bool isCameraResetKeyPressed = false;
+		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_5) == GLFW_PRESS)
+		{
+			if (!isCameraResetKeyPressed)
+			{
+				camera->Reset();
+				isCameraResetKeyPressed = true;
+			}
+		}
+		else
+		{
+			isCameraResetKeyPressed = false;
+		}
+
+		// Sphere Movement
 		const float sphereMovementSpeed = 3.5f * Time::GetDeltaTime();
 
 		if (glfwGetKey(glfwWindow, GLFW_KEY_W) == GLFW_PRESS)
@@ -197,6 +230,7 @@ namespace AnimationEngine
 		if (glfwGetKey(glfwWindow, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
 			sphere.GetCenter().y -= sphereMovementSpeed;
 
+		// Cloth Controls
 		static bool toggleIsStatic1 = false;
 		if (glfwGetKey(glfwWindow, GLFW_KEY_1) == GLFW_PRESS)
 		{
@@ -267,20 +301,7 @@ namespace AnimationEngine
 			freeCloth = false;
 		}
 
-		static bool isCameraResetKeyPressed = false;
-		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_5) == GLFW_PRESS)
-		{
-			if (!isCameraResetKeyPressed)
-			{
-				camera->Reset();
-				isCameraResetKeyPressed = true;
-			}
-		}
-		else
-		{
-			isCameraResetKeyPressed = false;
-		}
-
+		// Simulation Controls
 		static bool startClothSim = false;
 		if (glfwGetKey(glfwWindow, GLFW_KEY_ENTER) == GLFW_PRESS)
 		{

@@ -25,11 +25,15 @@ namespace AnimationEngine
 
 		void EnableWireFrameMode(bool value) override;
 
+		void ToggleWireFrameMode() override;
+
 		void EnablePointSize(bool value) override;
 
 		void EnableVSync(bool value) override;
 
 	private:
 		GLFWwindow* window;
+
+		bool isWireFrameModeEnabled;
 	};
 }

@@ -1,13 +1,13 @@
 #pragma once
+#include "Physics/Data/Constants.h"
 
 namespace AnimationEngine::Physics
 {
 	class Particle
 	{
 	public:
-		Particle() = default;
-
-		Particle(const Math::Vec3F& initialPosition, float mass = 1.0f, float damping = 1.0f);
+		Particle(const Math::Vec3F& initialPosition, 
+			float mass = CLOTH_PARTICLE_MASS, float damping = CLOTH_DAMPING_COEFFICIENT);
 
 		~Particle();
 
