@@ -24,7 +24,8 @@ namespace AnimationEngine::Physics
 		void SetPosition(const Math::Vec3F& newPosition);
 		void AddToCurrentPosition(const Math::Vec3F& changeInPosition);
 
-		// Last Position
+		// Other Positions
+		const Math::Vec3F& GetInitialPosition() const;
 		const Math::Vec3F& GetLastPosition() const;
 
 		// Tex-Coordinates
@@ -50,15 +51,16 @@ namespace AnimationEngine::Physics
 		bool isStatic;
 
 		Math::Vec3F position;
+		Math::Vec3F initialPosition;
 		Math::Vec3F lastPosition;
 		Math::Vec2F texCoord;
 
 		float mass;
 
-		float damping;
-
 		Math::Vec3F velocity;
 
 		Math::Vec3F force;
+
+		Math::Vec3F ComputeAcceleration();
 	};
 }

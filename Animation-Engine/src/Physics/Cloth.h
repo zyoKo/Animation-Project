@@ -28,6 +28,8 @@ namespace AnimationEngine::Physics
 
 		void ResetSimulation();
 
+		void ToggleIsStatic(unsigned index) const;
+
 		void Clear();
 
 		std::vector<std::weak_ptr<Particle>> GetWeakParticles() const;
@@ -37,6 +39,11 @@ namespace AnimationEngine::Physics
 		std::vector<std::shared_ptr<Particle>> particleList;
 		std::vector<std::shared_ptr<Spring>> springs;
 		unsigned width, height;
+
+		std::weak_ptr<Particle> topLeftParticle;
+		std::weak_ptr<Particle> topRightParticle;
+		std::weak_ptr<Particle> bottomLeftParticle;
+		std::weak_ptr<Particle> bottomRightParticle;
 
 		std::vector<Math::Vector3F> particleLocations;
 		std::vector<Math::Vector3F> elasticSprings;

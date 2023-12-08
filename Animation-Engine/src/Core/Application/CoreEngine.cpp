@@ -72,15 +72,27 @@ namespace AnimationEngine
 
 		GridMesh gridMesh;
 
+#if ANIM_DEBUG
+		constexpr unsigned width = 20;
+		constexpr unsigned height = 20;
+		sphere.GetRadius() = 4.0f;
+		static constexpr Math::Vec3F GRAVITY_FORCE = { 0.0f, -4000.0f, 0.0f };
+#else
 		constexpr unsigned width = 50;
 		constexpr unsigned height = 50;
+		sphere.GetRadius() = 8.0f;
+		static constexpr Math::Vec3F GRAVITY_FORCE = { 0.0f, -5000.0f, 0.0f };
+#endif
+		
 		constexpr float particleMass = 1.0f;
 
 		Physics::Cloth cloth(width, height, particleMass);
 
 		Physics::Wind wind;
 
-		//GraphicsAPI::GetContext()->EnableVSync(true);
+#if ANIM_DEBUG
+		GraphicsAPI::GetContext()->EnableVSync(true);
+#endif
 
 		while (isRunning && !window->WindowShouldClose())
 		{
@@ -99,7 +111,7 @@ namespace AnimationEngine
 				{
 					for (const auto& particle : cloth.GetParticles())
 					{
-						particle->AddForce({ 0.0f, -1000.0f, 0.0f });
+						particle->AddForce(GRAVITY_FORCE);
 					}
 
 					wind.Update(cloth.GetParticles());
@@ -116,7 +128,7 @@ namespace AnimationEngine
 
 			gridMesh.Update();
 
-			ProcessInput();
+			ProcessInput(&cloth);
 
 			window->Update();
 		}
@@ -136,7 +148,7 @@ namespace AnimationEngine
 		return true;
 	}
 
-	void CoreEngine::ProcessInput()
+	void CoreEngine::ProcessInput(Physics::Cloth* cloth)
 	{
 		const auto camera = Camera::GetInstance();
 
@@ -171,7 +183,7 @@ namespace AnimationEngine
 		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_SUBTRACT) == GLFW_PRESS || glfwGetKey(glfwWindow, GLFW_KEY_P) == GLFW_PRESS)
 			camera->ProcessKeyboard(CameraMovement::ZOOM_OUT);
 
-		const float sphereMovementSpeed = 2.0f * Time::GetDeltaTime();
+		const float sphereMovementSpeed = 3.5f * Time::GetDeltaTime();
 
 		if (glfwGetKey(glfwWindow, GLFW_KEY_W) == GLFW_PRESS)
 			sphere.GetCenter().z -= sphereMovementSpeed;
@@ -185,6 +197,76 @@ namespace AnimationEngine
 			sphere.GetCenter().y += sphereMovementSpeed;
 		if (glfwGetKey(glfwWindow, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
 			sphere.GetCenter().y -= sphereMovementSpeed;
+
+		static bool toggleIsStatic1 = false;
+		if (glfwGetKey(glfwWindow, GLFW_KEY_1) == GLFW_PRESS)
+		{
+			if (!toggleIsStatic1)
+			{
+				cloth->ToggleIsStatic(0);
+				toggleIsStatic1 = true;
+			}
+		}
+		else
+		{
+			toggleIsStatic1 = false;
+		}
+
+		static bool toggleIsStatic2 = false;
+		if (glfwGetKey(glfwWindow, GLFW_KEY_2) == GLFW_PRESS)
+		{
+			if (!toggleIsStatic2)
+			{
+				cloth->ToggleIsStatic(1);
+				toggleIsStatic2 = true;
+			}
+		}
+		else
+		{
+			toggleIsStatic2 = false;
+		}
+
+		static bool toggleIsStatic3 = false;
+		if (glfwGetKey(glfwWindow, GLFW_KEY_3) == GLFW_PRESS)
+		{
+			if (!toggleIsStatic3)
+			{
+				cloth->ToggleIsStatic(2);
+				toggleIsStatic3 = true;
+			}
+		}
+		else
+		{
+			toggleIsStatic3 = false;
+		}
+
+		static bool toggleIsStatic4 = false;
+		if (glfwGetKey(glfwWindow, GLFW_KEY_4) == GLFW_PRESS)
+		{
+			if (!toggleIsStatic4)
+			{
+				cloth->ToggleIsStatic(3);
+				toggleIsStatic4 = true;
+			}
+		}
+		else
+		{
+			toggleIsStatic4 = false;
+		}
+
+		static bool freeCloth = false;
+		if (glfwGetKey(glfwWindow, GLFW_KEY_5) == GLFW_PRESS)
+		{
+			if (!freeCloth)
+			{
+				cloth->ToggleIsStatic(4);
+				freeCloth = true;
+			}
+		}
+		else
+		{
+			freeCloth = false;
+		}
 
 		static bool isCameraResetKeyPressed = false;
 		if (glfwGetKey(glfwWindow, GLFW_KEY_KP_5) == GLFW_PRESS)
@@ -208,6 +290,28 @@ namespace AnimationEngine
 				startClothSimulation = true;
 				startClothSim = true;
 			}
+		}
+		else
+		{
+			startClothSim = false;
+		}
+
+		static bool resetSimulation = false;
+		if (glfwGetKey(glfwWindow, GLFW_KEY_R) == GLFW_PRESS)
+		{
+			if (!resetSimulation)
+			{
+				startClothSimulation = false;
+				if (cloth)
+				{
+					cloth->ResetSimulation();
+				}
+				resetSimulation = true;
+			}
+		}
+		else
+		{
+			resetSimulation = false;
 		}
 	}
 }

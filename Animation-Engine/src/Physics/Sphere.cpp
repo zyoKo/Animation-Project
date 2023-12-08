@@ -40,7 +40,7 @@ namespace AnimationEngine::Physics
 
 		auto model = glm::mat4(1.0f);
 		const auto translate = glm::translate(model, Utils::GLMInternalHelper::ConvertInternalVectorToGLM(center));
-		const auto scale = glm::scale(model, glm::vec3(radius));
+		const auto scale = glm::scale(model, glm::vec3(radius - 0.5f));
 
 		model = model * translate * scale;
 

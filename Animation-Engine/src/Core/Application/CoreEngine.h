@@ -5,6 +5,11 @@
 #include "Core/Window/IWindow.h"
 #include "Physics/Sphere.h"
 
+namespace AnimationEngine::Physics
+{
+	class Cloth;
+}
+
 namespace AnimationEngine
 {
 	class IApplication;
@@ -54,6 +59,6 @@ namespace AnimationEngine
 
 		AnimationStorage animationStorage;
 
-		void ProcessInput();
+		void ProcessInput(Physics::Cloth* cloth);
 	};
 }

@@ -10,7 +10,7 @@ namespace AnimationEngine::Physics
 	Spring::Spring(SpringType type, std::weak_ptr<Particle> p1, std::weak_ptr<Particle> p2, float springRestLength)
 		:	type(type),
 			endsOfSpring({ std::move(p1), std::move(p2) }),
-			dampingCoefficient(0.5f),
+			dampingCoefficient(DAMPING_COEFFICIENT),
 			restingLength(springRestLength)
 	{
 		if (springRestLength == 0.0f)

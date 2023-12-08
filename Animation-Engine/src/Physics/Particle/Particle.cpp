@@ -10,9 +10,9 @@ namespace AnimationEngine::Physics
 	Particle::Particle(const Math::Vec3F& initialPosition, float mass /* = 1.0f */, float damping /* = 1.0f */)
 		:	isStatic(false),
 			position(initialPosition),
+			initialPosition(initialPosition),
 			lastPosition(initialPosition),
-			mass(mass),
-			damping(damping)
+			mass(mass)
 	{
 		RungeKuttaIntegrator::SetVelocityEquation(Math::Kinematics::VelocityAsFunctionOfAccelerationAndTime);
 	}
@@ -31,7 +31,7 @@ namespace AnimationEngine::Physics
 
 		RungeKuttaIntegrator::Integrate(
 			velocity,
-			force / mass,
+			ComputeAcceleration(),
 			[&](const Math::Vec3F& newPosition){ this->AddToCurrentPosition(newPosition); },
 			[&](const Math::Vec3F& newVelocity){ this->AddToCurrentVelocity(newVelocity); },
 			[&]{ this->ClearForces(); });
@@ -72,6 +72,11 @@ namespace AnimationEngine::Physics
 	{
 		lastPosition = position;
 		position += changeInPosition;
+	}
+
+	const Math::Vec3F& Particle::GetInitialPosition() const
+	{
+		return initialPosition;
 	}
 
 	const Math::Vec3F& Particle::GetLastPosition() const
@@ -134,5 +139,10 @@ namespace AnimationEngine::Physics
 		force.x = 0.0f;
 		force.y = 0.0f;
 		force.z = 0.0f;
+	}
+
+	Math::Vec3F Particle::ComputeAcceleration()
+	{
+		return force / mass;
 	}
 }

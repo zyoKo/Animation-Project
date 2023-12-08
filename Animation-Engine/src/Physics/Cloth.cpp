@@ -66,9 +66,56 @@ namespace AnimationEngine::Physics
 
 	void Cloth::ResetSimulation()
 	{
-		//Clear();
+		unsigned i = -1;
+		for (const auto& particle : particleList)
+		{
+			++i;
+			if (!particle)
+			{
+				continue;
+			}
 
-		//InitializeParticles();
+			particle->SetPosition(particle->GetInitialPosition());
+
+			particleLocations[i] = particle->GetInitialPosition();
+		}
+
+		topLeftParticle.lock()->SetIsStatic(true);
+		topRightParticle.lock()->SetIsStatic(true);
+		bottomLeftParticle.lock()->SetIsStatic(true);
+		bottomRightParticle.lock()->SetIsStatic(true);
+	}
+
+	void Cloth::ToggleIsStatic(unsigned index) const
+	{
+		switch(index)
+		{
+		case 0:
+			topLeftParticle.lock()->ToggleIsStatic();
+			break;
+
+		case 1:
+			topRightParticle.lock()->ToggleIsStatic();
+			break;
+
+		case 2:
+			bottomLeftParticle.lock()->ToggleIsStatic();
+			break;
+
+		case 3:
+			bottomRightParticle.lock()->ToggleIsStatic();
+			break;
+
+		case 4:
+			topLeftParticle.lock()->SetIsStatic(false);
+			topRightParticle.lock()->SetIsStatic(false);
+			bottomLeftParticle.lock()->SetIsStatic(false);
+			bottomRightParticle.lock()->SetIsStatic(false);
+
+		default:
+			LOG_INFO("Toogle using 1, 2, 3, 4 keys!");
+			break;
+		}
 	}
 
 	void Cloth::Clear()
@@ -113,12 +160,25 @@ namespace AnimationEngine::Physics
 				Math::Vec3F position(static_cast<float>(x) * particleSpacing, yOffset, static_cast<float>(y) * particleSpacing);
 				auto newParticle = std::make_shared<Particle>(position, particleMass);
 
-				if (x == 0 && y == 0 ||
-					x == width - 1 && y == 0 ||
-					//x == 0 && y == height - 1 ||
-					x == width - 1 && y == height - 1)
+				if (x == 0 && y == 0)
 				{
-					//newParticle->SetIsStatic(true);
+					topLeftParticle = newParticle;
+					newParticle->SetIsStatic(true);
+				}
+				if (x == width - 1 && y == 0)
+				{
+					topRightParticle = newParticle;
+					newParticle->SetIsStatic(true);
+				}
+				if (x == 0 && y == height - 1)
+				{
+					bottomLeftParticle = newParticle;
+					newParticle->SetIsStatic(true);
+				}
+				if (x == width - 1 && y == height - 1)
+				{
+					bottomRightParticle = newParticle;
+					newParticle->SetIsStatic(true);
 				}
 
 				particleList.emplace_back(std::move(newParticle));
